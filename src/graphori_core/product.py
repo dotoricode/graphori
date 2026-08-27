@@ -126,12 +126,12 @@ class ProductPlanCompiler:
             write_scope: tuple[str, ...] = (".",),
             verification_argv: tuple[str, ...] | None = None) -> ProductPlanBundle:
         profile = _profile(spec.objective)
-        display_title = _objective_title(spec.objective, "요청한 변경")
+        display_title = _objective_title(spec.objective, "the requested change")
         nodes: list[NodeSpec] = []
         if profile in {"research", "research-and-implementation"}:
             nodes.extend((
                 NodeSpec(
-                    "r1", "research", "공식 근거 조사",
+                    "r1", "research", "Gather authoritative sources",
                     f"Research current primary-source evidence for: {spec.objective}", "worker",
                     role="researcher",
                     read_scope=read_scope, task_kind="research",
@@ -139,7 +139,7 @@ class ProductPlanCompiler:
                     estimated_execution_ms=90_000, permission_profile="read_only",
                 ),
                 NodeSpec(
-                    "r2", "research", "변경 범위 확인",
+                    "r2", "research", "Establish the scope of the change",
                     f"Inspect the current workspace and identify bounded impact for: {spec.objective}",
                     "worker", role="researcher", read_scope=read_scope, task_kind="research",
                     verification_policy="deterministic", estimated_startup_ms=5_000,
@@ -149,7 +149,7 @@ class ProductPlanCompiler:
         if profile in {"design-and-implementation", "research-and-implementation"}:
             dependencies = ("r1", "r2") if profile == "research-and-implementation" else ()
             nodes.append(NodeSpec(
-                "d1", "design", f"{display_title} 방법 정리",
+                "d1", "design", f"Design an approach: {display_title}",
                 f"Design the smallest compatible implementation for: {spec.objective}", "worker",
                 role="designer",
                 dependencies=dependencies, read_scope=read_scope, task_kind="design",

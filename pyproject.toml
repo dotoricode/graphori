@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "graphori-core"
-version = "0.1.0"
+version = "0.9.0b1"
 description = "Plan coding work, use only useful agents, and record the checks"
 requires-python = ">=3.11"
 license = "MIT"

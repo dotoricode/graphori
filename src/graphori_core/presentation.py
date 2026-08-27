@@ -82,6 +82,25 @@ OMISSION_REASON_LABELS: Mapping[str, Mapping[str, str]] = {
 }
 
 
+JOURNAL_LABELS = {
+    "writer_busy": {
+        "ko": "이 작업은 다른 Graphori에서 실행 중입니다. 실행 기록은 변경하지 않았습니다.",
+        "en": "Another Graphori run owns this journal. Nothing was recorded.",
+    },
+    "writer_unsupported": {
+        "ko": "이 환경은 journal writer 잠금을 지원하지 않아 안전하게 실행할 수 없습니다.",
+        "en": "This platform has no journal writer lock, so running would be unsafe.",
+    },
+    "writer_unavailable": {
+        "ko": "journal writer 잠금을 확보하지 못해 안전하게 실행을 중단했습니다",
+        "en": "Could not acquire the journal writer lock, so the run stopped",
+    },
+    "writer_closed": {
+        "ko": "닫힌 journal writer는 이벤트를 기록할 수 없습니다.",
+        "en": "A closed journal writer cannot record events.",
+    },
+}
+
 DOCTOR_LABELS = {
     "title": {"ko": "Graphori 상태 점검 (읽기 전용)",
               "en": "Graphori status check (read-only)"},
@@ -200,3 +219,7 @@ def presentation_vocabulary() -> dict[str, object]:
 
 def doctor_label(key: str, locale: str) -> str:
     return label(DOCTOR_LABELS, key, locale)
+
+
+def journal_label(key: str, locale: str) -> str:
+    return label(JOURNAL_LABELS, key, locale)

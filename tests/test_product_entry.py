@@ -329,7 +329,7 @@ class ProductPlanTests(unittest.TestCase):
                 handle = await first.start(spec)
                 callbacks = []
                 try:
-                    with self.assertRaisesRegex(RuntimeError, "다른 Graphori"):
+                    with self.assertRaisesRegex(RuntimeError, "Another Graphori run"):
                         await execute_product(
                             second, spec, bundle.plan,
                             started_sink=lambda _handle: callbacks.append(True),

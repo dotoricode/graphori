@@ -22,8 +22,9 @@ from .journal import ensure_run_dirs
 from .journal import RunPaths, replay_journal
 from .model_routing import Availability
 from .process_supervisor import ProcessLimits
-from .presentation import (doctor_label, effort_label, normalized_locale,
-                           resolve_locale, route_label, status_label, team_label)
+from .presentation import (doctor_label, effort_label, journal_label,
+                           normalized_locale, resolve_locale, route_label,
+                           status_label, team_label)
 from .product import ProductPlanCompiler, execute_product, render_plan_preview
 from .run_spec import RunConstraints, RunSpec, extract_acceptance_criteria
 from .projection import resolve_projection_metadata
@@ -305,6 +306,16 @@ async def _resume(args: argparse.Namespace) -> int:
 
 def cmd_resume(args: argparse.Namespace) -> int:
     return asyncio.run(_resume(args))
+
+
+def _error_text(exc: BaseException, locale: str) -> str:
+    """Render an error in the user's language when the condition has a name."""
+    key = getattr(exc, "key", "")
+    if not key:
+        return str(exc)
+    text = journal_label(key, normalized_locale(locale or "auto"))
+    detail = getattr(exc, "detail", "")
+    return f"{text}: {detail}" if detail else text
 
 
 def cmd_doctor(args: argparse.Namespace) -> int:
@@ -619,6 +630,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    args = None
     try:
         args = build_parser().parse_args(argv)
         # Resolve only at the presentation boundary. Plans, journals, and
@@ -631,7 +643,8 @@ def main(argv: list[str] | None = None) -> int:
             )
         return args.func(args)
     except (RuntimeError, ValueError, OSError) as exc:
-        print(f"error: {exc}", file=sys.stderr)
+        locale = getattr(args, "locale", "auto") if args is not None else "auto"
+        print(f"error: {_error_text(exc, locale)}", file=sys.stderr)
         return 2
 
 

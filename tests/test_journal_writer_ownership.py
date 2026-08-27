@@ -83,8 +83,8 @@ class JournalWriterOwnershipTests(unittest.TestCase):
             text=True, capture_output=True, timeout=10,
         )
         self.assertEqual(contender.returncode, 23)
-        self.assertIn("다른 Graphori에서 실행 중", contender.stdout)
-        self.assertIn("실행 기록은 변경하지 않았습니다", contender.stdout)
+        self.assertIn("Another Graphori run owns this journal", contender.stdout)
+        self.assertIn("Nothing was recorded", contender.stdout)
 
         paths = ensure_run_dirs(self.root, "run-one")
         raw_before = paths.journal_file.read_bytes()

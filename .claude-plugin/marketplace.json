@@ -8,7 +8,7 @@
     {
       "name": "graphori",
       "description": "Plan coding work, use only useful agents, and check the result.",
-      "version": "0.1.0",
+      "version": "0.9.0-beta.1",
       "source": "./",
       "author": {
         "name": "dotoricode"

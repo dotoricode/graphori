@@ -92,7 +92,18 @@ _WRITER_ASSIGNED = ("seq", "recorded_at", "prev_digest", "digest")
 
 
 class JournalOwnershipError(RuntimeError):
-    """Raised when this process cannot exclusively own a canonical journal."""
+    """Raised when this process cannot exclusively own a canonical journal.
+
+    The message is English so that the journal layer stays free of presentation
+    choices.  ``key`` names the condition, and ``detail`` carries any
+    platform text, so a caller that knows the user's language can render the
+    same condition in it.
+    """
+
+    def __init__(self, message: str, *, key: str = "", detail: str = "") -> None:
+        super().__init__(message)
+        self.key = key
+        self.detail = detail
 
 
 def _canonical_bytes(obj: Any) -> bytes:
@@ -334,23 +345,28 @@ class JournalWriter:
             os.close(fd)
             if isinstance(exc, BlockingIOError):
                 raise JournalOwnershipError(
-                    "이 작업은 다른 Graphori에서 실행 중입니다. "
-                    "실행 기록은 변경하지 않았습니다."
+                    "Another Graphori run owns this journal. Nothing was recorded.",
+                    key="writer_busy",
                 ) from exc
             if isinstance(exc, _UnsupportedLockPlatform):
                 raise JournalOwnershipError(
-                    "이 환경은 journal writer 잠금을 지원하지 않아 안전하게 실행할 수 없습니다."
+                    "This platform has no journal writer lock, so running would "
+                    "be unsafe.",
+                    key="writer_unsupported",
                 ) from exc
             if isinstance(exc, OSError):
                 raise JournalOwnershipError(
-                    f"journal writer 잠금을 확보하지 못해 안전하게 실행을 중단했습니다: {exc}"
+                    "Could not acquire the journal writer lock, so the run "
+                    f"stopped: {exc}",
+                    key="writer_unavailable", detail=str(exc),
                 ) from exc
             raise
         self._lock_fd = fd
 
     def _require_ownership(self) -> None:
         if self._closed or self._lock_fd is None:
-            raise JournalOwnershipError("닫힌 journal writer는 이벤트를 기록할 수 없습니다.")
+            raise JournalOwnershipError(
+                "A closed journal writer cannot record events.", key="writer_closed")
 
     def close(self) -> None:
         """Release this process's writer ownership without deleting the lock inode."""
@@ -469,11 +485,19 @@ class JournalWriter:
 
         Ordering is by (mtime_ns, filename): the tmp->ready rename preserves
         the tmp file's creation time, so this reflects real submission
-        arrival order across producers. The filename is only a tiebreak for
-        entries that land in the same tick. Both components are properties
-        of the files themselves, not of listdir order or wall-clock replay
-        time, so re-running consumption over an unchanged ready set always
-        assigns the same seq to the same events.
+        arrival order across producers, which the reducer needs -- a run
+        cannot be recorded as succeeded before the worker it waited on is
+        recorded as passed.  The filename is only a tiebreak for entries that
+        land in the same tick.
+
+        Known limitation: filesystem timestamp granularity decides which
+        entries share a tick, and that varies between runs. Two runs over an
+        identically submitted ready set can therefore differ in the order of
+        events that collide, which is why
+        ``test_ready_ordering_is_a_deterministic_function_of_filenames`` fails
+        intermittently. Ordering by filename alone would be reproducible but
+        breaks causal order across producers, so the fix is a submission
+        ordinal in the ready name rather than a different sort key.
         """
         self._require_ownership()
         counts = {"accepted": 0, "duplicate": 0, "conflict": 0, "quarantined": 0}

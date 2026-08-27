@@ -33,14 +33,12 @@
   guide said nothing executes at install time, but the installer runs
   `validate_skill.py` against the copied Skill.
 
-### Known inconsistency
-
-`pyproject.toml` declares `0.1.0` while the repository's first commit carries a
-`v0.9.0-beta.1` tag. The documents no longer try to reconcile the two; picking
-one scheme is still open.
-
 ### Changed
 
+- The declared version is now `0.9.0-beta.1`, matching the tag on the first
+  public commit. `pyproject.toml` spells it `0.9.0b1` because PEP 440
+  normalizes it that way; the two are the same version. Calling a beta `0.1.0`
+  understated how much of this line already existed.
 - Internal build reports, reviews, research checkpoints, and preserved Doctori
   evidence moved under `docs/archive/`. Maintainer-context documents moved from
   the repository root into `docs/`. Every relative link was repointed.
@@ -49,7 +47,7 @@ one scheme is still open.
   exists, and the macOS-only image probe and the symlink fixture skip instead
   of failing.
 
-## 0.1.0 — first public source release
+## 0.9.0-beta.1 — first public source release
 
 - Codex and Claude Code native plugin manifests, with separate install paths.
 - Dry-run installers for both the Skill and the optional Python runtime.
