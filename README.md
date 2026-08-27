@@ -1,245 +1,186 @@
 # Graphori
 
-[![Install Graphori from skills.sh](https://skills.sh/b/dotoricode/graphori)](https://skills.sh/dotoricode/graphori)
+[![Install from skills.sh](https://skills.sh/b/dotoricode/graphori)](https://skills.sh/dotoricode/graphori)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
+
+An Agent Skill that plans a coding task, delegates only where a second agent
+earns its keep, and decides completion from checks it ran rather than from an
+agent reporting success.
 
 ![Dori, Graphori's acorn operations engineer](assets/brand/hero.png)
 
-## Give Graphori a coding task. It plans the steps, uses only the agents that help, and checks the result.
+[한국어](README.ko.md) · [Trust model](docs/public/TRUST.md) · [Limitations](docs/public/LIMITATIONS.md) · [Security](SECURITY.md)
 
-Graphori does not start an agent swarm by default. Small work stays in one session.
-Larger work is split only at useful boundaries, and completion is judged from recorded
-checks instead of an agent saying “done.”
+## Why
 
-[한국어](README.ko.md) · [Trust](docs/public/TRUST.md) · [Limitations](docs/public/LIMITATIONS.md) · [Security](SECURITY.md)
+Most agent orchestrators fan out first and ask questions later. That costs
+tokens on small tasks and hides failures behind a confident summary.
 
-## Measured v1-style vs v2 result
+Graphori starts in one session and splits work only at boundaries where the
+split pays for itself. Every step records the command that judged it, so
+"complete" means a check passed.
 
-I originally expected a second AI reviewer to make small coding tasks safer. In this
-controlled comparison it found no new issue. The v2 candidate kept the same hidden-
-check result with half as many AI calls.
+## Install
 
-| Metric | v1-style reconstruction | Graphori v2 candidate | Change |
-| --- | ---: | ---: | ---: |
-| Hidden checks passed | 4/4 | 4/4 | Same |
-| Completion claim matched result | 4/4 | 4/4 | Same |
-| Scope violations | 0 | 0 | Same |
-| AI calls | 8 | 4 | **-50.0%** |
-| Median completion time | 48.542 s | 32.110 s | **-33.9%** |
-| Total input tokens | 567,584 | 333,681 | **-41.2%** |
-| Cached input tokens | 396,800 | 267,776 | **-32.5%** |
-| Fresh input tokens | 170,784 | 65,905 | **-61.4%** |
-| Output tokens | 4,960 | 3,309 | **-33.3%** |
-| New issues found by the second AI | 0 | Not applicable | — |
-| Provider cost | Not recorded | Not recorded | Unknown |
+Pick your agent. Both commands run inside the tool.
 
-Small controlled comparison: `n=4` per arm, two Python tasks run twice per arm,
-Codex only. v1-style reconstructed its design from commit `93c5fcf`; it did not replay
-historical runs. Fresh input is derived as total minus cached input. These numbers do
-not predict every coding task.
+### Claude Code
 
-[Method](benchmarks/v1_v2/PROTOCOL.en.md) · [Full report](benchmarks/v1_v2/REPORT.en.md) · [Raw data](benchmarks/v1_v2/raw-results.json) · [Corrected result](benchmarks/v1_v2/results.json) · [Verifier](benchmarks/v1_v2/verify_results.py)
-
-Recalculate the retained result locally:
-
-```sh
-python benchmarks/v1_v2/verify_results.py
+```text
+/plugin marketplace add dotoricode/graphori
+/plugin install graphori@graphori
 ```
 
-The broader Direct vs v1-style vs v2 protocol is published under
-[`benchmarks/`](benchmarks/), but its planned 72-run study has **not** been run. No
-result is claimed for it.
+Restart Claude Code, then:
 
-## Other decisions backed by measurements
-
-These are routing experiments, not additions to the performance table above.
-
-| Experiment | Samples | Result | Product decision |
-| --- | ---: | --- | --- |
-| Direct Codex + Claude baseline | 24 | 24/24 deterministic checks passed; 0 scope violations, rework, or self-report disagreements | Keep both direct routes |
-| Ponytail auto-selection | 22 | 4/4 provider/workload cells: `NO_BENEFIT` | Do not auto-select |
-| TDD auto-selection | 24 | Codex: `HARMFUL`; Claude: `MANUAL_ONLY` | Keep automatic selection off |
-
-[Direct baseline](docs/archive/research/RRC-04_DIRECT_ROUTE_BASELINE.md) · [Ponytail result](docs/archive/research/RRC-05A_PONYTAIL_EFFECTIVENESS.md) · [TDD result](docs/archive/research/RRC-05B_TDD_EFFECTIVENESS.md)
-
-## Install the Agent Skill
+```text
+/graphori:graphori plan, implement, and verify this task end to end.
+```
 
 ### Codex
 
 ```sh
 codex plugin marketplace add dotoricode/graphori
 codex plugin add graphori@graphori
-codex plugin list
 ```
 
-Start a new Codex session. The list should show `graphori@graphori` as enabled. Then:
+Start a new session, then:
 
 ```text
-$graphori:graphori plan, implement, and verify this task end to end. Respond in English.
+$graphori:graphori plan, implement, and verify this task end to end.
 ```
 
-Codex stores user Skills under `~/.agents/skills`; Graphori does not install them under
-the retired `~/.codex/skills` path.
+Skills land in `~/.claude/skills` for Claude Code and `~/.agents/skills` for
+Codex. [INSTALL.md](docs/public/INSTALL.md) covers the other routes: `npx
+skills`, a readable shell script over `gh`, and project-local copies.
 
-### Claude Code
+## The optional runtime
 
-Run these inside Claude Code:
-
-```text
-/plugin marketplace add dotoricode/graphori
-/plugin install graphori@graphori
-/plugin list
-```
-
-Restart Claude Code after an install or update. The plugin details should show the
-`graphori` and `graphori-dashboard` Skills. Then:
-
-```text
-/graphori:graphori plan, implement, and verify this task end to end. Respond in English.
-```
-
-Claude Code stores user Skills under `~/.claude/skills`.
-
-## Preview or install without a plugin marketplace
-
-Preview the repository with the open [`skills`](https://github.com/vercel-labs/skills)
-CLI:
-
-```sh
-npx skills add dotoricode/graphori --list
-```
-
-Project-local Codex install:
-
-```sh
-npx skills add dotoricode/graphori --skill graphori --agent codex --copy
-```
-
-Project-local Claude Code install:
-
-```sh
-npx skills add dotoricode/graphori --skill graphori --agent claude-code --copy
-```
-
-These commands intentionally omit `--global` because the CLI's current Codex global
-path differs from Codex's official user Skill path. Node.js 22.20 or newer is required.
-
-Prefer `gh` and a readable local script instead of npm? Preview before copying:
+The Skill works on its own. Add the Python runtime only if you want the
+`graphori` CLI, an append-only journal, replay, or resume:
 
 ```sh
 gh repo clone dotoricode/graphori -- --depth 1
 cd graphori
-./scripts/install_graphori.sh --mode solo --target codex --dry-run
-./scripts/install_graphori.sh --mode solo --target codex
-```
-
-Change `--target codex` to `--target claude` for Claude Code. The installer refuses to
-replace a different Skill without `--force`; forced replacement creates a timestamped
-backup. Windows PowerShell uses `scripts/install_graphori.ps1` with `-Mode solo` and
-`-Target codex` or `claude`.
-
-The exact personal destinations are `~/.agents/skills/graphori` for Codex and
-`~/.claude/skills/graphori` for Claude Code.
-
-## Optional Runtime
-
-The Agent Skill works without Graphori's Python Runtime. Clone the repository and add
-the Runtime only when you need the `graphori` CLI, deterministic verification, journal
-replay, or resume:
-
-```sh
-gh repo clone dotoricode/graphori -- --depth 1
-cd graphori
-./scripts/install_graphori.sh --mode runtime --dry-run
+./scripts/install_graphori.sh --mode runtime --dry-run   # prints, changes nothing
 ./scripts/install_graphori.sh --mode runtime
 graphori doctor --lang en
 ```
 
-The installer performs a local pip install of the checkout. Use a virtual environment
-if you do not want to change the current interpreter.
-
-Example:
+Then plan and run a change. Store the root in a variable and quote it, so a
+path with spaces cannot split into two arguments:
 
 ```sh
 repo_root="$(pwd -P)"
-graphori run "implement a small change" --root "$repo_root" \
-  --write-scope src/example.py \
-  --verify-command python -m unittest tests.test_example
+graphori run "add a docstring to the parser" \
+  --root "$repo_root" \
+  --write-scope src/parser.py \
+  --verify-command python -m unittest tests.test_parser
 ```
 
-Windows PowerShell:
+On Windows PowerShell:
 
 ```powershell
 $root = (Get-Location).Path
-graphori plan "implement a small change" --root $root --lang en
+graphori plan "add a docstring to the parser" --root $root --lang en
 ```
 
-`--lang auto` is the default. An explicit language wins; otherwise Graphori uses the
-objective language, configured preference, process locale, then English. Locale is a
-presentation choice and does not enter plan, journal, or projection digests.
+`--write-scope` bounds what the run may touch. `--verify-command` is the check
+that decides the verdict; without one, Graphori has nothing to judge by.
 
-## Trust at a glance
+## What the numbers say
 
-| Agent Skill | Optional Runtime |
-| --- | --- |
-| Plain Markdown and metadata | Open-source Python package |
-| No executable bundled in the Skill directories | No hidden daemon or Graphori telemetry |
-| Preview before installation | Append-only local journal and read-only replay |
-| Separate Codex and Claude install paths | Local release gate builds, audits, installs, and hashes artifacts |
+I expected a second AI reviewer to make small coding tasks safer. In a
+controlled comparison it found nothing the first pass missed, at twice the
+cost. Graphori v2 dropped it.
 
-Graphori is not a sandbox. A provider or verifier that you authorize can modify files
-or run commands. Use narrow write scopes, version control, explicit checks, and human
-review for risky work. Read the [trust model](docs/public/TRUST.md).
+| Metric | v1-style | v2 | Change |
+| --- | ---: | ---: | ---: |
+| Hidden checks passed | 4/4 | 4/4 | same |
+| Scope violations | 0 | 0 | same |
+| Issues found by the second AI | 0 | n/a | — |
+| AI calls | 8 | 4 | −50% |
+| Median completion | 48.5 s | 32.1 s | −34% |
+| Fresh input tokens | 170,784 | 65,905 | −61% |
 
-## Public source gate — 2026-08-27
+Four runs per arm, two Python tasks, Codex only. The v1-style arm is a
+reconstruction from commit `93c5fcf`, not a replay of historical runs. This is
+a small sample and it does not predict your codebase.
 
-These checks were run locally without GitHub Actions immediately before and after the
-public push. They are release evidence, not an independent security certification.
+Recompute it from the retained artifacts:
 
-| Check | Measured result |
-| --- | ---: |
-| Python 3.11 test suite | 401 passed, 6 skipped |
-| Retained v1/v2 artifact verifier | 8/8 hidden checks passed, 0 scope violations |
-| Gitleaks, clean public history and tree | 0 secrets found |
-| Installed Runtime dependency audit | 0 known vulnerabilities found |
-| Package build | wheel + sdist built; Twine check passed; SBOM + SHA-256 generated |
-| Public GitHub native plugin install | Codex 1/1, Claude Code 1/1; version `0.1.0` |
-| Installed Skill manifests vs public source | Codex match, Claude Code match |
-| Authenticated English behavior E2E | Codex 2/2 tests; Claude Code 3/3 tests |
+```sh
+python benchmarks/v1_v2/verify_results.py
+```
 
-The live E2E tasks each used a fresh disposable Git repository, changed only the two
-requested files, produced an English final report, and spawned no subagent.
+[Method](benchmarks/v1_v2/PROTOCOL.en.md) · [Report](benchmarks/v1_v2/REPORT.en.md) · [Raw data](benchmarks/v1_v2/raw-results.json)
 
-## Current verification and limits
+Three routing experiments settled other defaults, all of them negative
+results that turned a feature off:
 
-- Python 3.11+ is supported; the local suite is tested before every public push.
-- Native marketplace installation is tested separately for Codex and Claude Code.
-- Direct Codex and Claude Code adapters are supported; Orca execution is disabled.
-- Provider progress can be unavailable during a long run.
-- Optional Skill auto-selection is intentionally off.
-- A check proves only what its command and assertions cover.
-- Graphori v2 is the architecture generation; `0.1.0` is the first public source
-  version. No stable API is promised.
+| Experiment | Samples | Result |
+| --- | ---: | --- |
+| [Direct Codex + Claude baseline](docs/archive/research/RRC-04_DIRECT_ROUTE_BASELINE.md) | 24 | 24/24 checks passed — both routes kept |
+| [Ponytail auto-selection](docs/archive/research/RRC-05A_PONYTAIL_EFFECTIVENESS.md) | 22 | no benefit in any cell — not enabled |
+| [TDD auto-selection](docs/archive/research/RRC-05B_TDD_EFFECTIVENESS.md) | 24 | harmful on Codex — left manual |
 
-This repository does not use GitHub Actions. Maintainers run the fail-closed release
-gate locally:
+A wider Direct vs v1 vs v2 protocol is published under [`benchmarks/`](benchmarks/),
+but its 72-run study has not been run and nothing is claimed for it.
+
+## What it is not
+
+Graphori is not a sandbox. A provider you authorize can edit files and run
+commands. Use narrow write scopes, version control, and human review for
+anything risky.
+
+Other limits worth knowing before you install:
+
+- A check proves what its command asserts, and nothing else.
+- Provider progress can go dark during a long run. A heartbeat means alive,
+  not advancing.
+- Optional Skill auto-selection is off on purpose; the measurements above are why.
+- `0.1.0` is the first public source version. No stable API yet.
+- Orca integration exists as an optional adapter and is currently disabled.
+
+## Supported platforms
+
+| | Skill | CLI: `plan`, `doctor` | CLI: `run`, `resume` |
+| --- | --- | --- | --- |
+| Linux, macOS | yes | yes | yes |
+| Windows | yes | yes | yes |
+
+The journal takes an exclusive advisory lock so two writers can never
+interleave: `flock` on POSIX, `msvcrt.locking` on Windows. A platform with
+neither fails closed rather than running unprotected.
+
+The suite is 397 tests. On Windows with Python 3.12 all of them pass, with 5
+skipped: fixtures that need macOS-only tools or symlink privileges.
+
+## Release checks
+
+This repository has no GitHub Actions. Maintainers run a fail-closed gate
+locally before publishing:
 
 ```sh
 python3.11 scripts/verify_public_release.py --output build/release-artifacts
 ```
 
-It runs tests, secret and dependency audits, package builds, isolated installs, SBOM
-generation, and hashes. It does not publish, deploy, change visibility, or rewrite Git
-history. See the [release gate](docs/public/RELEASE_GATE.md).
+It runs the tests, secret and dependency audits, package builds, isolated
+installs, SBOM generation, and hashing. It never publishes, deploys, or
+rewrites history. The evidence from the `0.1.0` gate, and what it does not
+cover, is in [RELEASE_GATE.md](docs/public/RELEASE_GATE.md).
 
 ## Documentation
 
-- [Public product guide](docs/public/README.md)
+- [Product guide](docs/public/README.md) — start here
+- [Architecture](docs/architecture/GRAPHORI_ARCHITECTURE.md) and [event protocol](docs/architecture/EVENT_PROTOCOL.md)
+- [Decision records](docs/decisions/README.md) — why the defaults are what they are
 - [v1 to v2 history](docs/public/HISTORY.md)
-- [Architecture](docs/architecture/GRAPHORI_ARCHITECTURE.md)
-- [Contributing](CONTRIBUTING.md)
-- [Code of Conduct](CODE_OF_CONDUCT.md)
-- [Changelog](CHANGELOG.md)
-- [Third-party notices](THIRD_PARTY_NOTICES.md)
-- Maintainer context: [CONTEXT.md](CONTEXT.md), [PRODUCT.md](docs/PRODUCT.md),
-  [DESIGN.md](docs/DESIGN.md), [TEAM_TOPOLOGY.md](docs/TEAM_TOPOLOGY.md), and
-  [design-qa.md](docs/archive/verification/design-qa.md)
+- [CONTEXT.md](CONTEXT.md) — the domain vocabulary the code and docs both use
+- [Contributing](CONTRIBUTING.md) · [Code of Conduct](CODE_OF_CONDUCT.md) · [Changelog](CHANGELOG.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+- [docs/archive/](docs/archive/README.md) — build and review records kept for provenance
+
+## License
+
+MIT. See [LICENSE](LICENSE).

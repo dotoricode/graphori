@@ -1,7 +1,24 @@
 # Security policy
 
-Please do not file public issues for a suspected vulnerability. Report it privately to the repository maintainers with affected version/commit, reproduction steps, impact, and any safe mitigation. Do not include credentials, private repositories, or customer data.
+## Reporting a vulnerability
 
-This public-beta repository has no response-time or bounty commitment. Maintainers will acknowledge a reproducible report when practical, assess it, and coordinate a fix or disclosure before publishing details. Until a security advisory channel is configured, use the repository owner's private contact method rather than an issue.
+Please do not open a public issue. Report it privately to the repository owner
+with the affected version or commit, steps to reproduce, the impact you see,
+and any mitigation you know of. Leave out credentials, private repositories,
+and customer data.
 
-Graphori executes local tools only when asked. Review write scopes and verification commands before running it; a journal is audit evidence, not a sandbox or a security boundary.
+There is no advisory channel configured yet, so use the owner's private contact
+rather than the issue tracker.
+
+This is a public beta with no response-time or bounty commitment. Reproducible
+reports get acknowledged when practical, assessed, and fixed or disclosed in
+coordination with the reporter before details are published.
+
+## Scope
+
+Graphori runs local tools when you ask it to. It is not a sandbox and does not
+try to be one. Review write scopes and verification commands before a run: a
+provider you authorize can edit files and execute commands within them.
+
+The journal is append-only audit evidence. It records what happened; it does
+not constrain what can happen.

@@ -55,34 +55,42 @@ class LocalReleaseContractTests(unittest.TestCase):
             self.assertIn(token, text)
 
     def test_readmes_split_codex_and_claude_skill_installation(self):
-        for name in ("README.md", "README.ko.md"):
-            text = (ROOT / name).read_text(encoding="utf-8")
-            with self.subTest(readme=name):
-                self.assertIn("npx skills add dotoricode/graphori --list", text)
-                self.assertIn("--skill graphori --agent codex --copy", text)
-                self.assertIn("--skill graphori --agent claude-code --copy", text)
-                self.assertNotIn("--agent codex --global", text)
-                self.assertIn("codex plugin marketplace add dotoricode/graphori", text)
-                self.assertIn("codex plugin add graphori@graphori", text)
-                self.assertIn("/plugin marketplace add dotoricode/graphori", text)
-                self.assertIn("/plugin install graphori@graphori", text)
-                self.assertIn("gh repo clone dotoricode/graphori -- --depth 1", text)
-                self.assertIn("### Codex", text)
-                self.assertIn("### Claude Code", text)
-                self.assertIn("--mode solo --target codex", text)
-                self.assertIn("--target claude", text)
-                self.assertIn("~/.agents/skills/graphori", text)
-                self.assertIn("~/.claude/skills/graphori", text)
-                self.assertIn("$graphori", text)
-                self.assertIn("/graphori", text)
+        """Each language documents both agents across its install document set.
 
+        The README carries the native plugin install for both agents; the
+        shared INSTALL.md carries the preview, copy, and clone routes. A token
+        satisfies the contract when it appears anywhere in that set.
+        """
+        shared = (ROOT / "docs" / "public" / "INSTALL.md").read_text(encoding="utf-8")
+        for name in ("README.md", "README.ko.md"):
+            readme = (ROOT / name).read_text(encoding="utf-8")
+            combined = readme + chr(10) + shared
+            with self.subTest(readme=name):
+                # Both agents get a native plugin install in the README itself.
+                self.assertIn("codex plugin marketplace add dotoricode/graphori", readme)
+                self.assertIn("codex plugin add graphori@graphori", readme)
+                self.assertIn("/plugin marketplace add dotoricode/graphori", readme)
+                self.assertIn("/plugin install graphori@graphori", readme)
+                self.assertIn("### Codex", readme)
+                self.assertIn("### Claude Code", readme)
+                # The remaining routes may live in the shared install document.
+                self.assertIn("npx skills add dotoricode/graphori --list", combined)
+                self.assertIn("--skill graphori --agent codex --copy", combined)
+                self.assertIn("--skill graphori --agent claude-code --copy", combined)
+                self.assertIn("gh repo clone dotoricode/graphori -- --depth 1", combined)
+                self.assertIn("--mode solo --target codex", combined)
+                self.assertIn("--target claude", combined)
+                self.assertIn("~/.agents/skills/graphori", combined)
+                self.assertIn("~/.claude/skills/graphori", combined)
+                # The CLI's global Codex path is wrong; never document it.
+                self.assertNotIn("--agent codex --global", combined)
+                self.assertIn("$graphori", readme)
+                self.assertIn("/graphori", readme)
+                # Routes stay ordered from least to most manual: the native
+                # plugin install in the README, then preview, then clone.
                 self.assertLess(
-                    text.index("codex plugin marketplace add dotoricode/graphori"),
-                    text.index("npx skills add dotoricode/graphori --list"),
-                )
-                self.assertLess(
-                    text.index("npx skills add dotoricode/graphori --list"),
-                    text.index("gh repo clone dotoricode/graphori -- --depth 1"),
+                    shared.index("npx skills add dotoricode/graphori --list"),
+                    shared.index("gh repo clone dotoricode/graphori -- --depth 1"),
                 )
 
 
