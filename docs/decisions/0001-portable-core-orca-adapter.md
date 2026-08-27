@@ -30,4 +30,4 @@ view model은 Python portable core가 소유한다. Orca와 generic terminal은 
 core CLI replay가 동작하고, 이후 Orca 연결 결과가 같은 projection을 만드는 것이다.
 근거: [`GRAPHORI_ARCHITECTURE.md`](../architecture/GRAPHORI_ARCHITECTURE.md),
 [`PORTABILITY_CONTRACT.md`](../architecture/PORTABILITY_CONTRACT.md),
-[`MANIFEST.md`](../evidence/doctori/MANIFEST.md).
+[`MANIFEST.md`](../archive/evidence/doctori/MANIFEST.md).

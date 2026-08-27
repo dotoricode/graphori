@@ -60,7 +60,7 @@ Doctori는 "안드로이드 앱 버튼을 누르면 진짜 C++ 코드까지 연�
 | (병행) 2026-08-09 | 사용자가 "진행률이 70%에서 안 움직인다"고 느낌 → 캐시 문제/폴링 정지/애니메이션 멈춤 등 4개 가설을 하나씩 재현 시도 | 버그 아님으로 판명(사람이 `process.json`에 직접 적어둔 숫자 `70`이었음). 하지만 확인에 별도 시간 소요 |
 
 macOS 실행은 이 전체 타임라인에 **한 번도 등장하지 않는다.** 지금 이
-컴퓨터가 Windows이기 때문이다([Decision 0006](decisions/0006-windows-now-macos-deferred.md)).
+컴퓨터가 Windows이기 때문이다(`Decision 0006` (not published)).
 그래서 macOS는 계속 `status=deferred`, `confidence=unknown`이고, 이건
 "실패"가 아니라 "아직 실행할 컴퓨터가 없어서 확인 못 함"이라는 뜻이다.
 
@@ -72,7 +72,7 @@ macOS 실행은 이 전체 타임라인에 **한 번도 등장하지 않는다.*
 명령에는 `:doctori-analyzer:run`이라고 썼다. 마치 **문패는 "101호"라고
 붙여놓고 초대장에는 "102호로 오세요"라고 쓴 것**과 같다. 이대로 진행했으면
 구현자가 그대로 따라 하다가 "그런 방(module) 없음" 오류로 막혔을 것이다.
-같은 문서 안에서 "지금은 맥북이 없다"는 사실([Decision 0006](decisions/0006-windows-now-macos-deferred.md))도
+같은 문서 안에서 "지금은 맥북이 없다"는 사실(`Decision 0006` (not published))도
 빠뜨려서, "처음엔 맥북에서 실행한다"는 문장을 그대로 따르면 시작도 못 하는
 상태였다. 이 두 문제는 **설계를 다시 쓸 필요 없이 문장 몇 개, 이름 하나만
 맞추면 되는 문제**였다. 즉 오래 걸린 이유가 "어려운 문제"가 아니라
@@ -252,4 +252,4 @@ Gradle은 기본적으로 "이미 확인한 건 다시 안 한다"(캐시, `UP-T
 없다. Windows current gate의 **APPROVE**는 Windows에만 적용되며, macOS는
 계속 `status=deferred`, `confidence=unknown`이다. 회사 MacBook이나 macOS
 CI를 확보한 뒤에만 macOS 게이트를 별도로 실행하고 판정한다
-([Decision 0006](decisions/0006-windows-now-macos-deferred.md)).
+(`Decision 0006` (not published)).

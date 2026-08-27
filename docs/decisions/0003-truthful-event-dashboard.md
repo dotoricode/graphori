@@ -22,5 +22,5 @@ heartbeat를 progress로 세는 표현은 금지한다. original pixel art와 re
 `stale_marked` 뒤 reconnect snapshot/replay 검증 전에는 freeze한다. platform verdict는
 같은 화면에 Windows `pass`, macOS `deferred`로 함께 보인다. 근거:
 [`DASHBOARD_CONTRACT.md`](../architecture/DASHBOARD_CONTRACT.md),
-[`LIVE_GAME_DASHBOARD.md`](../research/LIVE_GAME_DASHBOARD.md), F01 보존 링크는
-[`F01_WINDOWS_FINAL_APPROVAL.md`](../evidence/doctori/verification/F01_WINDOWS_FINAL_APPROVAL.md)다.
+[`LIVE_GAME_DASHBOARD.md`](../archive/research/LIVE_GAME_DASHBOARD.md), F01 보존 링크는
+[`F01_WINDOWS_FINAL_APPROVAL.md`](../archive/evidence/doctori/verification/F01_WINDOWS_FINAL_APPROVAL.md)다.

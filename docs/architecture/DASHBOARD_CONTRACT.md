@@ -174,7 +174,7 @@ heartbeat나 입력 수락만으로 100%가 되지 않는다. `scripts/publish_s
 
 ## 기술 부록 C. 근거 연결
 
-세 신호·SSE·snapshot/replay·pixel art 제안은 [`LIVE_GAME_DASHBOARD.md`](../research/LIVE_GAME_DASHBOARD.md)를
+세 신호·SSE·snapshot/replay·pixel art 제안은 [`LIVE_GAME_DASHBOARD.md`](../archive/research/LIVE_GAME_DASHBOARD.md)를
 기초로 한다. 연결·재생은 [`EVENT_PROTOCOL.md`](EVENT_PROTOCOL.md)의 event seq에
-종속된다. F01 최신 Windows verdict와 macOS deferred는 [`F01_WINDOWS_FINAL_APPROVAL.md`](../evidence/doctori/verification/F01_WINDOWS_FINAL_APPROVAL.md),
-원문 digest 목록은 [`MANIFEST.md`](../evidence/doctori/MANIFEST.md)다.
+종속된다. F01 최신 Windows verdict와 macOS deferred는 [`F01_WINDOWS_FINAL_APPROVAL.md`](../archive/evidence/doctori/verification/F01_WINDOWS_FINAL_APPROVAL.md),
+원문 digest 목록은 [`MANIFEST.md`](../archive/evidence/doctori/MANIFEST.md)다.

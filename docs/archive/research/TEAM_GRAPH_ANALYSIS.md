@@ -36,13 +36,13 @@ Doctori의 고정 팀은 일을 일곱 방으로 나누어 맡는다. 하지만 
 
 이 보고서는 다음 내부 문서를 근거로 했다.
 
-- [`WORK_DURATION_ANALYSIS.md`](../WORK_DURATION_ANALYSIS.md): F01의 시간 순서, 세 번의 실제 보안 결함, 반복 재검증, 줄일 수 있었던 지연을 기록한다.
-- [`PROCESS.md`](../PROCESS.md): Android Kotlin/Java → JNI → C/C++ → Gradle/CMake → AAR/ELF → Evidence Ledger 범위와 현재 상태를 정한다.
-- [`0003-two-model-mutual-oversight.md`](../decisions/0003-two-model-mutual-oversight.md): 같은 중요한 결과를 서로 다른 모델이 독립적으로 확인하도록 한다.
-- [`0005-orchestrator-delegation-only.md`](../decisions/0005-orchestrator-delegation-only.md): 오케스트레이터는 조정·배정·결과 통합만 하며 저장소 파일을 직접 고치거나 테스트하지 않는다.
-- [`F01_FINAL_CROSS_MODEL_ACCEPTANCE.md`](../verification/F01_FINAL_CROSS_MODEL_ACCEPTANCE.md): 수정 전 마지막 교차 확인에서 경계 검사 지연과 AST 절대경로 누출을 `REVISE`로 기록한다.
-- [`F01_WINDOWS_FINAL_APPROVAL.md`](../verification/F01_WINDOWS_FINAL_APPROVAL.md): 경계·junction 수정 뒤 최신 Windows 승인과 남은 macOS 범위를 기록한다.
-- [`F01_JUNCTION_TEAM2_REAUDIT.md`](../verification/F01_JUNCTION_TEAM2_REAUDIT.md): 파일 생성 전 junction 공격을 재현하고 수정 뒤 차단했음을 기록한다.
+- [`WORK_DURATION_ANALYSIS.md`](../evidence/doctori/WORK_DURATION_ANALYSIS.md): F01의 시간 순서, 세 번의 실제 보안 결함, 반복 재검증, 줄일 수 있었던 지연을 기록한다.
+- [`PROCESS.md`](../../PROCESS.md): Android Kotlin/Java → JNI → C/C++ → Gradle/CMake → AAR/ELF → Evidence Ledger 범위와 현재 상태를 정한다.
+- [`0003-two-model-mutual-oversight.md`](../evidence/doctori/decisions/0003-two-model-mutual-oversight.md): 같은 중요한 결과를 서로 다른 모델이 독립적으로 확인하도록 한다.
+- [`0005-orchestrator-delegation-only.md`](../evidence/doctori/decisions/0005-orchestrator-delegation-only.md): 오케스트레이터는 조정·배정·결과 통합만 하며 저장소 파일을 직접 고치거나 테스트하지 않는다.
+- [`F01_FINAL_CROSS_MODEL_ACCEPTANCE.md`](../evidence/doctori/verification/F01_FINAL_CROSS_MODEL_ACCEPTANCE.md): 수정 전 마지막 교차 확인에서 경계 검사 지연과 AST 절대경로 누출을 `REVISE`로 기록한다.
+- [`F01_WINDOWS_FINAL_APPROVAL.md`](../evidence/doctori/verification/F01_WINDOWS_FINAL_APPROVAL.md): 경계·junction 수정 뒤 최신 Windows 승인과 남은 macOS 범위를 기록한다.
+- [`F01_JUNCTION_TEAM2_REAUDIT.md`](../evidence/doctori/verification/F01_JUNCTION_TEAM2_REAUDIT.md): 파일 생성 전 junction 공격을 재현하고 수정 뒤 차단했음을 기록한다.
 
 문서에 나온 “현재”와 “과거 REVISE”는 구별했다. 예를 들어 교차 승인 문서는
 수정 전 `REVISE`이고, 최종 승인 문서는 그 문제를 고친 뒤 Windows에 한정한

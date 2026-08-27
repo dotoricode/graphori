@@ -149,7 +149,7 @@ asyncio.run(main())
                                     env=_isolated_env())
             self.assertEqual(result.returncode, 0, result.stderr)
 
-    def test_doctor_is_korean_read_only_and_explains_no_provider(self):
+    def test_doctor_is_read_only_and_explains_no_provider_in_the_chosen_language(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             marker = root / ".graphori" / "skills.lock.json"
@@ -158,7 +158,8 @@ asyncio.run(main())
             before = {path.relative_to(root): path.read_bytes()
                       for path in root.rglob("*") if path.is_file()}
             result = subprocess.run(
-                [PY, "-m", "graphori_core.product_cli", "doctor", "--root", temp, "--json"],
+                [PY, "-m", "graphori_core.product_cli", "doctor", "--root", temp, "--json",
+                 "--lang", "ko"],
                 text=True, capture_output=True, env=_isolated_env(),
             )
             self.assertEqual(result.returncode, 0, result.stderr)

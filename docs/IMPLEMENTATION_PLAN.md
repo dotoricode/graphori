@@ -107,11 +107,11 @@ Acceptance: 독립 감사자의 fresh report와 승인자의 gate event가 모�
 ## 4. 근거와 산출물
 
 이 계획은 [`GRAPHORI_ARCHITECTURE.md`](architecture/GRAPHORI_ARCHITECTURE.md),
-[`TEAM_TOPOLOGY.md`](../TEAM_TOPOLOGY.md), [`0005-mvp-simple-single-verifier.md`](decisions/0005-mvp-simple-single-verifier.md),
+[`TEAM_TOPOLOGY.md`](TEAM_TOPOLOGY.md), [`0005-mvp-simple-single-verifier.md`](decisions/0005-mvp-simple-single-verifier.md),
 [`PORTABILITY_CONTRACT.md`](architecture/PORTABILITY_CONTRACT.md),
-두 REVISE 보고서([`Luna`](verification/DESIGN_EVIDENCE_REVIEW_LUNA.md),
-[`Claude`](verification/DESIGN_COMPARISON_CLAUDE.md))의 MUST/P0/P1을 반영한다.
-F01 원문 7개는 [`MANIFEST.md`](evidence/doctori/MANIFEST.md)에 SHA-256으로 보존된다.
+두 REVISE 보고서([`Luna`](archive/verification/DESIGN_EVIDENCE_REVIEW_LUNA.md),
+[`Claude`](archive/verification/DESIGN_COMPARISON_CLAUDE.md))의 MUST/P0/P1을 반영한다.
+F01 원문 7개는 [`MANIFEST.md`](archive/evidence/doctori/MANIFEST.md)에 SHA-256으로 보존된다.
 그 원문은 Graphori 구현 통과가 아니라 Doctori 관찰 evidence다.
 
 ## 기술 부록

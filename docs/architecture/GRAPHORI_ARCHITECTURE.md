@@ -115,10 +115,10 @@ Router도 결과 파일을 직접 수정하지 않는다. Worker가 `done`을 �
 ## 6. 근거와 판정의 경계
 
 F01 수치와 결함은 설계 근거가 아니라 보존된 프로젝트 관찰(E1)이다. 원문 7개와
-SHA-256은 [`docs/evidence/doctori/MANIFEST.md`](../evidence/doctori/MANIFEST.md)에
-연결되어 있다. 특히 세 원문은 [`F01_FINAL_CROSS_MODEL_ACCEPTANCE.md`](../evidence/doctori/verification/F01_FINAL_CROSS_MODEL_ACCEPTANCE.md),
-[`F01_WINDOWS_FINAL_APPROVAL.md`](../evidence/doctori/verification/F01_WINDOWS_FINAL_APPROVAL.md),
-[`F01_JUNCTION_TEAM2_REAUDIT.md`](../evidence/doctori/verification/F01_JUNCTION_TEAM2_REAUDIT.md)다.
+SHA-256은 [`docs/evidence/doctori/MANIFEST.md`](../archive/evidence/doctori/MANIFEST.md)에
+연결되어 있다. 특히 세 원문은 [`F01_FINAL_CROSS_MODEL_ACCEPTANCE.md`](../archive/evidence/doctori/verification/F01_FINAL_CROSS_MODEL_ACCEPTANCE.md),
+[`F01_WINDOWS_FINAL_APPROVAL.md`](../archive/evidence/doctori/verification/F01_WINDOWS_FINAL_APPROVAL.md),
+[`F01_JUNCTION_TEAM2_REAUDIT.md`](../archive/evidence/doctori/verification/F01_JUNCTION_TEAM2_REAUDIT.md)다.
 Windows 승인 범위와 macOS `deferred/unknown`은 서로 바꾸지 않는다.
 
 ## 기술 부록 A. 불변식 요약

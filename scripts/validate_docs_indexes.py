@@ -4,8 +4,11 @@ from __future__ import annotations
 
 import argparse
 import re
+import subprocess
 import sys
 from pathlib import Path
+
+NUL = chr(0)
 
 
 def excluded(path: Path) -> bool:
@@ -13,9 +16,24 @@ def excluded(path: Path) -> bool:
                                   or any(part.startswith(".") for part in path.parts)))
 
 
+def tracked_markdown(root: Path) -> list[Path]:
+    """Markdown files Git actually tracks.
+
+    Walking the filesystem would also pick up build output and other ignored
+    directories, which are not part of the published tree and have no index.
+    """
+    completed = subprocess.run(
+        ["git", "-C", str(root), "ls-files", "-z", "*.md"],
+        capture_output=True, text=True,
+    )
+    if completed.returncode != 0:
+        return sorted(root.rglob("*.md"))
+    return [root / name for name in completed.stdout.split(NUL) if name]
+
+
 def expected(root: Path) -> dict[Path, list[str]]:
     result: dict[Path, list[str]] = {}
-    for path in root.rglob("*.md"):
+    for path in tracked_markdown(root):
         relative = path.relative_to(root)
         if excluded(relative) or path.name.lower() == "readme.md":
             continue

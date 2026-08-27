@@ -61,11 +61,11 @@ heartbeat가 옴         ≠ 실제 작업이 진행됨
 
 | 범위 | 현재 근거 | 학습 게임에서의 표현 |
 | --- | --- | --- |
-| 실제 명령 실행 | [`src/graphori_core/cli.py`](../../src/graphori_core/cli.py)의 generic terminal adapter가 비대화형 명령 한 번을 실행한다. | Worker가 실제 명령을 실행하고 출력을 제출하는 장면으로 보여 준다. |
+| 실제 명령 실행 | [`src/graphori_core/cli.py`](../../../src/graphori_core/cli.py)의 generic terminal adapter가 비대화형 명령 한 번을 실행한다. | Worker가 실제 명령을 실행하고 출력을 제출하는 장면으로 보여 준다. |
 | 성공·실패 기록 | CLI가 `worker_finished`, 노드 상태, `run_terminal`을 JSONL journal에 기록한다. | 초록색 캐릭터보다 `exit_code`와 event를 먼저 보여 준다. |
-| hash-chain journal과 replay | [`src/graphori_core/journal.py`](../../src/graphori_core/journal.py)가 사건을 순서와 digest로 보존하고 replay한다. README의 실제 예시는 `event_count = 10`, `replay_verified = true`다. | 공책의 한 줄을 클릭하고 “다시 읽어도 같은가?”를 확인하게 한다. |
-| status와 snapshot/dashboard | [`src/graphori_core/dashboard.py`](../../src/graphori_core/dashboard.py)가 journal을 읽어 snapshot을 만들고 SSE로 snapshot/replay/heartbeat를 보낸다. | 대시보드는 작업 후 결과판이 아니라 진행 중인 관제판으로 설명한다. |
-| 역할 그래프 모델 | [`src/graphori_core/compiler.py`](../../src/graphori_core/compiler.py)는 Router, Worker, Verifier, Human Gate를 포함한 topology를 컴파일하고 독립성·위험·DAG 규칙을 검사한다. | “역할을 나누는 원리”를 가르친다. |
+| hash-chain journal과 replay | [`src/graphori_core/journal.py`](../../../src/graphori_core/journal.py)가 사건을 순서와 digest로 보존하고 replay한다. README의 실제 예시는 `event_count = 10`, `replay_verified = true`다. | 공책의 한 줄을 클릭하고 “다시 읽어도 같은가?”를 확인하게 한다. |
+| status와 snapshot/dashboard | [`src/graphori_core/dashboard.py`](../../../src/graphori_core/dashboard.py)가 journal을 읽어 snapshot을 만들고 SSE로 snapshot/replay/heartbeat를 보낸다. | 대시보드는 작업 후 결과판이 아니라 진행 중인 관제판으로 설명한다. |
+| 역할 그래프 모델 | [`src/graphori_core/compiler.py`](../../../src/graphori_core/compiler.py)는 Router, Worker, Verifier, Human Gate를 포함한 topology를 컴파일하고 독립성·위험·DAG 규칙을 검사한다. | “역할을 나누는 원리”를 가르친다. |
 | generic CLI의 실제 topology | CLI 파일의 설명대로 현재 generic adapter의 실행 그래프는 의도적으로 **한 개 Worker 노드**다. | 기획·조사·구현·검증 캐릭터는 전체 설계 개념을 가르치는 시각 모델로 표시하고, CLI가 항상 네 세션을 자동 실행한다고 말하지 않는다. |
 | 아직 기본 지원하지 않는 범위 | README는 여러 구현자의 동시 WIP, interactive PTY/GUI/browser 자동화, 독립 verifier의 완성된 자동 팀 실행을 기본 지원 범위 밖으로 명시한다. | “현재 된다”와 “앞으로 확장할 수 있다”를 카드 색이나 문장으로 구분한다. |
 
@@ -81,7 +81,7 @@ heartbeat가 옴         ≠ 실제 작업이 진행됨
 }
 ```
 
-이 결과의 뜻은 “명령은 성공했고 기록은 다시 읽혔지만, 독립 검증 도장은 아직 없다”이다. 즉, **작업 프로세스의 성공과 사람이 신뢰할 수 있는 완료를 구분하는 실제 산출물**이다. 자세한 원문 예시는 [`README.md`](../../README.md)의 “실제 실행 결과”와 현재 참여형 게임 [`docs/GRAPHORI_LEARNING_GAME.html`](../GRAPHORI_LEARNING_GAME.html)에 있다.
+이 결과의 뜻은 “명령은 성공했고 기록은 다시 읽혔지만, 독립 검증 도장은 아직 없다”이다. 즉, **작업 프로세스의 성공과 사람이 신뢰할 수 있는 완료를 구분하는 실제 산출물**이다. 자세한 원문 예시는 [`README.md`](../../README.md)의 “실제 실행 결과”와 현재 참여형 게임 [`docs/GRAPHORI_LEARNING_GAME.html`](../../GRAPHORI_LEARNING_GAME.html)에 있다.
 
 ## 3. 연구를 고른 기준
 
@@ -313,7 +313,7 @@ run_created
 
 ### 5.1 현재 HTML에서 다음에 보강할 부분
 
-현재 [`GRAPHORI_LEARNING_GAME.html`](../GRAPHORI_LEARNING_GAME.html)은 시작·일시정지·한 사건씩 진행·초기화, event stream, 노드 지도, 실제 산출물 카드와 퀴즈를 이미 갖고 있다. 연구를 반영할 때 우선순위는 다음과 같다.
+현재 [`GRAPHORI_LEARNING_GAME.html`](../../GRAPHORI_LEARNING_GAME.html)은 시작·일시정지·한 사건씩 진행·초기화, event stream, 노드 지도, 실제 산출물 카드와 퀴즈를 이미 갖고 있다. 연구를 반영할 때 우선순위는 다음과 같다.
 
 1. 퀴즈를 단순한 “정답 버튼”에서 `순서 예측 → 짧은 설명 → 새 사례 적용`으로 확장한다.
 2. `dashboard pulse`와 작업 event를 분리해, heartbeat를 progress로 오해하지 않게 한다.

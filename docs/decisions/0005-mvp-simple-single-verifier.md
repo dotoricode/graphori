@@ -50,7 +50,7 @@
    않는다.
 9. **fix + recheck는 한 번까지만 자동으로 한다.** 확인자가 `revise`를 한 번
    내면 그 한 번만 고쳐서 다시 확인받는다. 그래도 `revise`면 자동으로 또
-   고치지 않고 Human Gate로 넘긴다. (기존 [`TEAM_TOPOLOGY.md`](../../TEAM_TOPOLOGY.md)
+   고치지 않고 Human Gate로 넘긴다. (기존 [`TEAM_TOPOLOGY.md`](../TEAM_TOPOLOGY.md)
    의 3회 상한을 1회로 낮춘다.)
 10. **평소 active WIP는 Worker 1명이 기본값이다.** 정말로 서로 독립적인
     작업이 동시에 필요할 때만 일시적으로 2로 늘린다. 그 외 시간에는 다시
@@ -73,5 +73,5 @@
 - 이 결정은 아직 구현되지 않은 `core`/`runtime`/`dashboard`의 향후 기본
   정책이며, [`docs/IMPLEMENTATION_PLAN.md`](../IMPLEMENTATION_PLAN.md)의
   진행 상태(현재 1/9)를 바꾸지 않는다.
-- 근거: 사용자 결정(2026-08-09), [`TEAM_TOPOLOGY.md`](../../TEAM_TOPOLOGY.md),
+- 근거: 사용자 결정(2026-08-09), [`TEAM_TOPOLOGY.md`](../TEAM_TOPOLOGY.md),
   [`0004-token-aware-fast-mode.md`](0004-token-aware-fast-mode.md).

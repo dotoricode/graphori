@@ -220,8 +220,8 @@ estimate | unknown`이며 실제 청구와 client-side estimate를 구분한다.
 
 ## 기술 부록 B. 증거 연결
 
-원 설계의 상태·journal 제안은 [`PROPOSED_ARCHITECTURE_SOL.md`](../design/PROPOSED_ARCHITECTURE_SOL.md),
-대안의 누락된 WorkNode 완료 전이는 [`DESIGN_EVIDENCE_REVIEW_LUNA.md`](../verification/DESIGN_EVIDENCE_REVIEW_LUNA.md),
+원 설계의 상태·journal 제안은 [`PROPOSED_ARCHITECTURE_SOL.md`](../archive/design/PROPOSED_ARCHITECTURE_SOL.md),
+대안의 누락된 WorkNode 완료 전이는 [`DESIGN_EVIDENCE_REVIEW_LUNA.md`](../archive/verification/DESIGN_EVIDENCE_REVIEW_LUNA.md),
 F01의 `events 23줄`, `replay_mismatch=0`, Windows 승인과 macOS 미검증은
-보존 원문 [`F01_WINDOWS_FINAL_APPROVAL.md`](../evidence/doctori/verification/F01_WINDOWS_FINAL_APPROVAL.md)와
-해시 표 [`MANIFEST.md`](../evidence/doctori/MANIFEST.md)에 연결된다.
+보존 원문 [`F01_WINDOWS_FINAL_APPROVAL.md`](../archive/evidence/doctori/verification/F01_WINDOWS_FINAL_APPROVAL.md)와
+해시 표 [`MANIFEST.md`](../archive/evidence/doctori/MANIFEST.md)에 연결된다.

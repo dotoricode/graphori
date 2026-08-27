@@ -15,9 +15,9 @@ Graphori에는 늘 같은 반 친구들이 앉아 있지 않다. 새 숙제가 �
 모르겠는 어려운 일일 때만 확인자 한 명을 부른다. 이 확인자는 되도록 원래
 만든 사람과 다른 종류의 모델을 쓴다. 위험한 숙제는 여러 갈래로 조사한 뒤,
 만든 사람과 다른 사람이 모아 확인하고 사람이 마지막 결정을 한다. 이 기본
-정책은 [`docs/decisions/0005-mvp-simple-single-verifier.md`](docs/decisions/0005-mvp-simple-single-verifier.md)에
+정책은 [`docs/decisions/0005-mvp-simple-single-verifier.md`](decisions/0005-mvp-simple-single-verifier.md)에
 있다. Graphori Fast Mode(예산만으로 자동으로 빠른 경로를 고르는 흐름,
-[`0004`](docs/decisions/0004-token-aware-fast-mode.md))는 지금 활성 정책이
+[`0004`](decisions/0004-token-aware-fast-mode.md))는 지금 활성 정책이
 아니다.
 
 ## 2. 역할은 다섯 종류, 고정팀은 0개
@@ -37,7 +37,7 @@ provider/model, checkout, 독립성 차원을 기록한다. “팀 수”는 영
 ## 3. 세 가지 그래프
 
 Fast/Standard/Critical은 위험을 가늠하는 참고 개념으로만 남는다([ADR
-0005](docs/decisions/0005-mvp-simple-single-verifier.md) 결정 1). 활성
+0005](decisions/0005-mvp-simple-single-verifier.md) 결정 1). 활성
 정책에서 실제로 쓰는 그래프 모양 이름은 **normal**, **reviewed(마일스톤/
 위험)**, **critical** 세 가지뿐이다. **기본값은 확인자 없이 진행하는
 normal이다.** 아래 조건 중 하나에 해당할 때만 reviewed 또는 critical
@@ -82,7 +82,7 @@ normal이다.** 아래 조건 중 하나에 해당할 때만 reviewed 또는 cri
   아무도 없으면 `blocked(reason=independent_verifier_unavailable)`로 Human
   Gate에 보낸다. Critical(보안·경로·개인정보·파괴적 외부 효과)만 예외로
   독립 pool 최소 2명을 유지하는 안전장치가 그대로 남는다([ADR
-  0005](docs/decisions/0005-mvp-simple-single-verifier.md) 3장). 한 명만
+  0005](decisions/0005-mvp-simple-single-verifier.md) 3장). 한 명만
   가용하면 Critical은 실행을 멈추고
   `blocked(reason=independent_pool_unavailable)`로 Human Gate에 보낸다.
 - Human Gate authority pool도 최소 2명이다. 승인자는 Worker, Verifier, Router와
@@ -99,7 +99,7 @@ normal이다.** 아래 조건 중 하나에 해당할 때만 reviewed 또는 cri
 `active_wip`는 한 Run/시스템에서 현재 running인 역할 인스턴스 수이고,
 `task_parallelism`은 한 Task graph에서 독립 branch 수다. 서로 다른 숫자다.
 
-- [ADR 0005](docs/decisions/0005-mvp-simple-single-verifier.md) 이후 평소
+- [ADR 0005](decisions/0005-mvp-simple-single-verifier.md) 이후 평소
   active WIP 기본값은 1(구현 담당자 한 명)이다. 정말로 서로 독립적인 작업이
   동시에 필요하다고 명시적으로 정당화된 경우에만 일시적으로 2로 늘리고,
   끝나면 다시 1로 돌아온다. task parallelism에는 고정된 기본 branch 수를
@@ -116,7 +116,7 @@ normal이다.** 아래 조건 중 하나에 해당할 때만 reviewed 또는 cri
 ## 6. REVISE 상한과 자동 에스컬레이션
 
 한 논리 작업의 `revise_count`는 0에서 시작해 `verdict=revise`마다 1 증가한다.
-[ADR 0005](docs/decisions/0005-mvp-simple-single-verifier.md) 이후 상한은
+[ADR 0005](decisions/0005-mvp-simple-single-verifier.md) 이후 상한은
 1회다. 1회째 revise(fix + recheck 한 번)까지만 새 revision을 자동으로 만들 수
 있다. 1회를 넘기려는 revise는 새 Worker를 자동 생성하지 않고
 `human_gate_required(reason=revise_limit)`로 전환한다. Gate는 범위 축소, 추가
@@ -152,7 +152,7 @@ Flat `risk_class`는 저장하지 않고 위 표의 `risk_level`, `risk_tags`,
 
 ## 기술 부록 B. 증거 링크
 
-이 topology는 고정 역할 7개와 18 checkpoint를 기록한 [`TEAM_GRAPH_ANALYSIS.md`](docs/research/TEAM_GRAPH_ANALYSIS.md),
-상호 독립 감시를 결정한 [`0003-two-model-mutual-oversight.md`](docs/evidence/doctori/decisions/0003-two-model-mutual-oversight.md),
-delegation-only를 결정한 [`0005-orchestrator-delegation-only.md`](docs/evidence/doctori/decisions/0005-orchestrator-delegation-only.md)를
-참고하되, 해당 관찰은 E1이다. F01 원문 보존과 digest는 [`MANIFEST.md`](docs/evidence/doctori/MANIFEST.md)에서 확인한다.
+이 topology는 고정 역할 7개와 18 checkpoint를 기록한 [`TEAM_GRAPH_ANALYSIS.md`](archive/research/TEAM_GRAPH_ANALYSIS.md),
+상호 독립 감시를 결정한 [`0003-two-model-mutual-oversight.md`](archive/evidence/doctori/decisions/0003-two-model-mutual-oversight.md),
+delegation-only를 결정한 [`0005-orchestrator-delegation-only.md`](archive/evidence/doctori/decisions/0005-orchestrator-delegation-only.md)를
+참고하되, 해당 관찰은 E1이다. F01 원문 보존과 digest는 [`MANIFEST.md`](archive/evidence/doctori/MANIFEST.md)에서 확인한다.

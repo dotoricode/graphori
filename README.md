@@ -59,7 +59,7 @@ These are routing experiments, not additions to the performance table above.
 | Ponytail auto-selection | 22 | 4/4 provider/workload cells: `NO_BENEFIT` | Do not auto-select |
 | TDD auto-selection | 24 | Codex: `HARMFUL`; Claude: `MANUAL_ONLY` | Keep automatic selection off |
 
-[Direct baseline](docs/research/RRC-04_DIRECT_ROUTE_BASELINE.md) · [Ponytail result](docs/research/RRC-05A_PONYTAIL_EFFECTIVENESS.md) · [TDD result](docs/research/RRC-05B_TDD_EFFECTIVENESS.md)
+[Direct baseline](docs/archive/research/RRC-04_DIRECT_ROUTE_BASELINE.md) · [Ponytail result](docs/archive/research/RRC-05A_PONYTAIL_EFFECTIVENESS.md) · [TDD result](docs/archive/research/RRC-05B_TDD_EFFECTIVENESS.md)
 
 ## Install the Agent Skill
 
@@ -240,6 +240,6 @@ history. See the [release gate](docs/public/RELEASE_GATE.md).
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 - [Changelog](CHANGELOG.md)
 - [Third-party notices](THIRD_PARTY_NOTICES.md)
-- Maintainer context: [CONTEXT.md](CONTEXT.md), [PRODUCT.md](PRODUCT.md),
-  [DESIGN.md](DESIGN.md), [TEAM_TOPOLOGY.md](TEAM_TOPOLOGY.md), and
-  [design-qa.md](design-qa.md)
+- Maintainer context: [CONTEXT.md](CONTEXT.md), [PRODUCT.md](docs/PRODUCT.md),
+  [DESIGN.md](docs/DESIGN.md), [TEAM_TOPOLOGY.md](docs/TEAM_TOPOLOGY.md), and
+  [design-qa.md](docs/archive/verification/design-qa.md)

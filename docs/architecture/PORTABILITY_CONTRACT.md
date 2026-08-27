@@ -107,7 +107,7 @@ evidence에 기록하며, 실패하면 `adapter_unavailable`이지 core 상태 c
 
 ## 기술 부록 B. 이전 조사와 증거
 
-이식성 분류·Orca 로컬 관찰은 [`PORTABILITY_AND_DEPENDENCY.md`](../research/PORTABILITY_AND_DEPENDENCY.md),
-보존된 7개 원문과 SHA-256은 [`MANIFEST.md`](../evidence/doctori/MANIFEST.md),
-F01 junction 재감사는 [`F01_JUNCTION_TEAM2_REAUDIT.md`](../evidence/doctori/verification/F01_JUNCTION_TEAM2_REAUDIT.md)다.
+이식성 분류·Orca 로컬 관찰은 [`PORTABILITY_AND_DEPENDENCY.md`](../archive/research/PORTABILITY_AND_DEPENDENCY.md),
+보존된 7개 원문과 SHA-256은 [`MANIFEST.md`](../archive/evidence/doctori/MANIFEST.md),
+F01 junction 재감사는 [`F01_JUNCTION_TEAM2_REAUDIT.md`](../archive/evidence/doctori/verification/F01_JUNCTION_TEAM2_REAUDIT.md)다.
 모두 구현 전 설계 또는 Doctori의 E1 증거이며 Graphori adapter의 실행 PASS를 의미하지 않는다.

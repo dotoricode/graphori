@@ -1,7 +1,7 @@
 # I05 구현 보고서 — generic terminal adapter
 
 > 작성자: 구현 담당자 1명(단독). 이 보고서는 자체 점검 결과이며 승인(approve)이
-> 아니다. [ADR 0005](../decisions/0005-mvp-simple-single-verifier.md)에 따라
+> 아니다. [ADR 0005](../../decisions/0005-mvp-simple-single-verifier.md)에 따라
 > 이 milestone 완료 뒤 별도 확인자가 스케줄될 수 있다. **독립 검증 전이므로
 > 전체 진행률은 그대로 4/9로 유지한다.**
 
@@ -208,7 +208,7 @@ import가 성공했다. 저장소 경로는 `sys.path`에 전혀 없었다.
 
 ## 7. 진행률
 
-이번 작업은 [ADR 0005](../decisions/0005-mvp-simple-single-verifier.md)에
+이번 작업은 [ADR 0005](../../decisions/0005-mvp-simple-single-verifier.md)에
 따라 "의미 있는 마일스톤 완료"에 해당하므로, 이 보고서 이후 별도 확인자가
 스케줄될 수 있다. **독립 검증이 끝나기 전까지 전체 진행률은 그대로
 4/9 = 44.4%(I01, I02, I03, I04)로 유지한다.** I05는 이번 보고서로 "구현팀

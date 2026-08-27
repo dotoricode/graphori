@@ -297,7 +297,7 @@ adapter 경로를 실행합니다.
 | `replay --verify` 결정성 검사 | 지금 실행 가능 | [`cli.py`](../src/graphori_core/cli.py), journal replay |
 | HTTP snapshot + SSE replay | 지금 실행 가능 | [`dashboard.py`](../src/graphori_core/dashboard.py) |
 | liveness / progress / verdict 분리 | 지금 실행 가능 | dashboard projection과 [`DASHBOARD_CONTRACT.md`](architecture/DASHBOARD_CONTRACT.md) |
-| 위험도에 따른 Router·Worker·Verifier·Gate 그래프 컴파일 | 코어 계약·테스트 | [`compiler.py`](../src/graphori_core/compiler.py), [`TEAM_TOPOLOGY.md`](../TEAM_TOPOLOGY.md) |
+| 위험도에 따른 Router·Worker·Verifier·Gate 그래프 컴파일 | 코어 계약·테스트 | [`compiler.py`](../src/graphori_core/compiler.py), [`TEAM_TOPOLOGY.md`](TEAM_TOPOLOGY.md) |
 | 독립 verifier와 revise 1회·Human Gate 정책 | 코어 계약·설계 | [`0005-mvp-simple-single-verifier.md`](decisions/0005-mvp-simple-single-verifier.md) |
 | 여러 Claude Code/Codex 세션의 실제 동시 실행 | 아직 안 됨 | 기본 CLI가 한 worker graph를 만든다는 구현 주석 |
 | interactive PTY, GUI, browser 자동화 | 아직 안 됨 | [`PORTABILITY_CONTRACT.md`](architecture/PORTABILITY_CONTRACT.md) |
@@ -330,7 +330,7 @@ adapter 경로를 실행합니다.
 | 게임 기반 학습의 조건 | 게임 모양만으로 공부가 되는 것은 아닙니다. | 장식보다 실제 목표·선택·피드백·설명을 중심에 둡니다. |
 
 연구 근거와 “연구가 직접 말한 것” 및 “Graphori에 적용한 설계 추론”의 구분은
-[`docs/research/GRAPHORI_LEARNING_RESEARCH.md`](research/GRAPHORI_LEARNING_RESEARCH.md)에
+[`docs/research/GRAPHORI_LEARNING_RESEARCH.md`](archive/research/GRAPHORI_LEARNING_RESEARCH.md)에
 기록했습니다.
 
 ## 7. 직접 실행하기 전 체크리스트
@@ -362,7 +362,7 @@ adapter 경로를 실행합니다.
 ## 참고한 저장소 문서와 연구
 
 - [`skills/graphori/SKILL.md`](../skills/graphori/SKILL.md): Graphori 작업 규칙
-- [`TEAM_TOPOLOGY.md`](../TEAM_TOPOLOGY.md): 역할과 topology 계약
+- [`TEAM_TOPOLOGY.md`](TEAM_TOPOLOGY.md): 역할과 topology 계약
 - [`GRAPHORI_ARCHITECTURE.md`](architecture/GRAPHORI_ARCHITECTURE.md): core·adapter 구조
 - [`EVENT_PROTOCOL.md`](architecture/EVENT_PROTOCOL.md): 사건·재생·검증 계약
-- [`GRAPHORI_LEARNING_RESEARCH.md`](research/GRAPHORI_LEARNING_RESEARCH.md): 학습 설계 근거
+- [`GRAPHORI_LEARNING_RESEARCH.md`](archive/research/GRAPHORI_LEARNING_RESEARCH.md): 학습 설계 근거

@@ -1,7 +1,7 @@
 # I03 + I04 구현 보고서
 
 > 작성자: 구현 담당자 1명(단독). 이 보고서는 자체 점검 결과이며 승인(approve)이
-> 아니다. [ADR 0005](../decisions/0005-mvp-simple-single-verifier.md)에 따라
+> 아니다. [ADR 0005](../../decisions/0005-mvp-simple-single-verifier.md)에 따라
 > 이번 milestone 완료 뒤 별도 확인자가 스케줄될 수 있다.
 
 ## 1. 12살도 이해하는 설명

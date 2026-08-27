@@ -22,7 +22,8 @@ from .journal import ensure_run_dirs
 from .journal import RunPaths, replay_journal
 from .model_routing import Availability
 from .process_supervisor import ProcessLimits
-from .presentation import effort_label, normalized_locale, resolve_locale, route_label, status_label, team_label
+from .presentation import (doctor_label, effort_label, normalized_locale,
+                           resolve_locale, route_label, status_label, team_label)
 from .product import ProductPlanCompiler, execute_product, render_plan_preview
 from .run_spec import RunConstraints, RunSpec, extract_acceptance_criteria
 from .projection import resolve_projection_metadata
@@ -309,17 +310,19 @@ def cmd_resume(args: argparse.Namespace) -> int:
 def cmd_doctor(args: argparse.Namespace) -> int:
     """Read-only local diagnostics; it intentionally never calls ensure_run_dirs."""
     root = args.root.resolve()
+    locale = normalized_locale(getattr(args, "locale", "auto") or "auto")
     codex, claude = _direct_adapters(root, args.timeout)
     providers = {"Codex": codex.probe(), "Claude Code": claude.probe()}
     lock_path = root / ".graphori" / "skills.lock.json"
-    lock_status = "없음 (pinned Skill 없음)"
+    lock_status = doctor_label("lock_absent", locale)
     if lock_path.is_file():
         try:
             lock = json.loads(lock_path.read_text(encoding="utf-8"))
-            lock_status = "호환" if isinstance(lock, dict) and lock.get("schema_version") == 1 \
-                else "불일치: 지원하지 않는 skills.lock schema"
+            lock_status = (doctor_label("compatible", locale)
+                           if isinstance(lock, dict) and lock.get("schema_version") == 1
+                           else doctor_label("lock_unsupported", locale))
         except (OSError, json.JSONDecodeError):
-            lock_status = "불일치: skills.lock을 읽을 수 없음"
+            lock_status = doctor_label("lock_unreadable", locale)
     values: dict[str, object] = {
         "mode": "read_only", "providers": {
             name: {"available": probe.available, "reason": probe.reason}
@@ -327,16 +330,17 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         },
         "schemas": {"RunSpec": 2, "RunPlan": 2, "journal_event": 1,
                     "skills_lock": 1},
-        "skill": {"graphori_skill": "Orca 없이 독립 실행 계약", "lock": lock_status},
+        "skill": {"graphori_skill": doctor_label("skill_contract", locale),
+                  "lock": lock_status},
         "orca": {
             "required": False,
-            "status": "선택 기능이므로 설치 여부가 Direct 실행에 영향을 주지 않습니다.",
+            "status": doctor_label("orca_optional", locale),
         },
     }
     values["provider_summary"] = (
-        "사용 가능한 Direct provider가 없습니다. Codex 또는 Claude Code CLI를 설치·로그인하세요."
+        doctor_label("providers_none", locale)
         if not any(probe.available for probe in providers.values())
-        else "사용 가능한 Direct provider를 확인했습니다."
+        else doctor_label("providers_ok", locale)
     )
     if args.run_id:
         paths = RunPaths(root, args.run_id)
@@ -344,12 +348,13 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         if paths.journal_file.is_file():
             try:
                 events, digest = replay_journal(paths)
-                journal.update({"status": "정상", "event_count": len(events), "digest": digest,
+                journal.update({"status": doctor_label("journal_ok", locale),
+                                "event_count": len(events), "digest": digest,
                                 "terminal": any(e.get("type") == "run_terminal" for e in events)})
                 try:
                     metadata = resolve_projection_metadata(root, args.run_id, events)
                     journal["plan_digest"] = metadata.plan.digest()
-                    journal["schema_lock"] = "호환"
+                    journal["schema_lock"] = doctor_label("compatible", locale)
                 except ValueError as exc:
                     journal["schema_lock"] = f"불일치: {exc}"
             except Exception as exc:
@@ -357,6 +362,7 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         values["journal"] = journal
     runs_root = root / ".graphori" / "runs"
     interrupted: list[dict[str, object]] = []
+    resumable: list[bool] = []
     if runs_root.is_dir():
         for run_root in sorted(path for path in runs_root.iterdir() if path.is_dir()):
             paths = RunPaths(root, run_root.name)
@@ -379,20 +385,24 @@ def cmd_doctor(args: argparse.Namespace) -> int:
                         for event in events
                     )
                 )
+                resumable.append(not needs_review)
                 interrupted.append({
                     "run_id": run_root.name,
-                    "status": "결과 확인 필요" if needs_review else "이어서 실행 가능",
+                    "status": doctor_label(
+                        "run_needs_review" if needs_review else "run_resumable", locale),
                 })
             except Exception:
-                interrupted.append({"run_id": run_root.name, "status": "읽을 수 없음"})
+                resumable.append(False)
+                interrupted.append({"run_id": run_root.name,
+                                    "status": doctor_label("run_unreadable", locale)})
     values["interrupted_runs"] = {
         "count": len(interrupted),
-        "resumable": sum(item["status"] == "이어서 실행 가능" for item in interrupted),
-        "needs_review": sum(item["status"] != "이어서 실행 가능" for item in interrupted),
+        "resumable": sum(resumable),
+        "needs_review": len(resumable) - sum(resumable),
         "runs": interrupted,
     }
     text = json.dumps(values, indent=2, sort_keys=True, ensure_ascii=False)
-    print(text if args.json else "Graphori 상태 점검 (읽기 전용)\n" + text)
+    print(text if args.json else doctor_label("title", locale) + "\n" + text)
     return 0
 
 

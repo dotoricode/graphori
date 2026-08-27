@@ -59,7 +59,7 @@ Direct·v1 방식·v2의 세 조건을 비교하는 더 큰 계획은 [`benchmar
 | Ponytail 자동 선택 | 22 | 제공사·과제 조합 4/4가 `NO_BENEFIT` | 자동 선택하지 않음 |
 | TDD 자동 선택 | 24 | Codex `HARMFUL`, Claude `MANUAL_ONLY` | 자동 선택하지 않음 |
 
-[직접 실행 기준선](docs/research/RRC-04_DIRECT_ROUTE_BASELINE.md) · [Ponytail 결과](docs/research/RRC-05A_PONYTAIL_EFFECTIVENESS.md) · [TDD 결과](docs/research/RRC-05B_TDD_EFFECTIVENESS.md)
+[직접 실행 기준선](docs/archive/research/RRC-04_DIRECT_ROUTE_BASELINE.md) · [Ponytail 결과](docs/archive/research/RRC-05A_PONYTAIL_EFFECTIVENESS.md) · [TDD 결과](docs/archive/research/RRC-05B_TDD_EFFECTIVENESS.md)
 
 ## Agent Skill 설치
 
@@ -240,6 +240,6 @@ hash 계산을 수행합니다. 배포·공개 전환·Git 이력 변경은 하�
 - [행동 강령](CODE_OF_CONDUCT.md)
 - [변경 기록](CHANGELOG.md)
 - [제3자 자료 고지](THIRD_PARTY_NOTICES.md)
-- 관리자 문맥: [CONTEXT.md](CONTEXT.md), [PRODUCT.md](PRODUCT.md),
-  [DESIGN.md](DESIGN.md), [TEAM_TOPOLOGY.md](TEAM_TOPOLOGY.md),
-  [design-qa.md](design-qa.md)
+- 관리자 문맥: [CONTEXT.md](CONTEXT.md), [PRODUCT.md](docs/PRODUCT.md),
+  [DESIGN.md](docs/DESIGN.md), [TEAM_TOPOLOGY.md](docs/TEAM_TOPOLOGY.md),
+  [design-qa.md](docs/archive/verification/design-qa.md)

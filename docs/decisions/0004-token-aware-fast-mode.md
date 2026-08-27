@@ -27,6 +27,6 @@ reviewer_model_id는 TEAM_TOPOLOGY의 independence constraint를 반드시 통�
 라우팅 보조 점수는 `3*risk + 2*uncertainty + 2*scope + 2*synthesis + parallelism`
 과 budget band다. 점수는 hard trigger를 덮지 않는다. 가격은 실행 시 catalog
 snapshot과 `price_checked_at`을 기록하며 문서의 달러 값은 정책 상수가 아니다.
-근거: [`MODEL_ROUTING_AND_FAST_MODE.md`](../design/MODEL_ROUTING_AND_FAST_MODE.md),
+근거: [`MODEL_ROUTING_AND_FAST_MODE.md`](../archive/design/MODEL_ROUTING_AND_FAST_MODE.md),
 [`EVENT_PROTOCOL.md`](../architecture/EVENT_PROTOCOL.md),
-[`DESIGN_EVIDENCE_REVIEW_LUNA.md`](../verification/DESIGN_EVIDENCE_REVIEW_LUNA.md).
+[`DESIGN_EVIDENCE_REVIEW_LUNA.md`](../archive/verification/DESIGN_EVIDENCE_REVIEW_LUNA.md).

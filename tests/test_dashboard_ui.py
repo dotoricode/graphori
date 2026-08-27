@@ -631,7 +631,7 @@ class DashboardWorldGateTests(unittest.TestCase):
         self.assertIn('id="office-inspector"', self.html)
         self.assertNotIn("status-card", self.html)
         self.assertNotIn("kpi", self.html.lower())
-        design = (ROOT / "DESIGN.md").read_text(encoding="utf-8").lower()
+        design = (ROOT / "docs" / "DESIGN.md").read_text(encoding="utf-8").lower()
         self.assertIn("persistent kpi cards: zero", design)
 
     def test_connect_and_live_are_distinct_states(self):

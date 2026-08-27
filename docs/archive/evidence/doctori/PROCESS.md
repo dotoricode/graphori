@@ -30,8 +30,8 @@ iOS, 실행 중 추적, 자동 코드 수정, 웹 콘솔은 첫 범위에 넣지
 - `jvm.library_load`는 사용하고 `native.depends_on`은 첫 범위에서 미룹니다.
 - 테스트를 못 찾았다는 사실만으로 “테스트 없음”이라고 결론내리지 않습니다.
 - 장기 회사 환경은 MacBook 중심의 macOS 우선 gate로 두되, 현재 세션은
-  [Decision 0006](decisions/0006-windows-now-macos-deferred.md)과
-  [WINDOWS_CURRENT_SESSION.md](research/WINDOWS_CURRENT_SESSION.md)에 따라
+  `Decision 0006` (not published)과
+  `WINDOWS_CURRENT_SESSION.md` (not published)에 따라
   Windows에서 먼저 구현·중간 검증합니다. macOS는 회사 MacBook 또는 macOS CI를
   확보할 때까지 `status=deferred`, `confidence=unknown`으로 남깁니다.
 - 설계가 통과되기 전에는 F01 구현을 시작하지 않는 문턱을 추가했습니다.
@@ -133,7 +133,7 @@ current gate의 승인이지 macOS 승인이나 F01 전체 최종 완료가 아�
 더 좁은 320px 화면과 기본 데스크톱에서 `검증 1팀`·`검증 2팀`, 여섯 방 3×2,
 가로 넘침 없음을 다시 확인했습니다. 따라서 현재 대시보드 v3의 독립 최종 판정은
 **PASS**이며, 자세한 근거는
-[`docs/verification/DASHBOARD_V3_VISUAL_REVIEW.md`](verification/DASHBOARD_V3_VISUAL_REVIEW.md)에 있습니다.
+``docs/verification/DASHBOARD_V3_VISUAL_REVIEW.md`` (not published)에 있습니다.
 
 이 기록은 F01 구현 진행 상태나 F01의 완료·진행률을 바꾸지 않습니다.
 
@@ -162,7 +162,7 @@ macOS 상태는 계속 `deferred`(나중에 확인)와 `unknown`(아직 모름)�
   막대 배율 약 `0.817`, 여섯 카드 3×2 배치, 콘솔 오류 0건, PNG 작업자
   스프라이트 로딩을 확인했습니다. 현재 화면 진행률은 상태에서 자동 계산합니다.
   자세한 서버 전후 기록은
-  [`DASHBOARD_LIVE_SERVER_DEPLOY.md`](verification/DASHBOARD_LIVE_SERVER_DEPLOY.md)에
+  ``DASHBOARD_LIVE_SERVER_DEPLOY.md`` (not published)에
   적었습니다.
 
 ## F01 구현 설계 계획 기록 (2026-08-08 당시)

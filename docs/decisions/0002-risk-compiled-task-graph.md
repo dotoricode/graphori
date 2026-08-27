@@ -39,5 +39,5 @@ REVISE 보고서가 지적한 위험 분류 3분열, fan-in queue, 감사자 SPO
 Flat `risk_class`는 표시용으로만 매핑한다. `active_wip`와 `task_parallelism`을
 분리한다. **기본 Run WIP 4와 branch 2/3/4는 현재 MVP가 아닌 과거 실험 전
 운영값이다.** 현재 MVP의 기본 WIP는 ADR 0005 §10의 Worker 1명이다. 근거:
-[`TEAM_TOPOLOGY.md`](../../TEAM_TOPOLOGY.md), [`TEAM_GRAPH_ANALYSIS.md`](../research/TEAM_GRAPH_ANALYSIS.md),
-[`DESIGN_COMPARISON_CLAUDE.md`](../verification/DESIGN_COMPARISON_CLAUDE.md).
+[`TEAM_TOPOLOGY.md`](../TEAM_TOPOLOGY.md), [`TEAM_GRAPH_ANALYSIS.md`](../archive/research/TEAM_GRAPH_ANALYSIS.md),
+[`DESIGN_COMPARISON_CLAUDE.md`](../archive/verification/DESIGN_COMPARISON_CLAUDE.md).

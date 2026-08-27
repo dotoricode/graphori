@@ -10,7 +10,7 @@
   - `/var/folders/bk/3mxkf8t509dfnfs5b911qms80000gn/T/orca-paste-1786342716416-c3d4ee6c-5e59-4962-bca9-2c1c845d47e2.png` (736 × 736)
   - `/var/folders/bk/3mxkf8t509dfnfs5b911qms80000gn/T/orca-paste-1786342733658-00662121-f52e-42b7-a064-502a02b3d85e.png` (735 × 804)
 - Implementation URL: `http://127.0.0.1:8765/`
-- Historical browser print render: [docs/dashboard/qa/live-office-browser-print.png](docs/dashboard/qa/live-office-browser-print.png) (the previous standing-character revision).
+- Historical browser print render: [docs/dashboard/qa/live-office-browser-print.png](dashboard/qa/live-office-browser-print.png) (the previous standing-character revision).
 - Current state endpoint: `run-dashboard`, six verified nodes out of six.
 - Current visual capture status: unavailable because the app browser reported no available browser instances during this revision's QA.
 

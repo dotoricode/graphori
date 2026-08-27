@@ -82,6 +82,30 @@ OMISSION_REASON_LABELS: Mapping[str, Mapping[str, str]] = {
 }
 
 
+DOCTOR_LABELS = {
+    "title": {"ko": "Graphori 상태 점검 (읽기 전용)",
+              "en": "Graphori status check (read-only)"},
+    "lock_absent": {"ko": "없음 (pinned Skill 없음)", "en": "none (no pinned Skill)"},
+    "compatible": {"ko": "호환", "en": "compatible"},
+    "lock_unsupported": {"ko": "불일치: 지원하지 않는 skills.lock schema",
+                         "en": "mismatch: unsupported skills.lock schema"},
+    "lock_unreadable": {"ko": "불일치: skills.lock을 읽을 수 없음",
+                        "en": "mismatch: skills.lock could not be read"},
+    "skill_contract": {"ko": "Orca 없이 독립 실행 계약",
+                       "en": "runs standalone, without Orca"},
+    "orca_optional": {"ko": "선택 기능이므로 설치 여부가 Direct 실행에 영향을 주지 않습니다.",
+                      "en": "Optional. Whether it is installed does not affect Direct execution."},
+    "providers_none": {"ko": "사용 가능한 Direct provider가 없습니다. Codex 또는 Claude Code CLI를 설치·로그인하세요.",
+                       "en": "No Direct provider is available. Install and sign in to the Codex or Claude Code CLI."},
+    "providers_ok": {"ko": "사용 가능한 Direct provider를 확인했습니다.",
+                     "en": "Found at least one available Direct provider."},
+    "journal_ok": {"ko": "정상", "en": "ok"},
+    "run_needs_review": {"ko": "결과 확인 필요", "en": "needs review"},
+    "run_resumable": {"ko": "이어서 실행 가능", "en": "resumable"},
+    "run_unreadable": {"ko": "읽을 수 없음", "en": "unreadable"},
+}
+
+
 def normalized_locale(locale: str) -> str:
     value = (locale or "auto").lower().replace("_", "-").split("-", 1)[0]
     if value == "auto":
@@ -173,3 +197,6 @@ def presentation_vocabulary() -> dict[str, object]:
             key: dict(value) for key, value in OMISSION_REASON_LABELS.items()
         },
     }
+
+def doctor_label(key: str, locale: str) -> str:
+    return label(DOCTOR_LABELS, key, locale)
