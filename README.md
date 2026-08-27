@@ -190,6 +190,25 @@ Graphori is not a sandbox. A provider or verifier that you authorize can modify 
 or run commands. Use narrow write scopes, version control, explicit checks, and human
 review for risky work. Read the [trust model](docs/public/TRUST.md).
 
+## Public source gate — 2026-08-27
+
+These checks were run locally without GitHub Actions immediately before and after the
+public push. They are release evidence, not an independent security certification.
+
+| Check | Measured result |
+| --- | ---: |
+| Python 3.11 test suite | 401 passed, 6 skipped |
+| Retained v1/v2 artifact verifier | 8/8 hidden checks passed, 0 scope violations |
+| Gitleaks, clean public history and tree | 0 secrets found |
+| Installed Runtime dependency audit | 0 known vulnerabilities found |
+| Package build | wheel + sdist built; Twine check passed; SBOM + SHA-256 generated |
+| Public GitHub native plugin install | Codex 1/1, Claude Code 1/1; version `0.1.0` |
+| Installed Skill manifests vs public source | Codex match, Claude Code match |
+| Authenticated English behavior E2E | Codex 2/2 tests; Claude Code 3/3 tests |
+
+The live E2E tasks each used a fresh disposable Git repository, changed only the two
+requested files, produced an English final report, and spawned no subagent.
+
 ## Current verification and limits
 
 - Python 3.11+ is supported; the local suite is tested before every public push.

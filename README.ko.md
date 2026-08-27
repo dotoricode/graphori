@@ -190,6 +190,25 @@ Graphori는 sandbox가 아닙니다. 사용자가 허용한 provider나 검사 �
 위험 작업의 사람 검토를 함께 사용하세요. [신뢰 모델](docs/public/TRUST.ko.md)에
 정확한 경계를 적었습니다.
 
+## 공개 source 검증 — 2026-08-27
+
+GitHub Actions 없이 공개 push 직전과 직후에 로컬에서 실행한 결과입니다. 독립적인
+보안 인증이 아니라 이번 공개본의 검증 근거입니다.
+
+| 검사 | 실제 결과 |
+| --- | ---: |
+| Python 3.11 전체 테스트 | 401개 통과, 6개 건너뜀 |
+| 보존한 v1/v2 자료 검증기 | 숨은 검사 8/8 통과, 범위 위반 0 |
+| 깨끗한 공개 Git 이력·현재 파일 비밀 검사 | 발견 0건 |
+| 설치된 Runtime dependency 감사 | 알려진 취약점 0건 |
+| package 생성 | wheel·sdist 생성, Twine 검사 통과, SBOM·SHA-256 생성 |
+| 공개 GitHub native plugin 설치 | Codex 1/1, Claude Code 1/1, version `0.1.0` |
+| 설치 Skill과 공개 source SHA-256 비교 | Codex 일치, Claude Code 일치 |
+| 인증된 영어 실제 동작 | Codex 테스트 2/2, Claude Code 테스트 3/3 |
+
+실제 동작은 각각 새 일회용 Git 저장소에서 실행했습니다. 두 실행 모두 요청한 파일
+2개만 바꾸고 영어 최종 보고를 남겼으며 하위 Agent를 만들지 않았습니다.
+
 ## 현재 검증 범위와 제한
 
 - Python 3.11 이상을 지원하며 공개 push 전에 로컬 전체 검사를 실행합니다.
