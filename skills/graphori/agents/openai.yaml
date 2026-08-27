@@ -1,0 +1,4 @@
+interface:
+  display_name: "Graphori"
+  short_description: "Plan the work, use only helpful agents, and verify the result"
+  default_prompt: "Use $graphori to plan this task, delegate only where another agent helps, implement it, and verify the result. Match my language in every update."

@@ -2,6 +2,7 @@
 
 - `TEAM_GRAPH_ANALYSIS.md`: 팀 그래프 분석
 - `PORTABILITY_AND_DEPENDENCY.md`: OS portability와 의존성 조사
+- `MAJOR_SKILL_DISTRIBUTION.md`: 주요 Agent Skill 저장소의 Codex·Claude 배포 구조와 설치 방식 비교
 - `LIVE_GAME_DASHBOARD.md`: 실제 상태를 보여 주는 dashboard 조사
 - `GRAPHORI_LEARNING_RESEARCH.md`: Graphori 학습 게임에 적용한 교육학 연구와 설계 근거
 - `ORCA_PR3_OPERATIONAL_KNOWN_ISSUES.md`: Orca 실행에서 확인한 문제와 현재 우회 방법

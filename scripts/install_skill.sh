@@ -17,8 +17,8 @@ case "$target" in codex|claude) targets=("$target");; both) targets=(codex claud
 case "$skill" in graphori|graphori-dashboard);; *) echo "invalid skill: $skill" >&2; exit 2;; esac
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-source="$repo_root/$skill"
-validator="$repo_root/graphori/scripts/validate_skill.py"
+source="$repo_root/skills/$skill"
+validator="$repo_root/skills/graphori/scripts/validate_skill.py"
 home_path="${HOME:?HOME is required}"
 python_bin="${GRAPHORI_PYTHON:-python3}"
 command -v "$python_bin" >/dev/null 2>&1 || python_bin=python

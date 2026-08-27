@@ -1,6 +1,14 @@
 # Three-arm benchmark protocol
 
-This is reproducibility scaffolding, not a benchmark result. Do not commit generated results without the exact task set, tool versions, command transcript, and raw JSON records.
+This directory contains two distinct things:
+
+- [`v1_v2/`](v1_v2/) preserves a completed small two-arm comparison, including raw
+  data, corrected results, analysis code, and an independent verifier.
+- The files in this directory scaffold a future three-arm comparison. That comparison
+  has not been run and has no result yet.
+
+Do not commit generated results without the exact task set, tool versions, command
+transcript, and raw JSON records.
 
 Arms are intentionally comparable and must be run separately for Codex and Claude:
 

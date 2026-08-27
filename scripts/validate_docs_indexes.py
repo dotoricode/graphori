@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 def excluded(path: Path) -> bool:
-    return (bool(path.parts) and (path.parts[0].lower() == "graphori"
+    return (bool(path.parts) and (path.parts[0].lower() in {"graphori", "skills"}
                                   or any(part.startswith(".") for part in path.parts)))
 
 

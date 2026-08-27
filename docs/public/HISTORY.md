@@ -1,6 +1,6 @@
 # v1 to v2 history and evidence
 
-This repository preserves history rather than relabeling it as a release claim. The reachable commits show the v1 visual/learning work followed by v2 engine work:
+The private development repository preserves the original commit history. The public repository starts from a reviewed source snapshot, so the historical commits below are identifiers recorded in the exported documentation rather than reachable public commits:
 
 - `d6a3fa5` — learning-game dashboard work.
 - `f888c0b` and `eb382f4` — pixel-office dashboard work.

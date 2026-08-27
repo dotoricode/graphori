@@ -1,6 +1,6 @@
 # v1에서 v2까지의 이력과 근거
 
-이 저장소는 과거를 release claim으로 다시 부르지 않고 보존합니다. reachable commit에는 v1 시각화·학습 작업 뒤 v2 engine 작업이 보입니다.
+비공개 개발 저장소에는 원래 commit 이력이 보존되어 있습니다. 공개 저장소는 검토된 source snapshot에서 시작하므로 아래 commit은 공개 저장소에서 직접 이동할 수 있는 이력이 아니라 export 문서에 남긴 식별값입니다.
 
 - `d6a3fa5` — 학습 게임 dashboard 작업
 - `f888c0b`, `eb382f4` — pixel office dashboard 작업

@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "graphori-core"
-version = "0.9.0b1"
-description = "Graph-based orchestration that runs only needed coding agents and verifies every result"
+version = "0.1.0"
+description = "Plan coding work, use only useful agents, and record the checks"
 requires-python = ">=3.11"
 license = "MIT"
 license-files = ["LICENSE"]
@@ -13,7 +13,7 @@ readme = "README.md"
 authors = [{name = "Dotoricode"}]
 keywords = ["ai-agents", "audit", "coding-agents", "journal", "orchestration"]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 3 - Alpha",
   "Environment :: Console",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",

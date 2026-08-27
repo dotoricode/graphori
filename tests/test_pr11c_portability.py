@@ -278,7 +278,7 @@ asyncio.run(main())
             if "graphori_adapters.orca" in text:
                 offenders.append(str(path.relative_to(ROOT)))
         self.assertEqual(offenders, [])
-        skill = (ROOT / "graphori" / "SKILL.md").read_text(encoding="utf-8")
+        skill = (ROOT / "skills" / "graphori" / "SKILL.md").read_text(encoding="utf-8")
         self.assertNotIn("$orca-cli", skill)
         self.assertNotIn("skills get orchestration", skill)
 

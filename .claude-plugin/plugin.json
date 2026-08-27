@@ -1,0 +1,19 @@
+{
+  "name": "graphori",
+  "version": "0.1.0",
+  "description": "Plan coding work, use only useful agents, and check the result.",
+  "author": {
+    "name": "dotoricode",
+    "url": "https://github.com/dotoricode"
+  },
+  "homepage": "https://github.com/dotoricode/graphori",
+  "repository": "https://github.com/dotoricode/graphori",
+  "license": "MIT",
+  "keywords": [
+    "agent-skills",
+    "coding-agents",
+    "orchestration",
+    "verification"
+  ],
+  "skills": "./skills/"
+}

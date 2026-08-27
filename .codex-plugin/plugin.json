@@ -1,0 +1,34 @@
+{
+  "name": "graphori",
+  "version": "0.1.0",
+  "description": "Plan coding work, use only useful agents, and check the result.",
+  "author": {
+    "name": "dotoricode",
+    "url": "https://github.com/dotoricode"
+  },
+  "homepage": "https://github.com/dotoricode/graphori",
+  "repository": "https://github.com/dotoricode/graphori",
+  "license": "MIT",
+  "keywords": [
+    "agent-skills",
+    "coding-agents",
+    "orchestration",
+    "verification"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Graphori",
+    "shortDescription": "Plan the work, use only useful agents, and check the result.",
+    "longDescription": "Graphori turns a coding task into ordered steps, delegates only where another agent helps, and records the checks used to judge completion.",
+    "developerName": "dotoricode",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": "Use $graphori to plan, implement, and verify this task end to end.",
+    "websiteURL": "https://github.com/dotoricode/graphori",
+    "brandColor": "#D97706"
+  }
+}

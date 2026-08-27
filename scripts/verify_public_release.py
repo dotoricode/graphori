@@ -39,9 +39,9 @@ def verify(root: Path, output: Path | None) -> dict[str, object]:
 
     checks = (
         [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-v"],
-        [sys.executable, "-m", "compileall", "-q", "src", "tests", "scripts", "graphori", "benchmarks"],
+        [sys.executable, "-m", "compileall", "-q", "src", "tests", "scripts", "skills", "benchmarks"],
         [sys.executable, "scripts/validate_docs_indexes.py"],
-        [sys.executable, "graphori/scripts/validate_skill.py", "graphori"],
+        [sys.executable, "skills/graphori/scripts/validate_skill.py", "skills/graphori"],
         [sys.executable, "scripts/dashboard_smoke.py"],
         [sys.executable, "scripts/public_release_audit.py"],
     )

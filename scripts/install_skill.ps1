@@ -9,8 +9,8 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-$source = Join-Path $repoRoot $Skill
-$validator = Join-Path $repoRoot 'graphori\scripts\validate_skill.py'
+$source = Join-Path (Join-Path $repoRoot 'skills') $Skill
+$validator = Join-Path $repoRoot 'skills\graphori\scripts\validate_skill.py'
 
 function Get-HomePath {
     if ($env:HOME) { return $env:HOME }

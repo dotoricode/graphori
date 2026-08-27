@@ -30,7 +30,7 @@
 
 ```text
 python scripts/validate_docs_indexes.py
-python graphori/scripts/validate_skill.py graphori
+python skills/graphori/scripts/validate_skill.py skills/graphori
 python -m unittest discover -s tests -v
 python -m compileall -q src tests scripts graphori
 python scripts/dashboard_smoke.py

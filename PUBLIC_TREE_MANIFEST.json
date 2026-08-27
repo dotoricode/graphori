@@ -1,6 +1,22 @@
 {
   "files": [
     {
+      "path": ".agents/plugins/marketplace.json",
+      "sha256": "ef7b6059583554c62fc6f1bc0c1b8e962642b365cc8cd915d116f33f1684e9ef"
+    },
+    {
+      "path": ".claude-plugin/marketplace.json",
+      "sha256": "7a03eacec67f4c496c7e5636e0c29732370a29666ac9a38969e55a072aba8add"
+    },
+    {
+      "path": ".claude-plugin/plugin.json",
+      "sha256": "5420605e79e650df406d791b474165dd1b77e3bff6dab7874a18e76269ed6096"
+    },
+    {
+      "path": ".codex-plugin/plugin.json",
+      "sha256": "e7ca682cd07af0898e504478ff3fee53bed7dc7491cb7cd5de24f2e9e14ed686"
+    },
+    {
       "path": ".gitattributes",
       "sha256": "d60f352d0db1404c70afb4bb8b2ca3fd1c610572aa40720e8a0b7baa7885418c"
     },
@@ -10,7 +26,7 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "de0867a4e9cc6b3f419a9a79ae2b2e80d4e97b144d0b9561e9990daed8e51915"
+      "sha256": "3e559f038d3d46c975d654740586a8ea6e78e47e6c6e591a0bf862c512c1b4f7"
     },
     {
       "path": "CODE_OF_CONDUCT.md",
@@ -38,11 +54,11 @@
     },
     {
       "path": "README.ko.md",
-      "sha256": "fd082a550a36986e91203a9d560e280aa53ae23d09f25d94de970bf7f67ada75"
+      "sha256": "7ca5b50ee96bc7d571d7f251b13a3f655eafe43e1c4aa313edf827bc9e46d0ae"
     },
     {
       "path": "README.md",
-      "sha256": "7fda75bd8405d74c1bc1d0514bffc391487c0e84eb680885a2a3b8bd21ba548e"
+      "sha256": "764667ea393a1db635dd6c83c7b5dfba10b5fe1fc6d0624516c9e8e7902ec593"
     },
     {
       "path": "SECURITY.md",
@@ -102,7 +118,7 @@
     },
     {
       "path": "benchmarks/README.md",
-      "sha256": "86e3bed6df8645c9a8e57f2c9ab4f4a79c1f8bc527ac2385c62c46a29d5c512a"
+      "sha256": "d04d7035f1ad3cb516049176f7632841e250cd24add7d701745aaff64b7c46eb"
     },
     {
       "path": "benchmarks/raw-result.schema.json",
@@ -111,6 +127,46 @@
     {
       "path": "benchmarks/run_benchmark.py",
       "sha256": "160d0ac8a80a768374cb5e3f657088e6d8a5fe0d91d2111b75058fb66c814090"
+    },
+    {
+      "path": "benchmarks/v1_v2/PROTOCOL.en.md",
+      "sha256": "7dd06605aaa4fb41640b44daa660e95acf3022bb7caa2a773101e44076f20d4a"
+    },
+    {
+      "path": "benchmarks/v1_v2/PROTOCOL.md",
+      "sha256": "f694afc06468d1e58025572f428c62412686e34c94b9ffd196757c4600924374"
+    },
+    {
+      "path": "benchmarks/v1_v2/README.md",
+      "sha256": "032b8542d83c051004053ee7a1c399852b865a4185d548eb1ef7596fd0e92827"
+    },
+    {
+      "path": "benchmarks/v1_v2/REPORT.en.md",
+      "sha256": "ae732c2d8d6e675a96a043ccbbdfcb9f8e63571506002f94bbd545a8cc9e4a10"
+    },
+    {
+      "path": "benchmarks/v1_v2/REPORT.md",
+      "sha256": "d54d2cb562b4c6c565b82293a961dc969ca5a21824205be0bd866eb7b12e4311"
+    },
+    {
+      "path": "benchmarks/v1_v2/analyze_results.py",
+      "sha256": "ebb6ec3ffa18edb088611f0b6beda2c34c58a0f4d9d45af098eb4e716408b283"
+    },
+    {
+      "path": "benchmarks/v1_v2/raw-results.json",
+      "sha256": "ac71a6b091fcd4b296ea1cec96973a63f2ab871fb9a2a56beaabc4a34e13f3eb"
+    },
+    {
+      "path": "benchmarks/v1_v2/results.json",
+      "sha256": "ff5e61ec9de5fd3c7bdd2e64f85170465b18447ccb79593b2a425d44b62ebdb8"
+    },
+    {
+      "path": "benchmarks/v1_v2/run_benchmark.py",
+      "sha256": "6c413035cdd8b311166542f6bac9f8a0c88e141e267544cec9f5b10ebd1650fb"
+    },
+    {
+      "path": "benchmarks/v1_v2/verify_results.py",
+      "sha256": "180c96ef3ba4ae741693cbbad4ee6eb576038a9824c7ff0fa52ceba5f94977c3"
     },
     {
       "path": "build/README.md",
@@ -130,7 +186,7 @@
     },
     {
       "path": "docs/GRAPHORI_FUNCTION_GUIDE.md",
-      "sha256": "2a1bb25e0d9bf00ef2a44079d65aeedb02d6e8d720ae9adf366f0e33da8a98d2"
+      "sha256": "f0833836f6721cee42d2de715e7817247e8de41030a6679d0041d11447cf3f63"
     },
     {
       "path": "docs/GRAPHORI_LEARNING_GAME.html",
@@ -142,7 +198,7 @@
     },
     {
       "path": "docs/PROCESS.md",
-      "sha256": "735e4a6d7dd3d302467ac413d20b359e7dce26fbd80b416365f58d37abbe4249"
+      "sha256": "028456a18208148e3aa7f69c72bb7056f841c1605a1c92c40ab7424a9dc617bd"
     },
     {
       "path": "docs/PROCESS_VIEW.html",
@@ -478,11 +534,11 @@
     },
     {
       "path": "docs/public/HISTORY.ko.md",
-      "sha256": "ffc5511ce706c4d9dcc0a4dd6018dc389cb2b7027da19331857e82f6ebda3023"
+      "sha256": "480b728f572803ce858bb6465dcd9ccd2f048bceb3ed99626ec7713cfdf6b2f7"
     },
     {
       "path": "docs/public/HISTORY.md",
-      "sha256": "21ddce9f2d3de4df13bfe95ed896f706153346619e0c99453f042ec93b7b2f11"
+      "sha256": "8191210e9d6445626e1fc5e5ef1394747da2a1249b2effbbbe1ed1806d8471cc"
     },
     {
       "path": "docs/public/LIMITATIONS.ko.md",
@@ -549,6 +605,10 @@
       "sha256": "863ea30e553aa790f478dbd8c893587514b1f00e18814979e3842f3181df72a6"
     },
     {
+      "path": "docs/research/MAJOR_SKILL_DISTRIBUTION.md",
+      "sha256": "4eaaf3b1e1e065f76f9735e881e7ddb45a0ed831f359d179df0aad92f9be5da0"
+    },
+    {
       "path": "docs/research/ORCA_PR3_OPERATIONAL_KNOWN_ISSUES.md",
       "sha256": "6d573f0353957f8fa85ab639db89304a4b0dbe0a8d1465aa8fbc8a24fd73bbd1"
     },
@@ -590,7 +650,7 @@
     },
     {
       "path": "docs/research/README.md",
-      "sha256": "cd88d4b969051da705ec3b09f038a4a600ee8d7a09bea4d187db8f7c6757b2be"
+      "sha256": "5a277090ee0bd979280cb8a5f2c38f7eec732c2281dcc05da830edd592d1444d"
     },
     {
       "path": "docs/research/RRC-01-RESULTS.json",
@@ -913,36 +973,8 @@
       "sha256": "93359d3ebe8294581eb8f6fd92b059d06fa324f770559ecedd51fcbff7345940"
     },
     {
-      "path": "graphori-dashboard/README.md",
-      "sha256": "353227976c4d25ae84d0f5dea1380c01fa4fc0728ecc2530bb3a8c0b73238f18"
-    },
-    {
-      "path": "graphori-dashboard/SKILL.md",
-      "sha256": "ca5992a01df7890b45320d89b55336bd03bf2bd06181b74fab2583d208c93290"
-    },
-    {
-      "path": "graphori-dashboard/agents/openai.yaml",
-      "sha256": "8f8e523f7c91ff20ab75bf60c6f23e0634af3b5b433ba6a22c7f2e2ed2ff5118"
-    },
-    {
-      "path": "graphori/SKILL.md",
-      "sha256": "3ac618e64053aae664b759c4044d03a09c3d0e55af1923caefa75420d17e5efc"
-    },
-    {
-      "path": "graphori/agents/openai.yaml",
-      "sha256": "38ff4a1f49f3c2f57c040068782cb04580797935db1a6739eeb25496236afa7f"
-    },
-    {
-      "path": "graphori/references/canonical-routing.md",
-      "sha256": "02faec74b0a2e211708f6c3d97609b6e7e51d991e4f7eecc2c00fd0106212d6c"
-    },
-    {
-      "path": "graphori/scripts/validate_skill.py",
-      "sha256": "99390b07f0878aaa8a0bae1efb46be97470a3eeac16081bc07e2cdc44025065b"
-    },
-    {
       "path": "pyproject.toml",
-      "sha256": "ce0d46a283875e4ac190e38181e3fb003c44ca7300425934c31a66150a875b72"
+      "sha256": "3e5682520d0884a073586ba50f7b9db0a2a7f36b99179154234acdb0d6414fcd"
     },
     {
       "path": "scripts/build_dashboard_character_sheets.py",
@@ -978,11 +1010,11 @@
     },
     {
       "path": "scripts/install_skill.ps1",
-      "sha256": "18c15be295ddc9c51947f7abef214dc77a30027f5c7c67507d626319acad9ee6"
+      "sha256": "5d8c72c4d6fe772b4dc7e627426d83f79e22d21d1f303dea8cc304af845e954e"
     },
     {
       "path": "scripts/install_skill.sh",
-      "sha256": "929d24a203fc314d27256dcb081597e39a94b3de6df722efb0a1c3601e959c6d"
+      "sha256": "ebdbba8bb4c761deeeb0924e6bcffb7daf68e12f842308ede2f5d56e054326bf"
     },
     {
       "path": "scripts/ponytail_skill_benchmark.py",
@@ -990,7 +1022,7 @@
     },
     {
       "path": "scripts/public_release_audit.py",
-      "sha256": "3f47741e910cb8333cca10485105517b4190aad6e9504d76782fb2b60b695c72"
+      "sha256": "630c48a9e170b463d61caad5a3a64775781445de3c7ef25744057ca91c139b83"
     },
     {
       "path": "scripts/publish_snapshot.py",
@@ -1014,11 +1046,39 @@
     },
     {
       "path": "scripts/validate_docs_indexes.py",
-      "sha256": "8c0a8268ff9d790ced3d4e9ca986d8c7a39a704a8589931036d9c7a20afe1ead"
+      "sha256": "fec89807bd2504280873fcb9a82ad41d8dbdd82fb91d453f20112fc37d65363e"
     },
     {
       "path": "scripts/verify_public_release.py",
-      "sha256": "97b5eea350162f0d8172eaa6465aa3bc2ac44eb602aa3ab6c6e1fe4ff353bfba"
+      "sha256": "81492005a84f79229da68d22b3f3b6f764ce0a9b5a23b6c64fea535a0e581054"
+    },
+    {
+      "path": "skills/graphori-dashboard/README.md",
+      "sha256": "353227976c4d25ae84d0f5dea1380c01fa4fc0728ecc2530bb3a8c0b73238f18"
+    },
+    {
+      "path": "skills/graphori-dashboard/SKILL.md",
+      "sha256": "11e42c34c3011f0564283682999266f87849eac97a3c41447429005c214bf9aa"
+    },
+    {
+      "path": "skills/graphori-dashboard/agents/openai.yaml",
+      "sha256": "69ea19289207e02b279000c3c50c415b79b7e5a0aae6ca822417a78a73bdb14a"
+    },
+    {
+      "path": "skills/graphori/SKILL.md",
+      "sha256": "ef23c55ad2ef1ca1aec7ad01e269f2921e7abcc2970a21ccaa499ebec21902c7"
+    },
+    {
+      "path": "skills/graphori/agents/openai.yaml",
+      "sha256": "9919dfbe2f6000c136af56d1ba090c4789c858f4103730859b08f40baee61ce8"
+    },
+    {
+      "path": "skills/graphori/references/canonical-routing.md",
+      "sha256": "39a8852563e44e082043a70ffa643808bb6814cb0ebd6f618e6704299d31a5bf"
+    },
+    {
+      "path": "skills/graphori/scripts/validate_skill.py",
+      "sha256": "99390b07f0878aaa8a0bae1efb46be97470a3eeac16081bc07e2cdc44025065b"
     },
     {
       "path": "src/graphori_adapters/__init__.py",
@@ -1298,7 +1358,7 @@
     },
     {
       "path": "tests/test_local_release.py",
-      "sha256": "0bcdf69ca94e73192d78ff80deb5817320353d82dfa7bc4b2c2a799e7bec25a5"
+      "sha256": "040d3619d5edae5f9f098bc0c0e86da850c1f60009eb3a44143522afa28aa724"
     },
     {
       "path": "tests/test_model_routing.py",
@@ -1330,7 +1390,7 @@
     },
     {
       "path": "tests/test_pr11c_portability.py",
-      "sha256": "643f23b86a3b126e375a1bc13d820fdcce70830348799f758bab291ba95496e1"
+      "sha256": "833a1c41c2e39f9415f3ceb3802e1dde30fb26531b7bb2c091660dce91253a2e"
     },
     {
       "path": "tests/test_premium_gate.py",
@@ -1354,7 +1414,7 @@
     },
     {
       "path": "tests/test_public_release_prep.py",
-      "sha256": "3b2bc8fbcb61203388de53542c2e8e46373926343a900708353fd2019e94fff8"
+      "sha256": "650e4ed0107ac58d0f052e01d3fce6f0d55e28b1346e4ced7075d671afebb238"
     },
     {
       "path": "tests/test_quickstart_docs.py",

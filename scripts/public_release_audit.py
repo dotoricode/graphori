@@ -13,6 +13,8 @@ DEFAULT_ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = (
     "LICENSE", "SECURITY.md", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md",
     "THIRD_PARTY_NOTICES.md", "README.md", "README.ko.md",
+    ".codex-plugin/plugin.json", ".agents/plugins/marketplace.json",
+    ".claude-plugin/plugin.json", ".claude-plugin/marketplace.json",
     "benchmarks/raw-result.schema.json",
     "scripts/export_public_tree.py", "scripts/public_release_audit.py",
     "scripts/verify_public_release.py",

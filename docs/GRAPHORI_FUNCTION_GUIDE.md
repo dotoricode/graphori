@@ -361,7 +361,7 @@ adapter 경로를 실행합니다.
 
 ## 참고한 저장소 문서와 연구
 
-- [`graphori/SKILL.md`](../graphori/SKILL.md): Graphori 작업 규칙
+- [`skills/graphori/SKILL.md`](../skills/graphori/SKILL.md): Graphori 작업 규칙
 - [`TEAM_TOPOLOGY.md`](../TEAM_TOPOLOGY.md): 역할과 topology 계약
 - [`GRAPHORI_ARCHITECTURE.md`](architecture/GRAPHORI_ARCHITECTURE.md): core·adapter 구조
 - [`EVENT_PROTOCOL.md`](architecture/EVENT_PROTOCOL.md): 사건·재생·검증 계약
