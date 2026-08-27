@@ -181,7 +181,7 @@ class ProductPlanCompiler:
             rework_verdict = f".graphori/verdicts/{run_id}-v1-rework-1.json"
             argv = verification_argv or default_verification_argv(spec.workspace)
             verifier = NodeSpec(
-                "v1", "verification", f"{display_title} 결과 확인",
+                "v1", "verification", f"Verify: {display_title}",
                 "Run the deterministic acceptance command and record an independent verdict.",
                 "verifier", role="verifier", dependencies=("i1",),
                 read_scope=tuple(sorted(set((*read_scope, *write_scope)))),

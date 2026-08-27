@@ -16,6 +16,7 @@ class JournalIdempotencyTests(unittest.TestCase):
         self.root = Path(self.tmp.name)
         self.paths = ensure_run_dirs(self.root, "run-idem")
         self.writer = JournalWriter(self.paths)
+        self.addCleanup(self.writer.close)
 
     def _envelope(self, *, payload):
         envelope = canonical_event("heartbeat", event_id="evt_1", run_id="run-idem",

@@ -1,5 +1,6 @@
 import json
 import math
+import shutil
 import subprocess
 import unittest
 from pathlib import Path
@@ -650,6 +651,7 @@ class DashboardWorldGateTests(unittest.TestCase):
         self.assertIn("--stage-gap", self.css)
         self.assertIn("layoutMode: \"top\"", self.modules["world-stage.js"])
 
+    @unittest.skipUnless(shutil.which("sips"), "sips image probe is macOS-only")
     def test_background_asset_matches_canonical_world(self):
         completed = subprocess.run(
             ["sips", "-g", "pixelWidth", "-g", "pixelHeight", str(DASH / "world" / "office-background.webp")],

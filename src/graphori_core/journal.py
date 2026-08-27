@@ -28,6 +28,50 @@ from .reducer import EVENT_TYPES, StateTransitionError, validate_event_envelope
 
 GENESIS_DIGEST = "sha256:" + "0" * 64
 
+
+def _lock_exclusive_nonblocking(fd: int) -> None:
+    """Take a process-scoped exclusive advisory lock, or raise.
+
+    ``BlockingIOError`` means another live writer holds the lock.  Any other
+    ``OSError`` means the lock could not be evaluated at all, which callers
+    treat as fail-closed rather than as free ownership.
+    """
+    if os.name == "posix":
+        import fcntl
+
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        return
+    if os.name == "nt":
+        import msvcrt
+
+        os.lseek(fd, 0, os.SEEK_SET)
+        try:
+            msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+        except OSError as exc:
+            # Windows reports an existing holder as EDEADLOCK/EACCES rather
+            # than as a distinct non-blocking status, so it is normalized to
+            # the POSIX contention type the callers already handle.
+            raise BlockingIOError(str(exc)) from exc
+        return
+    raise _UnsupportedLockPlatform(os.name)
+
+
+def _unlock(fd: int) -> None:
+    if os.name == "posix":
+        import fcntl
+
+        fcntl.flock(fd, fcntl.LOCK_UN)
+        return
+    if os.name == "nt":
+        import msvcrt
+
+        os.lseek(fd, 0, os.SEEK_SET)
+        msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+
+
+class _UnsupportedLockPlatform(RuntimeError):
+    """Raised when no advisory-lock backend exists for this platform."""
+
 _PRODUCER_REQUIRED = (
     "schema_version", "event_id", "producer_event_id", "run_id", "graph_version",
     "occurred_at", "actor", "type", "entity", "payload",
@@ -263,32 +307,28 @@ class JournalWriter:
             raise
 
     def _acquire_ownership(self) -> None:
-        """Acquire a non-blocking, process-scoped exclusive POSIX file lock.
+        """Acquire a non-blocking, process-scoped exclusive advisory file lock.
 
-        The lock is deliberately fail-closed on platforms without POSIX
-        ``flock`` support.  A successful acquire happens before recovery or
-        journal reads that influence writer state, so a second writer cannot
-        compute a competing seq or hash-chain head.
+        POSIX uses ``flock`` and Windows uses ``msvcrt.locking``; both release
+        the lock when the descriptor closes or the process dies.  A platform
+        with neither backend is fail-closed rather than treated as unowned.
+        A successful acquire happens before recovery or journal reads that
+        influence writer state, so a second writer cannot compute a competing
+        seq or hash-chain head.
         """
-        if os.name != "posix":
-            raise JournalOwnershipError(
-                "이 환경은 journal writer 잠금을 지원하지 않아 안전하게 실행할 수 없습니다."
-            )
-        try:
-            import fcntl
-        except ImportError as exc:  # pragma: no cover - defensive POSIX guard
-            raise JournalOwnershipError(
-                "이 환경은 journal writer 잠금을 지원하지 않아 안전하게 실행할 수 없습니다."
-            ) from exc
-
         fd = os.open(str(self.paths.writer_lock_file), os.O_RDWR | os.O_CREAT, 0o600)
         try:
-            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            _lock_exclusive_nonblocking(fd)
         except BlockingIOError as exc:
             os.close(fd)
             raise JournalOwnershipError(
                 "이 작업은 다른 Graphori에서 실행 중입니다. "
                 "실행 기록은 변경하지 않았습니다."
+            ) from exc
+        except _UnsupportedLockPlatform as exc:
+            os.close(fd)
+            raise JournalOwnershipError(
+                "이 환경은 journal writer 잠금을 지원하지 않아 안전하게 실행할 수 없습니다."
             ) from exc
         except OSError as exc:
             os.close(fd)
@@ -310,8 +350,7 @@ class JournalWriter:
         if fd is None:
             return
         try:
-            import fcntl
-            fcntl.flock(fd, fcntl.LOCK_UN)
+            _unlock(fd)
         finally:
             os.close(fd)
 

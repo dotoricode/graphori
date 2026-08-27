@@ -52,7 +52,7 @@ writer.close()
 '''
 
 
-@unittest.skipUnless(os.name == "posix", "POSIX flock writer ownership fixture")
+@unittest.skipUnless(os.name in ("posix", "nt"), "no advisory-lock backend on this platform")
 class JournalWriterOwnershipTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

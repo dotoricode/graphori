@@ -121,7 +121,10 @@ class SkillRegistryTests(unittest.TestCase):
                 registry.install(replace(manifest("ponytail"), source_commit=""), source)
             target = source / "reference.md"
             target.write_text("reference", encoding="utf-8")
-            (source / "linked.md").symlink_to(target)
+            try:
+                (source / "linked.md").symlink_to(target)
+            except OSError as exc:  # Windows needs Developer Mode or admin
+                self.skipTest(f"symlink creation unavailable: {exc}")
             with self.assertRaisesRegex(SkillRegistryError, "symlink"):
                 registry.install(manifest("linked"), source)
 

@@ -15,6 +15,7 @@ class JournalMalformedTests(unittest.TestCase):
         self.root = Path(self.tmp.name)
         self.paths = ensure_run_dirs(self.root, "run-malformed")
         self.writer = JournalWriter(self.paths)
+        self.addCleanup(self.writer.close)
 
     def test_invalid_json_ready_file_is_quarantined(self):
         (self.paths.ready / "bad.json").write_bytes(b"{not valid json")
