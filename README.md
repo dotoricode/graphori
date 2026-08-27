@@ -4,26 +4,161 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 
-An Agent Skill that plans a coding task, delegates only where a second agent
-earns its keep, and decides completion from checks it ran rather than from an
-agent reporting success.
+An Agent Skill that turns a coding task into a dependency graph, decides for
+itself which parts can run at the same time, and picks a model per step.
 
 ![Dori, Graphori's acorn operations engineer](assets/brand/hero.png)
 
-[한국어](README.ko.md) · [Trust model](docs/public/TRUST.md) · [Limitations](docs/public/LIMITATIONS.md) · [Security](SECURITY.md)
+[한국어](README.ko.md) · [Install](docs/public/INSTALL.md) · [Trust model](docs/public/TRUST.md) · [Limitations](docs/public/LIMITATIONS.md)
 
-## Why
+## The problem
 
-Fanning out to several agents before knowing whether the work needs them costs
-tokens on small tasks, and it hides failures behind a confident summary.
+Work that could run at the same time usually runs one step after another,
+because the agent has no plan that says which steps are independent.
 
-Graphori starts in one session and splits work only at boundaries where the
-split pays for itself. Every step records the command that judged it, so
-"complete" means a check passed.
+You can fix that by hand. Write "research these three things in parallel, then
+implement" and a capable agent will do it. But now you are the planner: you
+decide what splits, you decide what waits, you decide who does what, and you
+redo that thinking for every task.
+
+Graphori moves that decision into the agent. You describe the outcome. It
+builds the graph, and the graph is what decides what runs together.
+
+## What happens when you use it
+
+You give your agent a task in plain language:
+
+```text
+/graphori:graphori add rate limiting to the public API and cover it with tests
+```
+
+Graphori then does four things.
+
+**It plans a graph, not a list.** Every step is a node with explicit
+dependencies. Nodes with no dependency between them are free to run together;
+nodes that need an earlier result wait for it. Nothing is parallel because you
+asked for parallelism — it is parallel because the graph says the two nodes
+never touch each other.
+
+**It drops the steps you don't need.** A one-line fix does not get a research
+phase. Teams that have nothing to do are marked omitted, with the reason, in
+the plan you see before anything runs.
+
+**It picks a model per node.** A mechanical edit and a design decision do not
+need the same model, so they do not get the same one.
+
+**It verifies before calling anything done.** Every implementation node gets a
+verification node that runs an actual command. "Complete" means that command
+passed.
+
+## The five teams
+
+Graphori plans against five roles. Each node belongs to exactly one, and each
+run uses only the ones the task needs.
+
+| Team | What it does | When it appears |
+| --- | --- | --- |
+| **Planning** | Builds the graph, assigns roles, collects results. Your agent session is this role. | Always |
+| **Research** | Gathers what the change depends on — external sources, or the current shape of the code. | Only when the task needs facts it doesn't have |
+| **Design** | Decides an approach before code is written. | Only when the change isn't already bounded |
+| **Implementation** | Writes the change, inside a declared write scope. | Almost always |
+| **Verification** | Runs the check and records an independent verdict. Cannot verify its own work. | Whenever something was implemented |
+
+A typical small fix uses Planning, Implementation, and Verification, and says
+so:
+
+```text
+Research · Omitted
+No external research is needed for this request.
+```
+
+## How it decides to run things in parallel
+
+Splitting work is not free. Two agents mean two startups, context handed to
+both, and results merged at the end. Graphori only splits when the split wins:
+
+```
+gain = (time if run one after another)
+     − (longest single node + startup for each + handoff + merge)
+
+split only when gain ≥ max(30 seconds, 15% of the sequential time)
+```
+
+Below that line it stays in one session, because the coordination would cost
+more than the wait. Two nodes run concurrently by default; a run can raise that
+when the graph genuinely has more independent work.
+
+This is the part you would otherwise be doing in your head every time.
+
+## How it picks a model
+
+Each node is classified by what it demands, and each class has a minimum
+capability score. Graphori keeps every model that clears the bar and has the
+right capability, then takes the **fastest** one left.
+
+| Node kind | Minimum coding index |
+| --- | ---: |
+| Routine | 42 |
+| Bounded implementation | 48 |
+| General or complex implementation | 56 |
+| Design | 56 |
+| Verification | 56 |
+| Critical synthesis | 64 |
+
+The scores come from a pinned snapshot of the
+[Artificial Analysis Coding Agent Index](https://artificialanalysis.ai/agents/coding-agents)
+(v1.3), stored in the repository so a routing decision can be replayed later.
+
+| Model | Provider | Coding index by effort | Approval |
+| --- | --- | --- | --- |
+| `gpt-5.6-luna` | Codex | 42 medium · 51 high | normal |
+| `gpt-5.6-terra` | Codex | 48 medium · 56 high · 57 xhigh | normal |
+| `gpt-5.6-sol` | Codex | 61 medium · 64 high · 65 xhigh | **premium** |
+| `claude-sonnet-5` | Claude Code | not in the snapshot — see below | normal |
+| `claude-opus-5` | Claude Code | 62 medium · 63 high · 67 xhigh | **premium** |
+
+Three rules sit on top of the scores:
+
+**Faster wins.** A model far above the bar is not better for a node that only
+needs the bar, so among everything that qualifies Graphori takes the lowest
+expected wall time. Routine work goes to a fast model; the slow, strong one is
+saved for the node that actually needs it.
+
+**Normal before premium.** `gpt-5.6-sol` and `claude-opus-5` are gated, and
+Graphori only considers them when no normal-class model clears the bar. When it
+does reach for one, it stops and asks. The approval it gets is bounded to that
+node, model family, effort ceiling, and write scope — it is not reusable for
+the rest of the run.
+
+**An unscored model is marked as such.** `claude-sonnet-5` has no entry in the
+pinned snapshot, so a node routed to it is recorded with
+`BENCHMARK_PARTIAL_PROVIDER_ONLY` and partial confidence rather than a borrowed
+score. Graphori does not invent a number for a model it has not measured.
+
+If a provider CLI is missing or not signed in, the route falls back to an
+available one and records why, instead of failing the node.
+
+## What you get
+
+Compared with prompting an agent yourself:
+
+- You describe the outcome. The decomposition is not your job any more.
+- Parallelism happens when it pays, not when you remember to ask for it.
+- Steps you don't need are omitted out loud, so the plan is short and you can
+  see the reasoning before it runs.
+
+Compared with orchestrators that fan out by default:
+
+- Small work stays in one session. In a controlled comparison, dropping a
+  second AI reviewer that never found anything halved the AI calls.
+- Completion is a check that passed, not a model reporting success.
+- Every routing decision, verdict, and check is written to an append-only local
+  journal you can replay.
 
 ## Install
 
-Pick your agent. Both commands run inside the tool.
+Run this inside your agent. Full details and other routes are in
+[INSTALL.md](docs/public/INSTALL.md).
 
 ### Claude Code
 
@@ -32,11 +167,7 @@ Pick your agent. Both commands run inside the tool.
 /plugin install graphori@graphori
 ```
 
-Restart Claude Code, then:
-
-```text
-/graphori:graphori plan, implement, and verify this task end to end.
-```
+Restart, then `/graphori:graphori <your task>`.
 
 ### Codex
 
@@ -45,72 +176,31 @@ codex plugin marketplace add dotoricode/graphori
 codex plugin add graphori@graphori
 ```
 
-Start a new session, then:
+New session, then `$graphori:graphori <your task>`.
 
-```text
-$graphori:graphori plan, implement, and verify this task end to end.
-```
+The Skill is all you need. A separate Python runtime is available if you want a
+`graphori` command line, journal replay, and resume; it is optional and
+documented in [INSTALL.md](docs/public/INSTALL.md).
 
-Skills land in `~/.claude/skills` for Claude Code and `~/.agents/skills` for
-Codex. [INSTALL.md](docs/public/INSTALL.md) covers the other routes: `npx
-skills`, a readable shell script over `gh`, and project-local copies.
+## What was measured
 
-## The optional runtime
+Three experiments settled current defaults. All three said "don't", and the
+defaults follow.
 
-The Skill works on its own. Add the Python runtime only if you want the
-`graphori` CLI, an append-only journal, replay, or resume:
+**Does a second AI reviewer catch what the first missed?** Two Python tasks,
+four runs per arm, Codex only. It found nothing, and cost twice as much. So v2
+does not run one.
 
-```sh
-gh repo clone dotoricode/graphori -- --depth 1
-cd graphori
-./scripts/install_graphori.sh --mode runtime --dry-run   # prints, changes nothing
-./scripts/install_graphori.sh --mode runtime
-graphori doctor --lang en
-```
-
-Then plan and run a change. Store the root in a variable and quote it, so a
-path with spaces cannot split into two arguments:
-
-```sh
-repo_root="$(pwd -P)"
-graphori run "add a docstring to the parser" \
-  --root "$repo_root" \
-  --write-scope src/parser.py \
-  --verify-command python -m unittest tests.test_parser
-```
-
-On Windows PowerShell:
-
-```powershell
-$root = (Get-Location).Path
-graphori plan "add a docstring to the parser" --root $root --lang en
-```
-
-`--write-scope` bounds what the run may touch. `--verify-command` is the check
-that decides the verdict. Leave it out and Graphori picks a default for the
-workspace — the unit test suite, then `compileall`, then `git diff --check` —
-which is weaker than a check you chose yourself.
-
-## What the numbers say
-
-I expected a second AI reviewer to make small coding tasks safer. In a
-controlled comparison it found nothing the first pass missed, at twice the
-cost. Graphori v2 dropped it.
-
-| Metric | v1-style | v2 | Change |
+| Metric | With second reviewer | Without | Change |
 | --- | ---: | ---: | ---: |
 | Hidden checks passed | 4/4 | 4/4 | same |
-| Scope violations | 0 | 0 | same |
-| Issues found by the second AI | 0 | n/a | — |
+| Issues the reviewer found | 0 | n/a | — |
 | AI calls | 8 | 4 | −50% |
 | Median completion | 48.5 s | 32.1 s | −34% |
 | Fresh input tokens | 170,784 | 65,905 | −61% |
 
-Four runs per arm, two Python tasks, Codex only. The v1-style arm is a
-reconstruction from commit `93c5fcf`, not a replay of historical runs. This is
-a small sample and it does not predict your codebase.
-
-Recompute it from the retained artifacts:
+Small sample, reconstructed from commit `93c5fcf` rather than replayed. It does
+not predict your codebase. Recompute it from the retained artifacts:
 
 ```sh
 python benchmarks/v1_v2/verify_results.py
@@ -118,79 +208,40 @@ python benchmarks/v1_v2/verify_results.py
 
 [Method](benchmarks/v1_v2/PROTOCOL.en.md) · [Report](benchmarks/v1_v2/REPORT.en.md) · [Raw data](benchmarks/v1_v2/raw-results.json)
 
-Three routing experiments settled other defaults, all of them negative
-results that turned a feature off:
+**Should Graphori attach other Agent Skills to a node automatically?** It can
+bind an external Skill to a step. Two skills were used as probes — `ponytail`
+and `tdd`, both third-party Skills, not part of Graphori. Auto-binding did not
+help in any provider/workload cell, and on Codex the TDD skill made results
+worse. Automatic Skill selection is therefore **off**; you can still bind one
+deliberately.
 
 | Experiment | Samples | Result |
 | --- | ---: | --- |
-| [Direct Codex + Claude baseline](docs/archive/research/RRC-04_DIRECT_ROUTE_BASELINE.md) | 24 | 24/24 checks passed — both routes kept |
-| [Ponytail auto-selection](docs/archive/research/RRC-05A_PONYTAIL_EFFECTIVENESS.md) | 22 | no benefit in any cell — not enabled |
-| [TDD auto-selection](docs/archive/research/RRC-05B_TDD_EFFECTIVENESS.md) | 24 | harmful on Codex — left manual |
+| [Both direct routes reliable?](docs/archive/research/RRC-04_DIRECT_ROUTE_BASELINE.md) | 24 | 24/24 checks passed, no scope violations — both kept |
+| [Auto-bind `ponytail`?](docs/archive/research/RRC-05A_PONYTAIL_EFFECTIVENESS.md) | 22 | no benefit in any cell — not enabled |
+| [Auto-bind `tdd`?](docs/archive/research/RRC-05B_TDD_EFFECTIVENESS.md) | 24 | harmful on Codex — not enabled |
 
-A wider Direct vs v1 vs v2 protocol is published under [`benchmarks/`](benchmarks/),
-but its 72-run study has not been run and nothing is claimed for it.
+## Limits worth knowing
 
-## What it is not
-
-Graphori is not a sandbox. A provider you authorize can edit files and run
-commands. Use narrow write scopes, version control, and human review for
-anything risky.
-
-Other limits worth knowing before you install:
-
+- Graphori is not a sandbox. A provider you authorize can edit files and run
+  commands. Use narrow write scopes and version control.
 - A check proves what its command asserts, and nothing else.
-- Provider progress can go dark during a long run. A heartbeat means alive,
-  not advancing.
-- Optional Skill auto-selection is off on purpose; the measurements above are why.
-- `0.1.0` is the version this package declares. No stable API is promised, and
-  nothing here is published to a package registry yet.
-- Orca integration exists as an optional adapter and is currently disabled.
-
-## Supported platforms
-
-| | Skill | CLI: `plan`, `doctor` | CLI: `run`, `resume` |
-| --- | --- | --- | --- |
-| Windows | yes | yes | yes, exercised |
-| Linux | yes | yes | yes, exercised |
-| macOS | yes | yes | implemented, not yet exercised |
-
-The journal takes an exclusive advisory lock so two writers can never
-interleave: `flock` on POSIX, `msvcrt.locking` on Windows. A platform with
-neither fails closed rather than running unprotected.
-
-macOS runs the same POSIX code path as Linux, but the
-[portability contract](docs/architecture/PORTABILITY_CONTRACT.md) holds macOS
-at `deferred/unknown` until the platform fixtures are run on a macOS host. The
-table says "implemented" rather than "supported" for that reason.
-
-The suite is 397 tests. The last full run on Windows with Python 3.12 passed
-with 5 skipped. The skip count is environment-dependent: fixtures opt out when
-a macOS-only tool is missing, when symlink creation needs privileges the host
-does not grant, and when live-provider tests are not enabled.
-
-## Release checks
-
-This repository has no GitHub Actions. Maintainers run a fail-closed gate
-locally before publishing:
-
-```sh
-python3.11 scripts/verify_public_release.py --output build/release-artifacts
-```
-
-It runs the tests, secret and dependency audits, package builds, isolated
-installs, SBOM generation, and hashing. It never publishes, deploys, or
-rewrites history. [RELEASE_GATE.md](docs/public/RELEASE_GATE.md) documents the
-procedure and the evidence each step must produce; the artifacts themselves are
-written to `build/release-artifacts` and are not committed.
+- A heartbeat means the provider is alive, not that it is making progress.
+- `0.9.0-beta.1` is a beta and the name says so. No stable API, and nothing is
+  published to a package registry yet.
+- Orca integration exists as an optional adapter and is currently off.
+- Windows and Linux are exercised. macOS runs the same POSIX path but its
+  platform fixtures have not been run, so the
+  [portability contract](docs/architecture/PORTABILITY_CONTRACT.md) still lists
+  it as unverified.
 
 ## Documentation
 
 - [Product guide](docs/public/README.md) — start here
 - [Architecture](docs/architecture/GRAPHORI_ARCHITECTURE.md) and [event protocol](docs/architecture/EVENT_PROTOCOL.md)
 - [Decision records](docs/decisions/README.md) — why the defaults are what they are
-- [v1 to v2 history](docs/public/HISTORY.md)
-- [CONTEXT.md](CONTEXT.md) — the domain vocabulary the code and docs both use
-- [Contributing](CONTRIBUTING.md) · [Code of Conduct](CODE_OF_CONDUCT.md) · [Changelog](CHANGELOG.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+- [CONTEXT.md](CONTEXT.md) — the vocabulary the code and docs share
+- [Contributing](CONTRIBUTING.md) · [Code of Conduct](CODE_OF_CONDUCT.md) · [Changelog](CHANGELOG.md) · [Security](SECURITY.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 - [docs/archive/](docs/archive/README.md) — build and review records kept for provenance
 
 ## License

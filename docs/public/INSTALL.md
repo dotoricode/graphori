@@ -64,6 +64,30 @@ graphori doctor --lang en
 This performs a local pip install of the checkout. Use a virtual environment if
 you do not want it in your current interpreter. Python 3.11 or newer.
 
+### Running a change from the command line
+
+Store the root in a variable and quote it, so a path containing spaces cannot
+split into two arguments:
+
+```sh
+repo_root="$(pwd -P)"
+graphori run "add a docstring to the parser" \
+  --root "$repo_root" \
+  --write-scope src/parser.py \
+  --verify-command python -m unittest tests.test_parser
+```
+
+On Windows PowerShell:
+
+```powershell
+$root = (Get-Location).Path
+graphori plan "add a docstring to the parser" --root $root --lang en
+```
+
+`--write-scope` bounds what the run may touch. `--verify-command` is the check
+that decides the verdict; leave it out and Graphori picks a default for the
+workspace — the unit test suite, then `compileall`, then `git diff --check`.
+
 ## Choosing the output language
 
 `--lang auto` is the default and resolves in this order: an explicit flag, then

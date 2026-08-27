@@ -7,8 +7,11 @@ ROOT = Path(__file__).parents[1]
 
 
 class QuickstartDocsTests(unittest.TestCase):
+    """Wherever a `graphori` quickstart appears, it must quote the run root."""
+
     def test_windows_quickstarts_store_absolute_root(self):
-        documents = (ROOT / "README.md", ROOT / "docs" / "archive" / "verification" / "I10_INSTALLABLE_SKILL_BUILD.md")
+        documents = (ROOT / "docs" / "public" / "INSTALL.md",
+                     ROOT / "docs" / "archive" / "verification" / "I10_INSTALLABLE_SKILL_BUILD.md")
         for path in documents:
             text = path.read_text(encoding="utf-8")
             self.assertIn("$root = (Get-Location).Path", text, path)
@@ -17,7 +20,8 @@ class QuickstartDocsTests(unittest.TestCase):
             self.assertRegex(text, r"--root\s+\$root\b", path)
 
     def test_posix_quickstarts_quote_pwd_p_root(self):
-        documents = (ROOT / "README.md", ROOT / "docs" / "archive" / "verification" / "I10_INSTALLABLE_SKILL_BUILD.md")
+        documents = (ROOT / "docs" / "public" / "INSTALL.md",
+                     ROOT / "docs" / "archive" / "verification" / "I10_INSTALLABLE_SKILL_BUILD.md")
         for path in documents:
             text = path.read_text(encoding="utf-8")
             self.assertRegex(text, r'repo_root="\$\(pwd -P\)"', path)
