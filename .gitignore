@@ -44,7 +44,7 @@ docs/dashboard/qa/character-art/office-static.html
 docs/dashboard/qa/character-art/scale-test.html
 
 # Duplicate or sensitive raw benchmark captures; aggregated results are tracked
-docs/research/RRC-01-DIRECT-*-FINAL.json
-docs/research/RRC-01-ORCA-*-FINAL.json
-docs/research/RRC-04_*PROTOCOL*.jsonl
-docs/research/RRC-04_*STDERR*.txt
+docs/archive/research/RRC-01-DIRECT-*-FINAL.json
+docs/archive/research/RRC-01-ORCA-*-FINAL.json
+docs/archive/research/RRC-04_*PROTOCOL*.jsonl
+docs/archive/research/RRC-04_*STDERR*.txt

@@ -13,10 +13,24 @@
 - The verifier node title is no longer Korean. It is part of the canonical plan
   digest, and the portability contract requires language to stay out of plan,
   journal, and projection digests.
+- On Windows, a lock failure that was not contention was reported as "another
+  Graphori is running". Only `EACCES` and `EDEADLOCK` now mean contention;
+  every other errno reports its own cause. A missing lock backend raises the
+  unsupported-platform error instead of escaping as `ImportError`, and the lock
+  descriptor is closed on every failure path.
 - `scripts/validate_docs_indexes.py` reads the tracked tree instead of walking
-  the working directory, so it no longer fails on ignored build output.
+  the working directory, so it no longer fails on ignored build output. It also
+  checks untracked documents Git would not ignore, which is how a new document
+  used to escape the index check until after it was committed.
 - `THIRD_PARTY_NOTICES.md` listed IBM Plex Sans KR fonts that this repository
   does not ship.
+- Several documents overstated what is verified. The README claimed macOS `run`
+  support the portability contract holds at `deferred/unknown`, presented an
+  environment-dependent skip count as fixed, said a run without
+  `--verify-command` has nothing to judge by when the runtime picks a default,
+  and called `0.1.0` the first version despite the earlier `v0.9.0-beta.1` tag.
+  The install guide said nothing executes at install time, but the installer
+  runs `validate_skill.py` against the copied Skill.
 
 ### Changed
 

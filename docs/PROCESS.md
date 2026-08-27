@@ -53,7 +53,7 @@ git diff --check
 
 이 문서 약속을 지키는지 `tests/test_quickstart_docs.py`가 자동으로 검사합니다. 설치기, skill, 문서 색인, 전체 테스트, compileall, dashboard smoke, diff 검사를 모두 다시 실행하고, Windows 3.11·3.12와 macOS hosted CI가 최신 SHA에서 성공한 뒤 최종 SHA를 아래에 적습니다.
 
-- I10 수정 보고서: `docs/verification/I10_FIX_REPORT.md`
+- I10 수정 보고서: `docs/archive/verification/I10_FIX_REPORT.md`
 - 최신 SHA: `226ecef1f24380107a3fa61faacbce26306354da`
 - PR: `https://github.com/dotoricode/graphori/pull/2`
 - CI: `https://github.com/dotoricode/graphori/actions/runs/31329340506`, `https://github.com/dotoricode/graphori/actions/runs/31329338640` (Windows 3.11·3.12, macOS 모두 success)

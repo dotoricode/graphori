@@ -17,18 +17,21 @@ def excluded(path: Path) -> bool:
 
 
 def tracked_markdown(root: Path) -> list[Path]:
-    """Markdown files Git actually tracks.
+    """Markdown files that belong to the published tree.
 
-    Walking the filesystem would also pick up build output and other ignored
-    directories, which are not part of the published tree and have no index.
+    Tracked files plus untracked ones Git would not ignore. Walking the
+    filesystem instead would pick up build output, which has no index; looking
+    only at tracked files would let a newly added document escape the check
+    until after it was committed.
     """
     completed = subprocess.run(
-        ["git", "-C", str(root), "ls-files", "-z", "*.md"],
+        ["git", "-C", str(root), "ls-files", "-z", "-co", "--exclude-standard", "*.md"],
         capture_output=True, text=True,
     )
     if completed.returncode != 0:
         return sorted(root.rglob("*.md"))
-    return [root / name for name in completed.stdout.split(NUL) if name]
+    names = {name for name in completed.stdout.split(NUL) if name}
+    return [root / name for name in sorted(names)]
 
 
 def expected(root: Path) -> dict[Path, list[str]]:

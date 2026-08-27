@@ -330,7 +330,7 @@ adapter 경로를 실행합니다.
 | 게임 기반 학습의 조건 | 게임 모양만으로 공부가 되는 것은 아닙니다. | 장식보다 실제 목표·선택·피드백·설명을 중심에 둡니다. |
 
 연구 근거와 “연구가 직접 말한 것” 및 “Graphori에 적용한 설계 추론”의 구분은
-[`docs/research/GRAPHORI_LEARNING_RESEARCH.md`](archive/research/GRAPHORI_LEARNING_RESEARCH.md)에
+[`docs/archive/research/GRAPHORI_LEARNING_RESEARCH.md`](archive/research/GRAPHORI_LEARNING_RESEARCH.md)에
 기록했습니다.
 
 ## 7. 직접 실행하기 전 체크리스트

@@ -8,4 +8,4 @@
 - `5185a18` — live office 화면과 dashboard skill
 - `4c09517` — 성능 측정·검증 근거 추가
 
-commit subject와 `docs/verification/`, `docs/research/` 기록은 provenance 단서이지 독립 audit가 아닙니다. fixture, local run, 설계 비교를 다룬 기록도 있으므로 reliability·cost·agent 품질 주장으로 바꾸면 안 됩니다. 공개 베타가 재현 가능한 benchmark schema를 추가하는 이유도 과거 근거가 통제된 benchmark가 아니기 때문입니다.
+commit subject와 `docs/archive/verification/`, `docs/archive/research/` 기록은 provenance 단서이지 독립 audit가 아닙니다. fixture, local run, 설계 비교를 다룬 기록도 있으므로 reliability·cost·agent 품질 주장으로 바꾸면 안 됩니다. 공개 베타가 재현 가능한 benchmark schema를 추가하는 이유도 과거 근거가 통제된 benchmark가 아니기 때문입니다.

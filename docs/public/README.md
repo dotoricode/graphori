@@ -4,6 +4,7 @@ Graphori's position is deliberately narrow: **Fewer agents. Every result verifie
 
 [Name and slogan search](NAME_CLEARANCE.md) · [한국어 이름 검색](NAME_CLEARANCE.ko.md) · [한국어](README.ko.md)
 
+- [Installation](INSTALL.md): every install route, and where each one puts files.
 - [Trust model](TRUST.md): what the local journal proves and what it cannot.
 - [Limitations](LIMITATIONS.md): provider, safety, and product boundaries.
 - [History](HISTORY.md): v1-to-v2 evidence without rewriting the past.

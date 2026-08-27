@@ -14,8 +14,8 @@
 
 ## 왜 만들었나
 
-에이전트 오케스트레이터 대부분은 일단 여러 명을 띄우고 본다. 작은 작업에서는
-토큰만 나가고, 실패는 그럴듯한 요약문 뒤에 묻힌다.
+필요한지 따져보기 전에 에이전트부터 여럿 띄우면 작은 작업에서 토큰만 나간다.
+실패도 그럴듯한 요약문 뒤에 묻힌다.
 
 Graphori는 한 세션에서 시작해서, 쪼개는 비용보다 이득이 큰 지점에서만 나눈다.
 단계마다 그 단계를 판정한 명령이 남는다. 그래서 완료는 검사가 통과했다는 뜻이다.
@@ -86,7 +86,8 @@ graphori plan "파서에 docstring 추가" --root $root
 ```
 
 `--write-scope`가 건드릴 수 있는 범위를 묶는다. 판정 근거는 `--verify-command`다.
-이걸 안 주면 Graphori에게는 판단할 재료가 없다.
+안 주면 작업 공간을 보고 기본값을 고른다. 단위 테스트, 없으면 `compileall`,
+그것도 아니면 `git diff --check` 순이다. 직접 고른 검사보다는 약하다.
 
 ## 측정한 것
 
@@ -137,22 +138,30 @@ Graphori는 샌드박스가 아니다. 사용자가 승인한 provider는 파일
 - 긴 실행 중에 provider 진행 상황이 안 보일 수 있다. heartbeat는 살아 있다는
   뜻이지 진행 중이라는 뜻이 아니다.
 - Skill 자동 선택은 일부러 꺼 뒀다. 위 측정이 그 이유다.
-- `0.1.0`은 첫 공개 소스 버전이다. 안정 API는 아직 없다.
+- `0.1.0`은 이 공개 소스 라인을 여는 버전이다. `v0.9.0-beta.1` 같은 이전 태그는
+  공개 소스 이전 것이라 여기에 해당하지 않는다. 안정 API는 아직 없다.
 - Orca 연동은 선택 adapter로 있고 지금은 꺼져 있다.
 
 ## 지원 플랫폼
 
 | | Skill | CLI `plan`, `doctor` | CLI `run`, `resume` |
 | --- | --- | --- | --- |
-| Linux, macOS | 지원 | 지원 | 지원 |
-| Windows | 지원 | 지원 | 지원 |
+| Windows | 지원 | 지원 | 지원, 실행 확인 |
+| Linux | 지원 | 지원 | 지원, 실행 확인 |
+| macOS | 지원 | 지원 | 구현됨, 실행 미확인 |
 
 journal은 배타 advisory lock을 잡아서 writer 둘이 섞이지 못하게 한다. POSIX에서는
 `flock`, Windows에서는 `msvcrt.locking`을 쓴다. 둘 다 없는 환경이라면 보호 없이
 돌리는 대신 fail-closed로 멈춘다.
 
-테스트는 397개다. Windows + Python 3.12에서 전부 통과하고 5개를 건너뛴다. macOS
-전용 도구나 symlink 권한이 필요한 fixture다.
+macOS는 Linux와 같은 POSIX 경로를 탄다. 다만
+[portability contract](docs/architecture/PORTABILITY_CONTRACT.md)가 macOS 호스트에서
+fixture를 돌리기 전까지 `deferred/unknown`으로 묶어 두고 있다. 표에 "지원"이 아니라
+"구현됨"이라고 적은 이유다.
+
+테스트는 397개다. Windows + Python 3.12에서 마지막으로 돌렸을 때 전부 통과했고
+5개를 건너뛰었다. 건너뛰는 개수는 환경마다 다르다. macOS 전용 도구가 없거나,
+symlink 생성 권한이 없거나, live provider 테스트를 켜지 않은 경우 빠진다.
 
 ## 릴리즈 검사
 
@@ -164,8 +173,9 @@ python3.11 scripts/verify_public_release.py --output build/release-artifacts
 ```
 
 테스트, 시크릿·의존성 감사, 패키지 빌드, 격리 설치, SBOM 생성, 해시까지 한 번에
-한다. 배포하거나 히스토리를 다시 쓰는 일은 하지 않는다. `0.1.0` 게이트가 남긴
-증거와 그게 다루지 못하는 범위는 [RELEASE_GATE.ko.md](docs/public/RELEASE_GATE.ko.md)에 있다.
+한다. 배포하거나 히스토리를 다시 쓰는 일은 하지 않는다. 절차와 각 단계가 남겨야
+하는 증거는 [RELEASE_GATE.ko.md](docs/public/RELEASE_GATE.ko.md)에 정리돼 있다.
+산출물 자체는 `build/release-artifacts`에 쓰이고 커밋하지 않는다.
 
 ## 문서
 

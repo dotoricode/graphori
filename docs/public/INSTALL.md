@@ -73,7 +73,13 @@ plan, journal, or projection digests.
 
 ## What gets installed
 
-The Skill directories hold Markdown, an `agents/openai.yaml` manifest, and one
-standard-library Python script (`scripts/validate_skill.py`) that checks the
-Skill's own metadata. Nothing executes at install time; the installer copies
-files and prints what it copied.
+Both Skill directories hold Markdown and an `agents/openai.yaml` manifest.
+`skills/graphori/` additionally ships `scripts/validate_skill.py`, a
+standard-library script that checks the Skill's own metadata;
+`skills/graphori-dashboard/` ships no script.
+
+One thing does execute during installation: after copying, the installer runs
+`validate_skill.py` against the destination to confirm the copy is a
+well-formed Skill. That is the only code either installer executes, and you can
+read it before you install. Nothing else runs, and the Skill itself is inert
+Markdown that your agent reads.

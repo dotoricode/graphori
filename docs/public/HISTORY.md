@@ -8,4 +8,4 @@ The private development repository preserves the original commit history. The pu
 - `5185a18` — live office screen and dashboard skill.
 - `4c09517` — performance-measurement and verification evidence added.
 
-These commit subjects and the records under `docs/verification/` and `docs/research/` are provenance clues, not independent audits. Some records describe fixtures, local runs, or design comparisons; they must not be converted into claims about reliability, cost, or agent quality. The public beta adds a reproducible benchmark schema precisely because historical evidence is not a controlled benchmark.
+These commit subjects and the records under `docs/archive/verification/` and `docs/archive/research/` are provenance clues, not independent audits. Some records describe fixtures, local runs, or design comparisons; they must not be converted into claims about reliability, cost, or agent quality. The public beta adds a reproducible benchmark schema precisely because historical evidence is not a controlled benchmark.

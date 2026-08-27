@@ -44,7 +44,7 @@ Graphori is the product name. The interface should be honest about the current i
 ## Evidence on Hand
 
 - `docs/GRAPHORI_FUNCTION_GUIDE.md` documents the current CLI, journal, status, replay, dashboard, and adapter behavior.
-- `docs/research/GRAPHORI_LEARNING_RESEARCH.md` records the learning principles used by the game.
+- `docs/archive/research/GRAPHORI_LEARNING_RESEARCH.md` records the learning principles used by the game.
 - `docs/GRAPHORI_LEARNING_GAME.html` is the existing offline learning artifact and the target for the replacement visual world.
 - No production customer claims, benchmark numbers, or external brand assets were supplied; future work must not invent them.
 

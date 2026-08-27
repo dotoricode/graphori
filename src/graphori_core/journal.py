@@ -17,6 +17,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Mapping
+import errno
 import hashlib
 import json
 import os
@@ -29,48 +30,58 @@ from .reducer import EVENT_TYPES, StateTransitionError, validate_event_envelope
 GENESIS_DIGEST = "sha256:" + "0" * 64
 
 
-def _lock_exclusive_nonblocking(fd: int) -> None:
-    """Take a process-scoped exclusive advisory lock, or raise.
-
-    ``BlockingIOError`` means another live writer holds the lock.  Any other
-    ``OSError`` means the lock could not be evaluated at all, which callers
-    treat as fail-closed rather than as free ownership.
-    """
-    if os.name == "posix":
-        import fcntl
-
-        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        return
-    if os.name == "nt":
-        import msvcrt
-
-        os.lseek(fd, 0, os.SEEK_SET)
-        try:
-            msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
-        except OSError as exc:
-            # Windows reports an existing holder as EDEADLOCK/EACCES rather
-            # than as a distinct non-blocking status, so it is normalized to
-            # the POSIX contention type the callers already handle.
-            raise BlockingIOError(str(exc)) from exc
-        return
-    raise _UnsupportedLockPlatform(os.name)
-
-
-def _unlock(fd: int) -> None:
-    if os.name == "posix":
-        import fcntl
-
-        fcntl.flock(fd, fcntl.LOCK_UN)
-        return
-    if os.name == "nt":
-        import msvcrt
-
-        os.lseek(fd, 0, os.SEEK_SET)
-        msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+# Windows reports a range already held by another process as EACCES; the
+# retrying lock modes can also surface EDEADLOCK.  Every other errno means the
+# lock could not be evaluated, which is a different failure and must not be
+# reported to the user as "another Graphori is running".
+_NT_CONTENTION_ERRNOS = frozenset(
+    value for value in (getattr(errno, name, None) for name in ("EACCES", "EDEADLOCK", "EDEADLK"))
+    if value is not None
+)
 
 
 class _UnsupportedLockPlatform(RuntimeError):
     """Raised when no advisory-lock backend exists for this platform."""
+
+
+def _lock_backend():
+    """Import this platform's lock module, or report the platform unsupported."""
+    if os.name not in ("posix", "nt"):
+        raise _UnsupportedLockPlatform(os.name)
+    try:
+        return __import__("fcntl" if os.name == "posix" else "msvcrt")
+    except ImportError as exc:  # pragma: no cover - defensive
+        raise _UnsupportedLockPlatform(os.name) from exc
+
+
+def _lock_exclusive_nonblocking(fd: int) -> None:
+    """Take a process-scoped exclusive advisory lock, or raise.
+
+    ``BlockingIOError`` means another live writer holds the lock.  Any other
+    ``OSError`` means the lock could not be evaluated at all, and
+    ``_UnsupportedLockPlatform`` means there is no backend here.  Callers treat
+    all three as fail-closed; only the first is reported as contention.
+    """
+    backend = _lock_backend()
+    if os.name == "posix":
+        backend.flock(fd, backend.LOCK_EX | backend.LOCK_NB)
+        return
+    os.lseek(fd, 0, os.SEEK_SET)
+    try:
+        backend.locking(fd, backend.LK_NBLCK, 1)
+    except OSError as exc:
+        if exc.errno in _NT_CONTENTION_ERRNOS:
+            raise BlockingIOError(str(exc)) from exc
+        raise
+
+
+def _unlock(fd: int) -> None:
+    backend = _lock_backend()
+    if os.name == "posix":
+        backend.flock(fd, backend.LOCK_UN)
+        return
+    os.lseek(fd, 0, os.SEEK_SET)
+    backend.locking(fd, backend.LK_UNLCK, 1)
 
 _PRODUCER_REQUIRED = (
     "schema_version", "event_id", "producer_event_id", "run_id", "graph_version",
@@ -319,22 +330,22 @@ class JournalWriter:
         fd = os.open(str(self.paths.writer_lock_file), os.O_RDWR | os.O_CREAT, 0o600)
         try:
             _lock_exclusive_nonblocking(fd)
-        except BlockingIOError as exc:
+        except BaseException as exc:
             os.close(fd)
-            raise JournalOwnershipError(
-                "이 작업은 다른 Graphori에서 실행 중입니다. "
-                "실행 기록은 변경하지 않았습니다."
-            ) from exc
-        except _UnsupportedLockPlatform as exc:
-            os.close(fd)
-            raise JournalOwnershipError(
-                "이 환경은 journal writer 잠금을 지원하지 않아 안전하게 실행할 수 없습니다."
-            ) from exc
-        except OSError as exc:
-            os.close(fd)
-            raise JournalOwnershipError(
-                "journal writer 잠금을 확보하지 못해 안전하게 실행을 중단했습니다."
-            ) from exc
+            if isinstance(exc, BlockingIOError):
+                raise JournalOwnershipError(
+                    "이 작업은 다른 Graphori에서 실행 중입니다. "
+                    "실행 기록은 변경하지 않았습니다."
+                ) from exc
+            if isinstance(exc, _UnsupportedLockPlatform):
+                raise JournalOwnershipError(
+                    "이 환경은 journal writer 잠금을 지원하지 않아 안전하게 실행할 수 없습니다."
+                ) from exc
+            if isinstance(exc, OSError):
+                raise JournalOwnershipError(
+                    f"journal writer 잠금을 확보하지 못해 안전하게 실행을 중단했습니다: {exc}"
+                ) from exc
+            raise
         self._lock_fd = fd
 
     def _require_ownership(self) -> None:

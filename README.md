@@ -14,8 +14,8 @@ agent reporting success.
 
 ## Why
 
-Most agent orchestrators fan out first and ask questions later. That costs
-tokens on small tasks and hides failures behind a confident summary.
+Fanning out to several agents before knowing whether the work needs them costs
+tokens on small tasks, and it hides failures behind a confident summary.
 
 Graphori starts in one session and splits work only at boundaries where the
 split pays for itself. Every step records the command that judged it, so
@@ -87,7 +87,9 @@ graphori plan "add a docstring to the parser" --root $root --lang en
 ```
 
 `--write-scope` bounds what the run may touch. `--verify-command` is the check
-that decides the verdict; without one, Graphori has nothing to judge by.
+that decides the verdict. Leave it out and Graphori picks a default for the
+workspace — the unit test suite, then `compileall`, then `git diff --check` —
+which is weaker than a check you chose yourself.
 
 ## What the numbers say
 
@@ -140,22 +142,32 @@ Other limits worth knowing before you install:
 - Provider progress can go dark during a long run. A heartbeat means alive,
   not advancing.
 - Optional Skill auto-selection is off on purpose; the measurements above are why.
-- `0.1.0` is the first public source version. No stable API yet.
+- `0.1.0` is the version that opens this source line. Earlier tags such as
+  `v0.9.0-beta.1` predate the public source and do not describe it. No stable
+  API yet.
 - Orca integration exists as an optional adapter and is currently disabled.
 
 ## Supported platforms
 
 | | Skill | CLI: `plan`, `doctor` | CLI: `run`, `resume` |
 | --- | --- | --- | --- |
-| Linux, macOS | yes | yes | yes |
-| Windows | yes | yes | yes |
+| Windows | yes | yes | yes, exercised |
+| Linux | yes | yes | yes, exercised |
+| macOS | yes | yes | implemented, not yet exercised |
 
 The journal takes an exclusive advisory lock so two writers can never
 interleave: `flock` on POSIX, `msvcrt.locking` on Windows. A platform with
 neither fails closed rather than running unprotected.
 
-The suite is 397 tests. On Windows with Python 3.12 all of them pass, with 5
-skipped: fixtures that need macOS-only tools or symlink privileges.
+macOS runs the same POSIX code path as Linux, but the
+[portability contract](docs/architecture/PORTABILITY_CONTRACT.md) holds macOS
+at `deferred/unknown` until the platform fixtures are run on a macOS host. The
+table says "implemented" rather than "supported" for that reason.
+
+The suite is 397 tests. The last full run on Windows with Python 3.12 passed
+with 5 skipped. The skip count is environment-dependent: fixtures opt out when
+a macOS-only tool is missing, when symlink creation needs privileges the host
+does not grant, and when live-provider tests are not enabled.
 
 ## Release checks
 
@@ -168,8 +180,9 @@ python3.11 scripts/verify_public_release.py --output build/release-artifacts
 
 It runs the tests, secret and dependency audits, package builds, isolated
 installs, SBOM generation, and hashing. It never publishes, deploys, or
-rewrites history. The evidence from the `0.1.0` gate, and what it does not
-cover, is in [RELEASE_GATE.md](docs/public/RELEASE_GATE.md).
+rewrites history. [RELEASE_GATE.md](docs/public/RELEASE_GATE.md) documents the
+procedure and the evidence each step must produce; the artifacts themselves are
+written to `build/release-artifacts` and are not committed.
 
 ## Documentation
 
