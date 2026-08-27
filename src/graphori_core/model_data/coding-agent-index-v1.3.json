@@ -1,0 +1,21 @@
+{
+  "source": "Artificial Analysis Coding Agent Index",
+  "source_url": "https://artificialanalysis.ai/agents/coding-agents",
+  "benchmark_version": "v1.3",
+  "retrieved_at": "2026-08-14",
+  "source_digest": "sha256:0840208b235054de47732313cac24367a216cd85b7a98538915d1787aabe5eb2",
+  "quality_equivalence_margin": 1.0,
+  "models": [
+    {"benchmark_model_id":"aa-v1.3-luna-medium","family":"luna","effort":"medium","coding_index":42,"expected_wall_ms":204000,"cost_per_task_usd":null,"benchmark_confidence":"high"},
+    {"benchmark_model_id":"aa-v1.3-terra-medium","family":"terra","effort":"medium","coding_index":48,"expected_wall_ms":258000,"cost_per_task_usd":null,"benchmark_confidence":"high"},
+    {"benchmark_model_id":"aa-v1.3-luna-high","family":"luna","effort":"high","coding_index":51,"expected_wall_ms":342000,"cost_per_task_usd":null,"benchmark_confidence":"low"},
+    {"benchmark_model_id":"aa-v1.3-terra-high","family":"terra","effort":"high","coding_index":56,"expected_wall_ms":372000,"cost_per_task_usd":null,"benchmark_confidence":"high"},
+    {"benchmark_model_id":"aa-v1.3-terra-xhigh","family":"terra","effort":"xhigh","coding_index":57,"expected_wall_ms":414000,"cost_per_task_usd":null,"benchmark_confidence":"high"},
+    {"benchmark_model_id":"aa-v1.3-sol-medium","family":"sol","effort":"medium","coding_index":61,"expected_wall_ms":312000,"cost_per_task_usd":null,"benchmark_confidence":"high"},
+    {"benchmark_model_id":"aa-v1.3-sol-high","family":"sol","effort":"high","coding_index":64,"expected_wall_ms":378000,"cost_per_task_usd":null,"benchmark_confidence":"high"},
+    {"benchmark_model_id":"aa-v1.3-sol-xhigh","family":"sol","effort":"xhigh","coding_index":65,"expected_wall_ms":444000,"cost_per_task_usd":null,"benchmark_confidence":"high"},
+    {"benchmark_model_id":"aa-v1.3-opus-medium","family":"opus","effort":"medium","coding_index":62,"expected_wall_ms":732000,"cost_per_task_usd":null,"benchmark_confidence":"medium"},
+    {"benchmark_model_id":"aa-v1.3-opus-high","family":"opus","effort":"high","coding_index":63,"expected_wall_ms":804000,"cost_per_task_usd":null,"benchmark_confidence":"medium"},
+    {"benchmark_model_id":"aa-v1.3-opus-xhigh","family":"opus","effort":"xhigh","coding_index":67,"expected_wall_ms":1416000,"cost_per_task_usd":null,"benchmark_confidence":"medium"}
+  ]
+}

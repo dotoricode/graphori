@@ -1,0 +1,4 @@
+interface:
+  display_name: "Graphori"
+  short_description: "회사 동료처럼 일을 나누고 결과까지 다시 확인"
+  default_prompt: "$graphori로 이 작업을 조사팀·설계팀·제작팀·품질관리팀에 알맞게 나누고 결과를 다시 확인해 주세요. 진행 상황은 현실적인 업무 만화처럼 쉽고 짧게 설명해 주세요."

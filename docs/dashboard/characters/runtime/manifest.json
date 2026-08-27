@@ -1,0 +1,154 @@
+{
+  "version": 2,
+  "states": [
+    "idle",
+    "walk",
+    "work",
+    "talk",
+    "blocked",
+    "complete"
+  ],
+  "cell": {
+    "width": 96,
+    "height": 128
+  },
+  "visibleBodyWidth": 48,
+  "footAnchor": {
+    "x": 48,
+    "y": 120
+  },
+  "actors": {
+    "planning-lead": {
+      "displayName": "Planning Lead",
+      "sheet": "./characters/runtime/planning-lead/sheet.png",
+      "frames": {
+        "idle": 0,
+        "walk": 1,
+        "work": 2,
+        "talk": 3,
+        "blocked": 4,
+        "complete": 5
+      }
+    },
+    "planning-member": {
+      "displayName": "Planning Member",
+      "sheet": "./characters/runtime/planning-member/sheet.png",
+      "frames": {
+        "idle": 0,
+        "walk": 1,
+        "work": 2,
+        "talk": 3,
+        "blocked": 4,
+        "complete": 5
+      }
+    },
+    "research-lead": {
+      "displayName": "Research Lead",
+      "sheet": "./characters/runtime/research-lead/sheet.png",
+      "frames": {
+        "idle": 0,
+        "walk": 1,
+        "work": 2,
+        "talk": 3,
+        "blocked": 4,
+        "complete": 5
+      }
+    },
+    "research-member": {
+      "displayName": "Research Member",
+      "sheet": "./characters/runtime/research-member/sheet.png",
+      "frames": {
+        "idle": 0,
+        "walk": 1,
+        "work": 2,
+        "talk": 3,
+        "blocked": 4,
+        "complete": 5
+      }
+    },
+    "design-lead": {
+      "displayName": "Design Lead",
+      "sheet": "./characters/runtime/design-lead/sheet.png",
+      "frames": {
+        "idle": 0,
+        "walk": 1,
+        "work": 2,
+        "talk": 3,
+        "blocked": 4,
+        "complete": 5
+      }
+    },
+    "design-member": {
+      "displayName": "Design Member",
+      "sheet": "./characters/runtime/design-member/sheet.png",
+      "frames": {
+        "idle": 0,
+        "walk": 1,
+        "work": 2,
+        "talk": 3,
+        "blocked": 4,
+        "complete": 5
+      }
+    },
+    "engineering-lead": {
+      "displayName": "Engineering Lead",
+      "sheet": "./characters/runtime/engineering-lead/sheet.png",
+      "frames": {
+        "idle": 0,
+        "walk": 1,
+        "work": 2,
+        "talk": 3,
+        "blocked": 4,
+        "complete": 5
+      }
+    },
+    "engineer-a": {
+      "displayName": "Engineer A",
+      "sheet": "./characters/runtime/engineer-a/sheet.png",
+      "frames": {
+        "idle": 0,
+        "walk": 1,
+        "work": 2,
+        "talk": 3,
+        "blocked": 4,
+        "complete": 5
+      }
+    },
+    "engineer-b": {
+      "displayName": "Engineer B",
+      "sheet": "./characters/runtime/engineer-b/sheet.png",
+      "frames": {
+        "idle": 0,
+        "walk": 1,
+        "work": 2,
+        "talk": 3,
+        "blocked": 4,
+        "complete": 5
+      }
+    },
+    "verification-lead": {
+      "displayName": "Verification Lead",
+      "sheet": "./characters/runtime/verification-lead/sheet.png",
+      "frames": {
+        "idle": 0,
+        "walk": 1,
+        "work": 2,
+        "talk": 3,
+        "blocked": 4,
+        "complete": 5
+      }
+    },
+    "verification-member": {
+      "displayName": "Verification Member",
+      "sheet": "./characters/runtime/verification-member/sheet.png",
+      "frames": {
+        "idle": 0,
+        "walk": 1,
+        "work": 2,
+        "talk": 3,
+        "blocked": 4,
+        "complete": 5
+      }
+    }
+  }
+}

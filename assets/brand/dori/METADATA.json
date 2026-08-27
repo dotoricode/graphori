@@ -1,0 +1,10 @@
+{
+  "character": "Dori",
+  "created_at": "2026-08-27",
+  "created_with": "OpenAI built-in image generation",
+  "license": "MIT",
+  "source_file": "dori-master.png",
+  "transparent_background": false,
+  "provenance": "Project-authored prompt; user image used only as a high-level pixel-art quality reference",
+  "review_required_for": ["trademark", "merchandise", "exclusive brand registration"]
+}

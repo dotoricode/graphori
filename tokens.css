@@ -1,0 +1,101 @@
+@font-face {
+  font-family: "SUIT";
+  src: url("assets/fonts/SUIT-Variable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  /* One local face keeps the dashboard and the lesson in the same voice. */
+  --font-ui: "SUIT", sans-serif;
+
+  /* A paper-white dispatch room: ink, cobalt and signal orange. */
+  --color-ink: #162224;
+  --color-ink-deep: #0d1719;
+  --color-surface: #ffffff;
+  --color-surface-raised: #ffffff;
+  --color-surface-soft: #f5f6f2;
+  --color-text: #182124;
+  --color-text-muted: #526064;
+  --color-text-dim: #596769;
+  --color-line: #c5cbc4;
+  --color-line-soft: #d9ddd6;
+  --color-grid: #314345;
+
+  --color-cyan: #1e5cc8;
+  --color-cyan-deep: #16458f;
+  --color-cyan-panel: #d9e5f8;
+  --color-cyan-panel-deep: #c8daf3;
+  --color-cyan-glow: rgb(30 92 200 / 16%);
+  --color-cyan-wash: rgb(30 92 200 / 9%);
+  --color-amber: #86540d;
+  --color-amber-wash: #f4e6c8;
+  --color-amber-rule: #d5b46f;
+  --color-amber-ring: rgb(169 110 22 / 18%);
+  --color-violet: #70519c;
+  --color-violet-panel: #e6def0;
+  --color-violet-wash: #f0eaf5;
+  --color-pink: #c94e40;
+  --color-pink-wash: #f6dfda;
+  --color-green: #2d715b;
+  --color-green-ring: rgb(45 113 91 / 17%);
+  --color-green-panel: #dbe9df;
+  --color-red: #c94e40;
+  --color-accent-ink: #ffffff;
+
+  /* Pixel office materials. These stay saturated so activity is visible without glow. */
+  --color-office: #263a3b;
+  --color-office-working: #315a52;
+  --color-office-done: #3a5d4d;
+  --color-lens: #81b6c2;
+  --color-black-pixel: #111719;
+  --color-skin-light: #f5b49e;
+  --color-skin-mid: #d87c68;
+  --color-skin-deep: #a94f46;
+  --color-hair-dark: #1b2024;
+  --color-hair-brown: #5d3e2b;
+  --color-hair-violet: #4d376a;
+  --color-hair-teal: #1d5653;
+  --color-shirt-blue: #285ca8;
+  --color-shirt-rose: #9d4c56;
+  --color-shirt-gold: #b47c25;
+  --color-shirt-green: #3f785d;
+  --color-desk: #a36f3f;
+  --color-desk-dark: #624329;
+  --color-paper: #f3ead7;
+  --color-paper-shadow: #c9a86a;
+  --color-screen: #7eaeb7;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.2rem;
+  --text-xl: 1.65rem;
+  --text-2xl: clamp(1.8rem, 3.8vw, 3rem);
+  --text-display: clamp(2.35rem, 5vw, 3.9rem);
+
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --rule: 1px solid var(--color-line-soft);
+  --shadow-soft: 0 12px 26px rgb(17 30 32 / 12%);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 140ms;
+  --dur-mid: 260ms;
+}

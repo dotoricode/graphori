@@ -1,0 +1,1 @@
+{"schema_version":1,"demo":"parallel-research","evidence_status":"not_recorded","required_story":["two independent read-only nodes","fan-in before implementation","deterministic verification"]}

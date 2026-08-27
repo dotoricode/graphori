@@ -1,0 +1,1 @@
+Apply the idempotent fixture migration, verify the marker once, and preserve enough journal evidence to inspect a restart after dispatch.

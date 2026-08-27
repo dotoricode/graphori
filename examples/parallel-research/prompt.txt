@@ -1,0 +1,1 @@
+Compare the two supplied API specifications independently, then implement one compatibility adapter from the combined findings and run the fixture verifier.

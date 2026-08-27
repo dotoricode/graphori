@@ -1,0 +1,4 @@
+interface:
+  display_name: "Graphori Dashboard"
+  short_description: "Graphori 실행 기록과 현재 작업 상태 대시보드를 연다"
+  default_prompt: "Use $graphori-dashboard to open the dashboard for the current Graphori run."

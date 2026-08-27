@@ -1,0 +1,1 @@
+{"schema_version":1,"demo":"scope-protection","evidence_status":"not_recorded","required_story":["declared src write scope","observable rejected out-of-scope change"]}

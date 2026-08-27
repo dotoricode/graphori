@@ -1,0 +1,26 @@
+# research 문서 색인
+
+- `TEAM_GRAPH_ANALYSIS.md`: 팀 그래프 분석
+- `PORTABILITY_AND_DEPENDENCY.md`: OS portability와 의존성 조사
+- `LIVE_GAME_DASHBOARD.md`: 실제 상태를 보여 주는 dashboard 조사
+- `GRAPHORI_LEARNING_RESEARCH.md`: Graphori 학습 게임에 적용한 교육학 연구와 설계 근거
+- `ORCA_PR3_OPERATIONAL_KNOWN_ISSUES.md`: Orca 실행에서 확인한 문제와 현재 우회 방법
+- `PR7_MODEL_ROUTING_SOURCES.md`: PR7 runtime model identity와 benchmark prior 출처 검증
+- `PR9_PRODUCT_ENTRY_CHECKPOINT.md`: `$graphori` 제품 진입점과 v2 Engine 연결 범위
+- `PR10_CANONICAL_DASHBOARD_CHECKPOINT.md`: Engine·CLI·replay·Dashboard projection 통합 범위
+- `PR11A_DOGFOOD_CHECKPOINT.md`: Graphori가 직접 수행한 legacy journal compatibility 작업과 orchestration 평가
+- `PR11A1_DOGFOOD_CHECKPOINT.md`: 첫 dogfooding 사용성 개선과 acceptance evidence 감사 결과
+- `PR11B_WRITER_OWNERSHIP_CHECKPOINT.md`: Run journal writer ownership과 multi-process fixture 범위
+- `PR11C_ORCA_INDEPENDENCE_AUDIT.md`: cold resume·read-only doctor와 Orca 독립성 감사
+- `PR11D_PRODUCTION_RELEASE_ACCEPTANCE.md`: disposable install·no-Orca·legacy replay 중심의 PR11D release acceptance evidence
+- `RRC-01_REPORT.md`: Direct/Orca 실행 경로의 live latency, health, 품질 검증 결과
+- `RRC-02_ORCA_INSTRUCTION_DELIVERY.md`: Orca fresh-worker instruction readiness와 lifecycle 격리 결과
+- `RRC-02_CHECKPOINT.md`: 두 번째 실행 경로 점검에서 확인한 결과
+- `RRC-03_ORCA_READY_TERMINAL.md`: ready-terminal production launch 경계와 live lifecycle 검증 결과
+- `RRC-03_CHECKPOINT.md`: 세 번째 실행 경로 점검에서 확인한 결과
+- `RRC-04_DIRECT_ROUTE_BASELINE.md`: Direct Claude 안정화와 Codex/Claude no-Skill 성능 기준선
+- `RRC-04_CHECKPOINT.md`: 직접 실행 경로의 안정성과 속도 점검 결과
+- `RRC-05A_PONYTAIL_EFFECTIVENESS.md`: Direct Codex/Claude의 no-Skill 대비 Ponytail full paired benchmark
+- `RRC-05A_CHECKPOINT.md`: Ponytail 스킬 효과 측정의 확인 결과
+- `RRC-05B_TDD_EFFECTIVENESS.md`: approved public seam 기반 no-Skill 대비 TDD paired benchmark
+- `RRC-05B_CHECKPOINT.md`: TDD 스킬 효과 측정의 확인 결과

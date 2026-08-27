@@ -1,0 +1,1924 @@
+{
+  "adaptive_routing_enabled": false,
+  "collect_only": true,
+  "created_at": "2026-08-19T11:07:30.341691Z",
+  "environment": {
+    "claude": "2.1.220 (Claude Code)",
+    "codex": "codex-cli 0.148.0",
+    "platform": "darwin",
+    "python": "3.14.6"
+  },
+  "model_router_changed": false,
+  "overall_classification": "harmful",
+  "samples": [
+    {
+      "arm": "no-skill",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 1,
+        "production_loc": 2,
+        "test_loc": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "gpt-5.6-luna",
+      "observed_effort": "unknown",
+      "observed_model": "unknown",
+      "order_index": 0,
+      "pair_id": "codex-w2-tiny-write-1",
+      "provider": "codex",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": false,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 1,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:ad592f32022412031fde6e3bb58b586499af761e454f09ecfcf944919683a773",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T10:52:13.583156Z",
+      "timing": {
+        "effective_time_ms": 33415,
+        "execution_ms": 30046,
+        "first_event_ms": 3524,
+        "startup_ms": 30,
+        "structured_result_ms": 25561,
+        "total_ms": 33415,
+        "ttur_ms": 31395,
+        "verification_ms": 690
+      },
+      "usage": {
+        "cached_tokens": 54528,
+        "estimated_cost": null,
+        "input_tokens": 76106,
+        "output_tokens": 697
+      },
+      "workload": "w2-tiny-write"
+    },
+    {
+      "arm": "tdd",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 1,
+        "production_loc": 2,
+        "test_loc": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "gpt-5.6-luna",
+      "observed_effort": "unknown",
+      "observed_model": "unknown",
+      "order_index": 1,
+      "pair_id": "codex-w2-tiny-write-1",
+      "provider": "codex",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": false,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 1,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:f227a0edb212e75fed4bf0d30d2dd5e591a6f546827a201a6842fbf5f6b310ae",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:f7762d76e11000f502a707b08f3ef292cd13c5e752c2d3bb38a66b69ce9c82f2",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "tdd",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:020e48193f19c303f462ac6c6bf16548f10e3b1f706df562f8fb8f6b3efb43a6",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T10:53:02.814605Z",
+      "timing": {
+        "effective_time_ms": 47576,
+        "execution_ms": 44844,
+        "first_event_ms": 2301,
+        "startup_ms": 3,
+        "structured_result_ms": 40721,
+        "total_ms": 47576,
+        "ttur_ms": 45897,
+        "verification_ms": 605
+      },
+      "usage": {
+        "cached_tokens": 98048,
+        "estimated_cost": null,
+        "input_tokens": 121927,
+        "output_tokens": 1302
+      },
+      "workload": "w2-tiny-write"
+    },
+    {
+      "arm": "tdd",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 1,
+        "production_loc": 2,
+        "test_loc": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "gpt-5.6-luna",
+      "observed_effort": "unknown",
+      "observed_model": "unknown",
+      "order_index": 0,
+      "pair_id": "codex-w2-tiny-write-2",
+      "provider": "codex",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": false,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 2,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:161fa3e11a213afa7d2b043fbb0de78af1b25f3ce9f5bfc1e3e72ec3a10f7cbf",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:f7762d76e11000f502a707b08f3ef292cd13c5e752c2d3bb38a66b69ce9c82f2",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "tdd",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:020e48193f19c303f462ac6c6bf16548f10e3b1f706df562f8fb8f6b3efb43a6",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T10:53:48.064400Z",
+      "timing": {
+        "effective_time_ms": 44431,
+        "execution_ms": 42670,
+        "first_event_ms": 1961,
+        "startup_ms": 2,
+        "structured_result_ms": 39819,
+        "total_ms": 44431,
+        "ttur_ms": 43159,
+        "verification_ms": 222
+      },
+      "usage": {
+        "cached_tokens": 56576,
+        "estimated_cost": null,
+        "input_tokens": 79145,
+        "output_tokens": 745
+      },
+      "workload": "w2-tiny-write"
+    },
+    {
+      "arm": "no-skill",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 1,
+        "production_loc": 2,
+        "test_loc": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "gpt-5.6-luna",
+      "observed_effort": "unknown",
+      "observed_model": "unknown",
+      "order_index": 1,
+      "pair_id": "codex-w2-tiny-write-2",
+      "provider": "codex",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": false,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 2,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:8e88726417e6573cfd8b8562e7dda4f102f963ac4c6296897192dc357db5c2d6",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T10:54:13.487580Z",
+      "timing": {
+        "effective_time_ms": 24711,
+        "execution_ms": 23571,
+        "first_event_ms": 829,
+        "startup_ms": 1,
+        "structured_result_ms": 21541,
+        "total_ms": 24711,
+        "ttur_ms": 24091,
+        "verification_ms": 316
+      },
+      "usage": {
+        "cached_tokens": 54528,
+        "estimated_cost": null,
+        "input_tokens": 76021,
+        "output_tokens": 625
+      },
+      "workload": "w2-tiny-write"
+    },
+    {
+      "arm": "no-skill",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 2,
+        "production_loc": 4,
+        "test_loc": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "gpt-5.6-luna",
+      "observed_effort": "unknown",
+      "observed_model": "unknown",
+      "order_index": 0,
+      "pair_id": "codex-w3-bounded-implementation-1",
+      "provider": "codex",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": false,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 1,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:9b61a434c0cffda22e1b8560efc210c8fd3bf68d051ff5032cb9e7860e386dc0",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T10:54:40.670937Z",
+      "timing": {
+        "effective_time_ms": 26209,
+        "execution_ms": 24804,
+        "first_event_ms": 1008,
+        "startup_ms": 1,
+        "structured_result_ms": 22714,
+        "total_ms": 26209,
+        "ttur_ms": 25531,
+        "verification_ms": 465
+      },
+      "usage": {
+        "cached_tokens": 55552,
+        "estimated_cost": null,
+        "input_tokens": 76682,
+        "output_tokens": 699
+      },
+      "workload": "w3-bounded-implementation"
+    },
+    {
+      "arm": "tdd",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 2,
+        "production_loc": 4,
+        "test_loc": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "gpt-5.6-luna",
+      "observed_effort": "unknown",
+      "observed_model": "unknown",
+      "order_index": 1,
+      "pair_id": "codex-w3-bounded-implementation-1",
+      "provider": "codex",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": false,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 1,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:3f3088616fc0c15d7926351764f7d6c24e125ea5e5e605deca52978b0f19d561",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:f7762d76e11000f502a707b08f3ef292cd13c5e752c2d3bb38a66b69ce9c82f2",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "tdd",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:020e48193f19c303f462ac6c6bf16548f10e3b1f706df562f8fb8f6b3efb43a6",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T10:55:17.943220Z",
+      "timing": {
+        "effective_time_ms": 36104,
+        "execution_ms": 33908,
+        "first_event_ms": 1901,
+        "startup_ms": 2,
+        "structured_result_ms": 31149,
+        "total_ms": 36104,
+        "ttur_ms": 34761,
+        "verification_ms": 506
+      },
+      "usage": {
+        "cached_tokens": 57600,
+        "estimated_cost": null,
+        "input_tokens": 79876,
+        "output_tokens": 1064
+      },
+      "workload": "w3-bounded-implementation"
+    },
+    {
+      "arm": "tdd",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 2,
+        "production_loc": 4,
+        "test_loc": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "gpt-5.6-luna",
+      "observed_effort": "unknown",
+      "observed_model": "unknown",
+      "order_index": 0,
+      "pair_id": "codex-w3-bounded-implementation-2",
+      "provider": "codex",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": false,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 2,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:3782c1fbe6a19f77af9f05dbc4a79b7e19391030b153c53379ad5d06c183669f",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:f7762d76e11000f502a707b08f3ef292cd13c5e752c2d3bb38a66b69ce9c82f2",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "tdd",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:020e48193f19c303f462ac6c6bf16548f10e3b1f706df562f8fb8f6b3efb43a6",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T10:55:54.754940Z",
+      "timing": {
+        "effective_time_ms": 35867,
+        "execution_ms": 34023,
+        "first_event_ms": 1753,
+        "startup_ms": 2,
+        "structured_result_ms": 31432,
+        "total_ms": 35867,
+        "ttur_ms": 34562,
+        "verification_ms": 266
+      },
+      "usage": {
+        "cached_tokens": 77824,
+        "estimated_cost": null,
+        "input_tokens": 101436,
+        "output_tokens": 1094
+      },
+      "workload": "w3-bounded-implementation"
+    },
+    {
+      "arm": "no-skill",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 3,
+        "production_loc": 4,
+        "test_loc": 4
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "gpt-5.6-luna",
+      "observed_effort": "unknown",
+      "observed_model": "unknown",
+      "order_index": 1,
+      "pair_id": "codex-w3-bounded-implementation-2",
+      "provider": "codex",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": true,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 2,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:0d758d664a9d3cbe174abb093a2c7ff2498afc1761129edfe97709f38b85aa80",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T10:56:29.868497Z",
+      "timing": {
+        "effective_time_ms": 34624,
+        "execution_ms": 33636,
+        "first_event_ms": 1126,
+        "startup_ms": 1,
+        "structured_result_ms": 31807,
+        "total_ms": 34624,
+        "ttur_ms": 33933,
+        "verification_ms": 155
+      },
+      "usage": {
+        "cached_tokens": 55552,
+        "estimated_cost": null,
+        "input_tokens": 77556,
+        "output_tokens": 1166
+      },
+      "workload": "w3-bounded-implementation"
+    },
+    {
+      "arm": "no-skill",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 2,
+        "production_loc": 19,
+        "test_loc": 17
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "gpt-5.6-luna",
+      "observed_effort": "unknown",
+      "observed_model": "unknown",
+      "order_index": 0,
+      "pair_id": "codex-w4-regression-prone-1",
+      "provider": "codex",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": true,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 1,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:ccb6efdd0f5d3c77317ebe59522fe51352f45052213e9ba6386457542bf5a454",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T10:57:04.001134Z",
+      "timing": {
+        "effective_time_ms": 33752,
+        "execution_ms": 32964,
+        "first_event_ms": 443,
+        "startup_ms": 1,
+        "structured_result_ms": 31740,
+        "total_ms": 33752,
+        "ttur_ms": 33267,
+        "verification_ms": 182
+      },
+      "usage": {
+        "cached_tokens": 55552,
+        "estimated_cost": null,
+        "input_tokens": 77727,
+        "output_tokens": 1351
+      },
+      "workload": "w4-regression-prone"
+    },
+    {
+      "arm": "tdd",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 2,
+        "production_loc": 19,
+        "test_loc": 20
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "gpt-5.6-luna",
+      "observed_effort": "unknown",
+      "observed_model": "unknown",
+      "order_index": 1,
+      "pair_id": "codex-w4-regression-prone-1",
+      "provider": "codex",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": true,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 1,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:f11da4ff66f1f6dab121693b217f8c6f22f2737f646ff3c63a69af009fdd33d7",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:f7762d76e11000f502a707b08f3ef292cd13c5e752c2d3bb38a66b69ce9c82f2",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "tdd",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:020e48193f19c303f462ac6c6bf16548f10e3b1f706df562f8fb8f6b3efb43a6",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T10:58:06.934334Z",
+      "timing": {
+        "effective_time_ms": 62495,
+        "execution_ms": 61708,
+        "first_event_ms": 631,
+        "startup_ms": 1,
+        "structured_result_ms": 60395,
+        "total_ms": 62495,
+        "ttur_ms": 62029,
+        "verification_ms": 192
+      },
+      "usage": {
+        "cached_tokens": 141568,
+        "estimated_cost": null,
+        "input_tokens": 169666,
+        "output_tokens": 2654
+      },
+      "workload": "w4-regression-prone"
+    },
+    {
+      "arm": "tdd",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 2,
+        "production_loc": 25,
+        "test_loc": 23
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "gpt-5.6-luna",
+      "observed_effort": "unknown",
+      "observed_model": "unknown",
+      "order_index": 0,
+      "pair_id": "codex-w4-regression-prone-2",
+      "provider": "codex",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": true,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 2,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:6d2c8f2f50f10c70a055cd01ee1e039c749b46ca5f32e2898b60d5e27163e81e",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:f7762d76e11000f502a707b08f3ef292cd13c5e752c2d3bb38a66b69ce9c82f2",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "tdd",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:020e48193f19c303f462ac6c6bf16548f10e3b1f706df562f8fb8f6b3efb43a6",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T10:59:01.341341Z",
+      "timing": {
+        "effective_time_ms": 53974,
+        "execution_ms": 53162,
+        "first_event_ms": 419,
+        "startup_ms": 1,
+        "structured_result_ms": 51874,
+        "total_ms": 53974,
+        "ttur_ms": 53468,
+        "verification_ms": 183
+      },
+      "usage": {
+        "cached_tokens": 158720,
+        "estimated_cost": null,
+        "input_tokens": 185616,
+        "output_tokens": 2013
+      },
+      "workload": "w4-regression-prone"
+    },
+    {
+      "arm": "no-skill",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 2,
+        "production_loc": 23,
+        "test_loc": 17
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "gpt-5.6-luna",
+      "observed_effort": "unknown",
+      "observed_model": "unknown",
+      "order_index": 1,
+      "pair_id": "codex-w4-regression-prone-2",
+      "provider": "codex",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": true,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 2,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:6d35eb3b150c70902cf977382072623fa9041d448f1bb5bef692b52dc4ab39a4",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T10:59:33.904132Z",
+      "timing": {
+        "effective_time_ms": 32141,
+        "execution_ms": 31323,
+        "first_event_ms": 806,
+        "startup_ms": 1,
+        "structured_result_ms": 29759,
+        "total_ms": 32141,
+        "ttur_ms": 31600,
+        "verification_ms": 156
+      },
+      "usage": {
+        "cached_tokens": 55552,
+        "estimated_cost": null,
+        "input_tokens": 77700,
+        "output_tokens": 1256
+      },
+      "workload": "w4-regression-prone"
+    },
+    {
+      "arm": "no-skill",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 1,
+        "production_loc": 2,
+        "test_loc": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 0,
+      "pair_id": "claude-w2-tiny-write-1",
+      "provider": "claude",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": false,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 1,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:90d387fb5d59fb855d84e66c43b62d9cfe5ff5660fe99ce80e4c12f82cc8ab80",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T10:59:51.249072Z",
+      "timing": {
+        "effective_time_ms": 16985,
+        "execution_ms": 16089,
+        "first_event_ms": 1073,
+        "startup_ms": 1,
+        "structured_result_ms": 13648,
+        "total_ms": 16985,
+        "ttur_ms": 16370,
+        "verification_ms": 157
+      },
+      "usage": {
+        "cached_tokens": 134090,
+        "estimated_cost": 0.16058699999999998,
+        "input_tokens": 8,
+        "output_tokens": 732
+      },
+      "workload": "w2-tiny-write"
+    },
+    {
+      "arm": "tdd",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 1,
+        "production_loc": 2,
+        "test_loc": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 1,
+      "pair_id": "claude-w2-tiny-write-1",
+      "provider": "claude",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": false,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 1,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:a47b0365eb4b286d4d0f7c96bc1d347a653d92a78bf9b9c8dab4b6b62fca7319",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:f7762d76e11000f502a707b08f3ef292cd13c5e752c2d3bb38a66b69ce9c82f2",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "tdd",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:020e48193f19c303f462ac6c6bf16548f10e3b1f706df562f8fb8f6b3efb43a6",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T11:00:08.970081Z",
+      "timing": {
+        "effective_time_ms": 17345,
+        "execution_ms": 16343,
+        "first_event_ms": 1039,
+        "startup_ms": 1,
+        "structured_result_ms": 13689,
+        "total_ms": 17345,
+        "ttur_ms": 16632,
+        "verification_ms": 163
+      },
+      "usage": {
+        "cached_tokens": 136825,
+        "estimated_cost": 0.1731795,
+        "input_tokens": 8,
+        "output_tokens": 814
+      },
+      "workload": "w2-tiny-write"
+    },
+    {
+      "arm": "tdd",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 1,
+        "production_loc": 2,
+        "test_loc": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 0,
+      "pair_id": "claude-w2-tiny-write-2",
+      "provider": "claude",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": false,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 2,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:f214a337c67e3d669eb2f96b56ad919b861f96938adf08c7c276fc13b6e75a7d",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:f7762d76e11000f502a707b08f3ef292cd13c5e752c2d3bb38a66b69ce9c82f2",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "tdd",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:020e48193f19c303f462ac6c6bf16548f10e3b1f706df562f8fb8f6b3efb43a6",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T11:00:28.771922Z",
+      "timing": {
+        "effective_time_ms": 19422,
+        "execution_ms": 18438,
+        "first_event_ms": 1032,
+        "startup_ms": 1,
+        "structured_result_ms": 16176,
+        "total_ms": 19422,
+        "ttur_ms": 18754,
+        "verification_ms": 185
+      },
+      "usage": {
+        "cached_tokens": 136805,
+        "estimated_cost": 0.1735995,
+        "input_tokens": 8,
+        "output_tokens": 836
+      },
+      "workload": "w2-tiny-write"
+    },
+    {
+      "arm": "no-skill",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 1,
+        "production_loc": 2,
+        "test_loc": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 1,
+      "pair_id": "claude-w2-tiny-write-2",
+      "provider": "claude",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": false,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 2,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:1a486ee3847aa26044292bf7864fae6ab3184cf4dd808d89302c18ca9525f835",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T11:00:47.930226Z",
+      "timing": {
+        "effective_time_ms": 18728,
+        "execution_ms": 17718,
+        "first_event_ms": 1257,
+        "startup_ms": 1,
+        "structured_result_ms": 15088,
+        "total_ms": 18728,
+        "ttur_ms": 18022,
+        "verification_ms": 179
+      },
+      "usage": {
+        "cached_tokens": 134076,
+        "estimated_cost": 0.1605438,
+        "input_tokens": 8,
+        "output_tokens": 731
+      },
+      "workload": "w2-tiny-write"
+    },
+    {
+      "arm": "no-skill",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 2,
+        "production_loc": 4,
+        "test_loc": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 0,
+      "pair_id": "claude-w3-bounded-implementation-1",
+      "provider": "claude",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": false,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 1,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:3ae5f3c5418e013475a55188e1c5acc5a0d36a7a6568877e5cb2b288d5382bab",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T11:01:07.650980Z",
+      "timing": {
+        "effective_time_ms": 19242,
+        "execution_ms": 18172,
+        "first_event_ms": 1199,
+        "startup_ms": 2,
+        "structured_result_ms": 15637,
+        "total_ms": 19242,
+        "ttur_ms": 18492,
+        "verification_ms": 188
+      },
+      "usage": {
+        "cached_tokens": 135838,
+        "estimated_cost": 0.17196240000000002,
+        "input_tokens": 8,
+        "output_tokens": 927
+      },
+      "workload": "w3-bounded-implementation"
+    },
+    {
+      "arm": "tdd",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 2,
+        "production_loc": 4,
+        "test_loc": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 1,
+      "pair_id": "claude-w3-bounded-implementation-1",
+      "provider": "claude",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": false,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 1,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:58fe652651aad9a0d5c7efc4dd7f419c9a3023c6f4e4f73b3b6172f25572351b",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:f7762d76e11000f502a707b08f3ef292cd13c5e752c2d3bb38a66b69ce9c82f2",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "tdd",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:020e48193f19c303f462ac6c6bf16548f10e3b1f706df562f8fb8f6b3efb43a6",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T11:01:35.729459Z",
+      "timing": {
+        "effective_time_ms": 27700,
+        "execution_ms": 26720,
+        "first_event_ms": 1143,
+        "startup_ms": 1,
+        "structured_result_ms": 24484,
+        "total_ms": 27700,
+        "ttur_ms": 26994,
+        "verification_ms": 155
+      },
+      "usage": {
+        "cached_tokens": 138630,
+        "estimated_cost": 0.181077,
+        "input_tokens": 8,
+        "output_tokens": 1102
+      },
+      "workload": "w3-bounded-implementation"
+    },
+    {
+      "arm": "tdd",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 2,
+        "production_loc": 4,
+        "test_loc": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 0,
+      "pair_id": "claude-w3-bounded-implementation-2",
+      "provider": "claude",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": false,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 2,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:ed294b9a26df9fe015991861d5772fef6fe4d40a54472066ab2229d1bfa371d9",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:f7762d76e11000f502a707b08f3ef292cd13c5e752c2d3bb38a66b69ce9c82f2",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "tdd",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:020e48193f19c303f462ac6c6bf16548f10e3b1f706df562f8fb8f6b3efb43a6",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T11:01:57.700890Z",
+      "timing": {
+        "effective_time_ms": 21620,
+        "execution_ms": 20742,
+        "first_event_ms": 1021,
+        "startup_ms": 1,
+        "structured_result_ms": 18529,
+        "total_ms": 21620,
+        "ttur_ms": 21012,
+        "verification_ms": 151
+      },
+      "usage": {
+        "cached_tokens": 138300,
+        "estimated_cost": 0.18093900000000002,
+        "input_tokens": 8,
+        "output_tokens": 1123
+      },
+      "workload": "w3-bounded-implementation"
+    },
+    {
+      "arm": "no-skill",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 2,
+        "production_loc": 4,
+        "test_loc": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 1,
+      "pair_id": "claude-w3-bounded-implementation-2",
+      "provider": "claude",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": false,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 2,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:0597bb830d66d5fdf74046ad59a9ba1cc8dc4598c1d41965dd4b5a40ba34c065",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T11:02:19.081182Z",
+      "timing": {
+        "effective_time_ms": 21036,
+        "execution_ms": 20166,
+        "first_event_ms": 1072,
+        "startup_ms": 1,
+        "structured_result_ms": 17830,
+        "total_ms": 21036,
+        "ttur_ms": 20438,
+        "verification_ms": 152
+      },
+      "usage": {
+        "cached_tokens": 134825,
+        "estimated_cost": 0.16563449999999996,
+        "input_tokens": 8,
+        "output_tokens": 847
+      },
+      "workload": "w3-bounded-implementation"
+    },
+    {
+      "arm": "no-skill",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 2,
+        "production_loc": 27,
+        "test_loc": 24
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 0,
+      "pair_id": "claude-w4-regression-prone-1",
+      "provider": "claude",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": true,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 1,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:bfb9d9f6d9a0c971244155bc2c89f1d044345534215b65e3cbd548c16a0c1431",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T11:02:46.539190Z",
+      "timing": {
+        "effective_time_ms": 27109,
+        "execution_ms": 26212,
+        "first_event_ms": 991,
+        "startup_ms": 1,
+        "structured_result_ms": 24121,
+        "total_ms": 27109,
+        "ttur_ms": 26514,
+        "verification_ms": 178
+      },
+      "usage": {
+        "cached_tokens": 176451,
+        "estimated_cost": 0.2005923,
+        "input_tokens": 10,
+        "output_tokens": 1839
+      },
+      "workload": "w4-regression-prone"
+    },
+    {
+      "arm": "tdd",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 2,
+        "production_loc": 23,
+        "test_loc": 24
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 1,
+      "pair_id": "claude-w4-regression-prone-1",
+      "provider": "claude",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": true,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 1,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:72872acc4da10330c90f9db749aa98d9efcf7787c1717ab57278adb680917d89",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:f7762d76e11000f502a707b08f3ef292cd13c5e752c2d3bb38a66b69ce9c82f2",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "tdd",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:020e48193f19c303f462ac6c6bf16548f10e3b1f706df562f8fb8f6b3efb43a6",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T11:03:31.607350Z",
+      "timing": {
+        "effective_time_ms": 44708,
+        "execution_ms": 43768,
+        "first_event_ms": 990,
+        "startup_ms": 1,
+        "structured_result_ms": 41512,
+        "total_ms": 44708,
+        "ttur_ms": 44090,
+        "verification_ms": 210
+      },
+      "usage": {
+        "cached_tokens": 223740,
+        "estimated_cost": 0.241731,
+        "input_tokens": 12,
+        "output_tokens": 2801
+      },
+      "workload": "w4-regression-prone"
+    },
+    {
+      "arm": "tdd",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 2,
+        "production_loc": 22,
+        "test_loc": 26
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 0,
+      "pair_id": "claude-w4-regression-prone-2",
+      "provider": "claude",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": true,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": true,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 2,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:6110bc440ec83c845d5407ceb57ed7e96ee8de55294365631fb8e9ddf565301d",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:f7762d76e11000f502a707b08f3ef292cd13c5e752c2d3bb38a66b69ce9c82f2",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "tdd",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:020e48193f19c303f462ac6c6bf16548f10e3b1f706df562f8fb8f6b3efb43a6",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T11:04:14.039213Z",
+      "timing": {
+        "effective_time_ms": 42091,
+        "execution_ms": 41195,
+        "first_event_ms": 990,
+        "startup_ms": 1,
+        "structured_result_ms": 38633,
+        "total_ms": 42091,
+        "ttur_ms": 41467,
+        "verification_ms": 162
+      },
+      "usage": {
+        "cached_tokens": 223738,
+        "estimated_cost": 0.2474214,
+        "input_tokens": 12,
+        "output_tokens": 3080
+      },
+      "workload": "w4-regression-prone"
+    },
+    {
+      "arm": "no-skill",
+      "control": {
+        "nested_agent_count": 0,
+        "user_question_count": 0
+      },
+      "diff": {
+        "files_changed": 1,
+        "production_loc": 27,
+        "test_loc": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 1,
+      "pair_id": "claude-w4-regression-prone-2",
+      "provider": "claude",
+      "quality": {
+        "escaped_defect": false,
+        "implementation_mock_count": 0,
+        "mutation_detected": false,
+        "private_method_test_count": 0,
+        "public_seam_test": true,
+        "regression_test_exists": false,
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 2,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:d1436527db67ab31dff92fdf4c173ea3c7923bf8f0ba8f79c87e039f79b638b2",
+      "skill": {
+        "approved_seams_present": true,
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "green_observed": "unknown",
+        "hooks_executed": false,
+        "id": "",
+        "plugin_installed": false,
+        "red_observed": "unknown",
+        "skill_read": "unknown",
+        "snapshot_verified": true,
+        "source_revision": "",
+        "unexpected_dependencies": []
+      },
+      "timestamp": "2026-08-19T11:04:59.938959Z",
+      "timing": {
+        "effective_time_ms": 45568,
+        "execution_ms": 44699,
+        "first_event_ms": 982,
+        "startup_ms": 1,
+        "structured_result_ms": 42603,
+        "total_ms": 45568,
+        "ttur_ms": 44968,
+        "verification_ms": 154
+      },
+      "usage": {
+        "cached_tokens": 340748,
+        "estimated_cost": 0.2717874,
+        "input_tokens": 18,
+        "output_tokens": 2917
+      },
+      "workload": "w4-regression-prone"
+    }
+  ],
+  "sampling": {
+    "actual_runs": 24,
+    "paired_order": "AB/BA",
+    "planned_runs": 24
+  },
+  "schema_version": 1,
+  "skill": {
+    "dependencies": [],
+    "digest": "sha256:f7762d76e11000f502a707b08f3ef292cd13c5e752c2d3bb38a66b69ce9c82f2",
+    "hooks_executed": false,
+    "id": "tdd",
+    "license": "MIT",
+    "plugin_installed": false,
+    "raw_package_digest": "sha256:020e48193f19c303f462ac6c6bf16548f10e3b1f706df562f8fb8f6b3efb43a6",
+    "referenced_files": [
+      "mocking.md",
+      "tests.md"
+    ],
+    "source": "user-local",
+    "source_commit": null,
+    "source_commit_status": "unavailable_local_copy",
+    "source_path": "~/.agents/skills/tdd",
+    "source_revision": "local-sha256:020e48193f19c303f462ac6c6bf16548f10e3b1f706df562f8fb8f6b3efb43a6"
+  },
+  "skill_policy_changed": false,
+  "summary": {
+    "claude": {
+      "w2-tiny-write": {
+        "classification": "no_benefit",
+        "delta": {
+          "effective_percent": 3.0,
+          "ttur_percent": 2.9
+        },
+        "no-skill": {
+          "cost": 0.16056539999999997,
+          "effective_time_ms": 17856,
+          "escaped_defects": 0,
+          "mutation_detected": 2,
+          "production_loc": 2,
+          "reworks": 0,
+          "samples": 2,
+          "scope_violations": 0,
+          "test_loc": 0,
+          "ttur_ms": 17196,
+          "verification_passes": 2
+        },
+        "tdd": {
+          "cost": 0.17338949999999997,
+          "effective_time_ms": 18384,
+          "escaped_defects": 0,
+          "mutation_detected": 2,
+          "production_loc": 2,
+          "reworks": 0,
+          "samples": 2,
+          "scope_violations": 0,
+          "test_loc": 0,
+          "ttur_ms": 17693,
+          "verification_passes": 2
+        }
+      },
+      "w3-bounded-implementation": {
+        "classification": "no_benefit",
+        "delta": {
+          "effective_percent": 22.4,
+          "ttur_percent": 23.3
+        },
+        "no-skill": {
+          "cost": 0.16879845,
+          "effective_time_ms": 20139,
+          "escaped_defects": 0,
+          "mutation_detected": 2,
+          "production_loc": 4,
+          "reworks": 0,
+          "samples": 2,
+          "scope_violations": 0,
+          "test_loc": 0,
+          "ttur_ms": 19465,
+          "verification_passes": 2
+        },
+        "tdd": {
+          "cost": 0.181008,
+          "effective_time_ms": 24660,
+          "escaped_defects": 0,
+          "mutation_detected": 2,
+          "production_loc": 4,
+          "reworks": 0,
+          "samples": 2,
+          "scope_violations": 0,
+          "test_loc": 0,
+          "ttur_ms": 24003,
+          "verification_passes": 2
+        }
+      },
+      "w4-regression-prone": {
+        "classification": "manual_only",
+        "delta": {
+          "effective_percent": 19.4,
+          "ttur_percent": 19.7
+        },
+        "no-skill": {
+          "cost": 0.23618985,
+          "effective_time_ms": 36338,
+          "escaped_defects": 0,
+          "mutation_detected": 1,
+          "production_loc": 27,
+          "reworks": 0,
+          "samples": 2,
+          "scope_violations": 0,
+          "test_loc": 12,
+          "ttur_ms": 35741,
+          "verification_passes": 2
+        },
+        "tdd": {
+          "cost": 0.24457620000000002,
+          "effective_time_ms": 43400,
+          "escaped_defects": 0,
+          "mutation_detected": 2,
+          "production_loc": 22,
+          "reworks": 0,
+          "samples": 2,
+          "scope_violations": 0,
+          "test_loc": 25,
+          "ttur_ms": 42778,
+          "verification_passes": 2
+        }
+      }
+    },
+    "codex": {
+      "w2-tiny-write": {
+        "classification": "harmful",
+        "delta": {
+          "effective_percent": 58.3,
+          "ttur_percent": 60.5
+        },
+        "no-skill": {
+          "cost": null,
+          "effective_time_ms": 29063,
+          "escaped_defects": 0,
+          "mutation_detected": 2,
+          "production_loc": 2,
+          "reworks": 0,
+          "samples": 2,
+          "scope_violations": 0,
+          "test_loc": 0,
+          "ttur_ms": 27743,
+          "verification_passes": 2
+        },
+        "tdd": {
+          "cost": null,
+          "effective_time_ms": 46004,
+          "escaped_defects": 0,
+          "mutation_detected": 2,
+          "production_loc": 2,
+          "reworks": 0,
+          "samples": 2,
+          "scope_violations": 0,
+          "test_loc": 0,
+          "ttur_ms": 44528,
+          "verification_passes": 2
+        }
+      },
+      "w3-bounded-implementation": {
+        "classification": "no_benefit",
+        "delta": {
+          "effective_percent": 18.3,
+          "ttur_percent": 16.6
+        },
+        "no-skill": {
+          "cost": null,
+          "effective_time_ms": 30416,
+          "escaped_defects": 0,
+          "mutation_detected": 2,
+          "production_loc": 4,
+          "reworks": 0,
+          "samples": 2,
+          "scope_violations": 0,
+          "test_loc": 2,
+          "ttur_ms": 29732,
+          "verification_passes": 2
+        },
+        "tdd": {
+          "cost": null,
+          "effective_time_ms": 35986,
+          "escaped_defects": 0,
+          "mutation_detected": 2,
+          "production_loc": 4,
+          "reworks": 0,
+          "samples": 2,
+          "scope_violations": 0,
+          "test_loc": 0,
+          "ttur_ms": 34662,
+          "verification_passes": 2
+        }
+      },
+      "w4-regression-prone": {
+        "classification": "harmful",
+        "delta": {
+          "effective_percent": 76.8,
+          "ttur_percent": 78.0
+        },
+        "no-skill": {
+          "cost": null,
+          "effective_time_ms": 32946,
+          "escaped_defects": 0,
+          "mutation_detected": 2,
+          "production_loc": 21,
+          "reworks": 0,
+          "samples": 2,
+          "scope_violations": 0,
+          "test_loc": 17,
+          "ttur_ms": 32434,
+          "verification_passes": 2
+        },
+        "tdd": {
+          "cost": null,
+          "effective_time_ms": 58234,
+          "escaped_defects": 0,
+          "mutation_detected": 2,
+          "production_loc": 22,
+          "reworks": 0,
+          "samples": 2,
+          "scope_violations": 0,
+          "test_loc": 22,
+          "ttur_ms": 57748,
+          "verification_passes": 2
+        }
+      }
+    }
+  }
+}

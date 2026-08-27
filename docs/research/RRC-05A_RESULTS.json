@@ -1,0 +1,1590 @@
+{
+  "adaptive_routing_enabled": false,
+  "benchmark_snapshot_changed": false,
+  "collect_only": true,
+  "created_at": "2026-08-19T10:21:27.133884Z",
+  "environment": {
+    "claude": "2.1.220 (Claude Code)",
+    "codex": "codex-cli 0.148.0",
+    "platform": "darwin",
+    "python": "3.14.6"
+  },
+  "model_router_changed": false,
+  "samples": [
+    {
+      "arm": "no-skill",
+      "attempt_isolated": true,
+      "diff": {
+        "added": 1,
+        "deleted": 1,
+        "files_changed": 1,
+        "net_loc": 0,
+        "new_dependencies": 0,
+        "new_files": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "gpt-5.6-luna",
+      "observed_effort": "unknown",
+      "observed_model": "unknown",
+      "order_index": 0,
+      "pair_id": "codex-w2-tiny-write-1",
+      "provider": "codex",
+      "quality": {
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 1,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:b911c74c51d5013cc85a709b22a357442b44bb5424aa95d727ff57e077b733df",
+      "skill": {
+        "args": [],
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "hooks_executed": false,
+        "id": "",
+        "instruction_overhead_ms": null,
+        "materialization_ms": 0,
+        "plugin_installed": false,
+        "resolution_ms": 0,
+        "snapshot_verified": true,
+        "source_revision": ""
+      },
+      "timestamp": "2026-08-19T10:07:50.860815Z",
+      "timing": {
+        "effective_time_ms": 21955,
+        "execution_ms": 21190,
+        "first_event_ms": 1045,
+        "startup_ms": 11,
+        "structured_result_ms": 18720,
+        "total_ms": 21955,
+        "ttur_ms": 21485,
+        "verification_ms": 143
+      },
+      "usage": {
+        "cached_tokens": 54528,
+        "estimated_cost": null,
+        "input_tokens": 75772,
+        "output_tokens": 566
+      },
+      "workload": "w2-tiny-write"
+    },
+    {
+      "arm": "ponytail-full",
+      "attempt_isolated": true,
+      "diff": {
+        "added": 1,
+        "deleted": 1,
+        "files_changed": 1,
+        "net_loc": 0,
+        "new_dependencies": 0,
+        "new_files": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "gpt-5.6-luna",
+      "observed_effort": "unknown",
+      "observed_model": "unknown",
+      "order_index": 1,
+      "pair_id": "codex-w2-tiny-write-1",
+      "provider": "codex",
+      "quality": {
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 1,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:e09b431af87ab9977be5da940876ddd12e1df6adfff1d21c7e09881ea55f133b",
+      "skill": {
+        "args": [
+          "full"
+        ],
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:147d4648f0a0644fb7c8c6d2bdd7afa089f7a97ede7cf385214fde3a6c5533ac",
+        "hooks_executed": false,
+        "id": "ponytail",
+        "instruction_overhead_ms": null,
+        "materialization_ms": 6,
+        "plugin_installed": false,
+        "resolution_ms": 2,
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:40519c9eb29bcbfe225bdf1c3566ecea7916a958f4a65c9ffae2979743cd67e2"
+      },
+      "timestamp": "2026-08-19T10:08:16.063669Z",
+      "timing": {
+        "effective_time_ms": 24570,
+        "execution_ms": 23285,
+        "first_event_ms": 1169,
+        "startup_ms": 1,
+        "structured_result_ms": 21069,
+        "total_ms": 24570,
+        "ttur_ms": 23977,
+        "verification_ms": 325
+      },
+      "usage": {
+        "cached_tokens": 58624,
+        "estimated_cost": null,
+        "input_tokens": 81459,
+        "output_tokens": 728
+      },
+      "workload": "w2-tiny-write"
+    },
+    {
+      "arm": "ponytail-full",
+      "attempt_isolated": true,
+      "diff": {
+        "added": 1,
+        "deleted": 1,
+        "files_changed": 1,
+        "net_loc": 0,
+        "new_dependencies": 0,
+        "new_files": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "gpt-5.6-luna",
+      "observed_effort": "unknown",
+      "observed_model": "unknown",
+      "order_index": 0,
+      "pair_id": "codex-w2-tiny-write-2",
+      "provider": "codex",
+      "quality": {
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 2,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:7318a7507378b6e4b4a373023a97f6624959090e1a2b1ff4daae2c60f98fa486",
+      "skill": {
+        "args": [
+          "full"
+        ],
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:147d4648f0a0644fb7c8c6d2bdd7afa089f7a97ede7cf385214fde3a6c5533ac",
+        "hooks_executed": false,
+        "id": "ponytail",
+        "instruction_overhead_ms": null,
+        "materialization_ms": 10,
+        "plugin_installed": false,
+        "resolution_ms": 4,
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:40519c9eb29bcbfe225bdf1c3566ecea7916a958f4a65c9ffae2979743cd67e2"
+      },
+      "timestamp": "2026-08-19T10:08:45.984850Z",
+      "timing": {
+        "effective_time_ms": 29159,
+        "execution_ms": 27450,
+        "first_event_ms": 2195,
+        "startup_ms": 1,
+        "structured_result_ms": 23843,
+        "total_ms": 29159,
+        "ttur_ms": 28126,
+        "verification_ms": 306
+      },
+      "usage": {
+        "cached_tokens": 58624,
+        "estimated_cost": null,
+        "input_tokens": 81465,
+        "output_tokens": 684
+      },
+      "workload": "w2-tiny-write"
+    },
+    {
+      "arm": "no-skill",
+      "attempt_isolated": true,
+      "diff": {
+        "added": 1,
+        "deleted": 1,
+        "files_changed": 1,
+        "net_loc": 0,
+        "new_dependencies": 0,
+        "new_files": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "gpt-5.6-luna",
+      "observed_effort": "unknown",
+      "observed_model": "unknown",
+      "order_index": 1,
+      "pair_id": "codex-w2-tiny-write-2",
+      "provider": "codex",
+      "quality": {
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 2,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:f9b379aca7c2e7bbc9cfee5ec27687734164583ffeae2ffb8184897d4cb3f0e9",
+      "skill": {
+        "args": [],
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "hooks_executed": false,
+        "id": "",
+        "instruction_overhead_ms": null,
+        "materialization_ms": 0,
+        "plugin_installed": false,
+        "resolution_ms": 0,
+        "snapshot_verified": true,
+        "source_revision": ""
+      },
+      "timestamp": "2026-08-19T10:09:09.942390Z",
+      "timing": {
+        "effective_time_ms": 23102,
+        "execution_ms": 21385,
+        "first_event_ms": 2240,
+        "startup_ms": 1,
+        "structured_result_ms": 17695,
+        "total_ms": 23102,
+        "ttur_ms": 22018,
+        "verification_ms": 345
+      },
+      "usage": {
+        "cached_tokens": 54528,
+        "estimated_cost": null,
+        "input_tokens": 75404,
+        "output_tokens": 411
+      },
+      "workload": "w2-tiny-write"
+    },
+    {
+      "arm": "no-skill",
+      "attempt_isolated": true,
+      "diff": {
+        "added": 2,
+        "deleted": 2,
+        "files_changed": 2,
+        "net_loc": 0,
+        "new_dependencies": 0,
+        "new_files": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "gpt-5.6-luna",
+      "observed_effort": "unknown",
+      "observed_model": "unknown",
+      "order_index": 0,
+      "pair_id": "codex-w3-bounded-implementation-1",
+      "provider": "codex",
+      "quality": {
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 1,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:347ae5c32592582765ed8a24ced83e1c7ec6081728b6f9f56d9cf58fbba01c41",
+      "skill": {
+        "args": [],
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "hooks_executed": false,
+        "id": "",
+        "instruction_overhead_ms": null,
+        "materialization_ms": 0,
+        "plugin_installed": false,
+        "resolution_ms": 0,
+        "snapshot_verified": true,
+        "source_revision": ""
+      },
+      "timestamp": "2026-08-19T10:09:45.412189Z",
+      "timing": {
+        "effective_time_ms": 34647,
+        "execution_ms": 32618,
+        "first_event_ms": 1495,
+        "startup_ms": 1,
+        "structured_result_ms": 28843,
+        "total_ms": 34647,
+        "ttur_ms": 33542,
+        "verification_ms": 400
+      },
+      "usage": {
+        "cached_tokens": 73728,
+        "estimated_cost": null,
+        "input_tokens": 96199,
+        "output_tokens": 885
+      },
+      "workload": "w3-bounded-implementation"
+    },
+    {
+      "arm": "ponytail-full",
+      "attempt_isolated": true,
+      "diff": {
+        "added": 2,
+        "deleted": 2,
+        "files_changed": 2,
+        "net_loc": 0,
+        "new_dependencies": 0,
+        "new_files": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "gpt-5.6-luna",
+      "observed_effort": "unknown",
+      "observed_model": "unknown",
+      "order_index": 1,
+      "pair_id": "codex-w3-bounded-implementation-1",
+      "provider": "codex",
+      "quality": {
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 1,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:c0a42a7d0aaf27a42a3817d9d8720f6d71c0582634f5f8cfb237ec1f7d8a1240",
+      "skill": {
+        "args": [
+          "full"
+        ],
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:147d4648f0a0644fb7c8c6d2bdd7afa089f7a97ede7cf385214fde3a6c5533ac",
+        "hooks_executed": false,
+        "id": "ponytail",
+        "instruction_overhead_ms": null,
+        "materialization_ms": 28,
+        "plugin_installed": false,
+        "resolution_ms": 3,
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:40519c9eb29bcbfe225bdf1c3566ecea7916a958f4a65c9ffae2979743cd67e2"
+      },
+      "timestamp": "2026-08-19T10:10:22.353558Z",
+      "timing": {
+        "effective_time_ms": 35909,
+        "execution_ms": 33294,
+        "first_event_ms": 2216,
+        "startup_ms": 3,
+        "structured_result_ms": 30120,
+        "total_ms": 35909,
+        "ttur_ms": 34406,
+        "verification_ms": 687
+      },
+      "usage": {
+        "cached_tokens": 58624,
+        "estimated_cost": null,
+        "input_tokens": 82123,
+        "output_tokens": 1000
+      },
+      "workload": "w3-bounded-implementation"
+    },
+    {
+      "arm": "ponytail-full",
+      "attempt_isolated": true,
+      "diff": {
+        "added": 2,
+        "deleted": 2,
+        "files_changed": 2,
+        "net_loc": 0,
+        "new_dependencies": 0,
+        "new_files": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "gpt-5.6-luna",
+      "observed_effort": "unknown",
+      "observed_model": "unknown",
+      "order_index": 0,
+      "pair_id": "codex-w3-bounded-implementation-2",
+      "provider": "codex",
+      "quality": {
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 2,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:938a17cb6df67216d5c26bd02d63cc5031a929f88b38ce4825b661e47d392e79",
+      "skill": {
+        "args": [
+          "full"
+        ],
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:147d4648f0a0644fb7c8c6d2bdd7afa089f7a97ede7cf385214fde3a6c5533ac",
+        "hooks_executed": false,
+        "id": "ponytail",
+        "instruction_overhead_ms": null,
+        "materialization_ms": 19,
+        "plugin_installed": false,
+        "resolution_ms": 9,
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:40519c9eb29bcbfe225bdf1c3566ecea7916a958f4a65c9ffae2979743cd67e2"
+      },
+      "timestamp": "2026-08-19T10:11:07.561753Z",
+      "timing": {
+        "effective_time_ms": 44370,
+        "execution_ms": 42252,
+        "first_event_ms": 1877,
+        "startup_ms": 2,
+        "structured_result_ms": 39454,
+        "total_ms": 44370,
+        "ttur_ms": 42826,
+        "verification_ms": 235
+      },
+      "usage": {
+        "cached_tokens": 93952,
+        "estimated_cost": null,
+        "input_tokens": 117842,
+        "output_tokens": 1439
+      },
+      "workload": "w3-bounded-implementation"
+    },
+    {
+      "arm": "no-skill",
+      "attempt_isolated": true,
+      "diff": {
+        "added": 2,
+        "deleted": 2,
+        "files_changed": 2,
+        "net_loc": 0,
+        "new_dependencies": 0,
+        "new_files": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "gpt-5.6-luna",
+      "observed_effort": "unknown",
+      "observed_model": "unknown",
+      "order_index": 1,
+      "pair_id": "codex-w3-bounded-implementation-2",
+      "provider": "codex",
+      "quality": {
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 2,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:3e36a5b9859d9b4a8839c4042aaed2bdebfdd0bf3b6d76784ea26f6656d2d577",
+      "skill": {
+        "args": [],
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "hooks_executed": false,
+        "id": "",
+        "instruction_overhead_ms": null,
+        "materialization_ms": 0,
+        "plugin_installed": false,
+        "resolution_ms": 0,
+        "snapshot_verified": true,
+        "source_revision": ""
+      },
+      "timestamp": "2026-08-19T10:11:35.327135Z",
+      "timing": {
+        "effective_time_ms": 27089,
+        "execution_ms": 25604,
+        "first_event_ms": 1784,
+        "startup_ms": 1,
+        "structured_result_ms": 22848,
+        "total_ms": 27089,
+        "ttur_ms": 26241,
+        "verification_ms": 306
+      },
+      "usage": {
+        "cached_tokens": 54528,
+        "estimated_cost": null,
+        "input_tokens": 76104,
+        "output_tokens": 606
+      },
+      "workload": "w3-bounded-implementation"
+    },
+    {
+      "arm": "no-skill",
+      "attempt_isolated": true,
+      "diff": {
+        "added": 1,
+        "deleted": 1,
+        "files_changed": 1,
+        "net_loc": 0,
+        "new_dependencies": 0,
+        "new_files": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 0,
+      "pair_id": "claude-w2-tiny-write-1",
+      "provider": "claude",
+      "quality": {
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 1,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:99229981f9c0a64068fbc023b6728e4beda099f570729b551889f67279eafa67",
+      "skill": {
+        "args": [],
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "hooks_executed": false,
+        "id": "",
+        "instruction_overhead_ms": null,
+        "materialization_ms": 0,
+        "plugin_installed": false,
+        "resolution_ms": 0,
+        "snapshot_verified": true,
+        "source_revision": ""
+      },
+      "timestamp": "2026-08-19T10:12:02.931092Z",
+      "timing": {
+        "effective_time_ms": 26805,
+        "execution_ms": 24316,
+        "first_event_ms": 2893,
+        "startup_ms": 3,
+        "structured_result_ms": 19163,
+        "total_ms": 26805,
+        "ttur_ms": 25156,
+        "verification_ms": 368
+      },
+      "usage": {
+        "cached_tokens": 112511,
+        "estimated_cost": 0.2831673,
+        "input_tokens": 8,
+        "output_tokens": 606
+      },
+      "workload": "w2-tiny-write"
+    },
+    {
+      "arm": "ponytail-full",
+      "attempt_isolated": true,
+      "diff": {
+        "added": 1,
+        "deleted": 1,
+        "files_changed": 1,
+        "net_loc": 0,
+        "new_dependencies": 0,
+        "new_files": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 1,
+      "pair_id": "claude-w2-tiny-write-1",
+      "provider": "claude",
+      "quality": {
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 1,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:179cfa655c244d7e245583bc72c944132330c90f99fb7d493441f97f34966c0b",
+      "skill": {
+        "args": [
+          "full"
+        ],
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:147d4648f0a0644fb7c8c6d2bdd7afa089f7a97ede7cf385214fde3a6c5533ac",
+        "hooks_executed": false,
+        "id": "ponytail",
+        "instruction_overhead_ms": null,
+        "materialization_ms": 10,
+        "plugin_installed": false,
+        "resolution_ms": 7,
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:40519c9eb29bcbfe225bdf1c3566ecea7916a958f4a65c9ffae2979743cd67e2"
+      },
+      "timestamp": "2026-08-19T10:12:32.270119Z",
+      "timing": {
+        "effective_time_ms": 28467,
+        "execution_ms": 26153,
+        "first_event_ms": 3516,
+        "startup_ms": 2,
+        "structured_result_ms": 20990,
+        "total_ms": 28467,
+        "ttur_ms": 26754,
+        "verification_ms": 259
+      },
+      "usage": {
+        "cached_tokens": 140004,
+        "estimated_cost": 0.1827282,
+        "input_tokens": 8,
+        "output_tokens": 755
+      },
+      "workload": "w2-tiny-write"
+    },
+    {
+      "arm": "ponytail-full",
+      "attempt_isolated": true,
+      "diff": {
+        "added": 1,
+        "deleted": 1,
+        "files_changed": 1,
+        "net_loc": 0,
+        "new_dependencies": 0,
+        "new_files": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 0,
+      "pair_id": "claude-w2-tiny-write-2",
+      "provider": "claude",
+      "quality": {
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 2,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:0f27a015f166ea0f7f1159de7c3a6f9c4dc7dd9abe8736a371ff9d2ebf83fb2b",
+      "skill": {
+        "args": [
+          "full"
+        ],
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:147d4648f0a0644fb7c8c6d2bdd7afa089f7a97ede7cf385214fde3a6c5533ac",
+        "hooks_executed": false,
+        "id": "ponytail",
+        "instruction_overhead_ms": null,
+        "materialization_ms": 9,
+        "plugin_installed": false,
+        "resolution_ms": 3,
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:40519c9eb29bcbfe225bdf1c3566ecea7916a958f4a65c9ffae2979743cd67e2"
+      },
+      "timestamp": "2026-08-19T10:13:00.662736Z",
+      "timing": {
+        "effective_time_ms": 27655,
+        "execution_ms": 25648,
+        "first_event_ms": 2799,
+        "startup_ms": 1,
+        "structured_result_ms": 21303,
+        "total_ms": 27655,
+        "ttur_ms": 26246,
+        "verification_ms": 272
+      },
+      "usage": {
+        "cached_tokens": 139880,
+        "estimated_cost": 0.185361,
+        "input_tokens": 140,
+        "output_tokens": 799
+      },
+      "workload": "w2-tiny-write"
+    },
+    {
+      "arm": "no-skill",
+      "attempt_isolated": true,
+      "diff": {
+        "added": 1,
+        "deleted": 1,
+        "files_changed": 1,
+        "net_loc": 0,
+        "new_dependencies": 0,
+        "new_files": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 1,
+      "pair_id": "claude-w2-tiny-write-2",
+      "provider": "claude",
+      "quality": {
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 2,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:ba0ad1655122a39387776df8d9c5d6f10e87af500bc61f26bdf59566f9edf81a",
+      "skill": {
+        "args": [],
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "hooks_executed": false,
+        "id": "",
+        "instruction_overhead_ms": null,
+        "materialization_ms": 0,
+        "plugin_installed": false,
+        "resolution_ms": 0,
+        "snapshot_verified": true,
+        "source_revision": ""
+      },
+      "timestamp": "2026-08-19T10:13:26.834867Z",
+      "timing": {
+        "effective_time_ms": 25535,
+        "execution_ms": 23165,
+        "first_event_ms": 2696,
+        "startup_ms": 2,
+        "structured_result_ms": 18512,
+        "total_ms": 25535,
+        "ttur_ms": 23823,
+        "verification_ms": 272
+      },
+      "usage": {
+        "cached_tokens": 133987,
+        "estimated_cost": 0.1600371,
+        "input_tokens": 8,
+        "output_tokens": 681
+      },
+      "workload": "w2-tiny-write"
+    },
+    {
+      "arm": "no-skill",
+      "attempt_isolated": true,
+      "diff": {
+        "added": 2,
+        "deleted": 2,
+        "files_changed": 2,
+        "net_loc": 0,
+        "new_dependencies": 0,
+        "new_files": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 0,
+      "pair_id": "claude-w3-bounded-implementation-1",
+      "provider": "claude",
+      "quality": {
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 1,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:4c5371f31c1a1da2e2bf97c0c84a2dd23f64b054939cac987845ac193e6eb4a9",
+      "skill": {
+        "args": [],
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "hooks_executed": false,
+        "id": "",
+        "instruction_overhead_ms": null,
+        "materialization_ms": 0,
+        "plugin_installed": false,
+        "resolution_ms": 0,
+        "snapshot_verified": true,
+        "source_revision": ""
+      },
+      "timestamp": "2026-08-19T10:13:53.717646Z",
+      "timing": {
+        "effective_time_ms": 26079,
+        "execution_ms": 24181,
+        "first_event_ms": 2950,
+        "startup_ms": 1,
+        "structured_result_ms": 19321,
+        "total_ms": 26079,
+        "ttur_ms": 24745,
+        "verification_ms": 266
+      },
+      "usage": {
+        "cached_tokens": 134865,
+        "estimated_cost": 0.16775849999999998,
+        "input_tokens": 8,
+        "output_tokens": 937
+      },
+      "workload": "w3-bounded-implementation"
+    },
+    {
+      "arm": "ponytail-full",
+      "attempt_isolated": true,
+      "diff": {
+        "added": 2,
+        "deleted": 2,
+        "files_changed": 2,
+        "net_loc": 0,
+        "new_dependencies": 0,
+        "new_files": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 1,
+      "pair_id": "claude-w3-bounded-implementation-1",
+      "provider": "claude",
+      "quality": {
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 1,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:b457f5ce30e8e99b9ad0005db0b23a36a56d0d28d48de11b51e4be07b9c5a385",
+      "skill": {
+        "args": [
+          "full"
+        ],
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:147d4648f0a0644fb7c8c6d2bdd7afa089f7a97ede7cf385214fde3a6c5533ac",
+        "hooks_executed": false,
+        "id": "ponytail",
+        "instruction_overhead_ms": null,
+        "materialization_ms": 10,
+        "plugin_installed": false,
+        "resolution_ms": 3,
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:40519c9eb29bcbfe225bdf1c3566ecea7916a958f4a65c9ffae2979743cd67e2"
+      },
+      "timestamp": "2026-08-19T10:14:27.636860Z",
+      "timing": {
+        "effective_time_ms": 33269,
+        "execution_ms": 31219,
+        "first_event_ms": 2974,
+        "startup_ms": 2,
+        "structured_result_ms": 26776,
+        "total_ms": 33269,
+        "ttur_ms": 31744,
+        "verification_ms": 247
+      },
+      "usage": {
+        "cached_tokens": 141277,
+        "estimated_cost": 0.19222409999999998,
+        "input_tokens": 8,
+        "output_tokens": 1033
+      },
+      "workload": "w3-bounded-implementation"
+    },
+    {
+      "arm": "ponytail-full",
+      "attempt_isolated": true,
+      "diff": {
+        "added": 2,
+        "deleted": 2,
+        "files_changed": 2,
+        "net_loc": 0,
+        "new_dependencies": 0,
+        "new_files": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 0,
+      "pair_id": "claude-w3-bounded-implementation-2",
+      "provider": "claude",
+      "quality": {
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 2,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:61b28a59d238ce54216b300969f1ca6a75fc9526150cf8b240fb721e6ec32759",
+      "skill": {
+        "args": [
+          "full"
+        ],
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:147d4648f0a0644fb7c8c6d2bdd7afa089f7a97ede7cf385214fde3a6c5533ac",
+        "hooks_executed": false,
+        "id": "ponytail",
+        "instruction_overhead_ms": null,
+        "materialization_ms": 8,
+        "plugin_installed": false,
+        "resolution_ms": 3,
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:40519c9eb29bcbfe225bdf1c3566ecea7916a958f4a65c9ffae2979743cd67e2"
+      },
+      "timestamp": "2026-08-19T10:14:53.811072Z",
+      "timing": {
+        "effective_time_ms": 25609,
+        "execution_ms": 24094,
+        "first_event_ms": 1887,
+        "startup_ms": 1,
+        "structured_result_ms": 20767,
+        "total_ms": 25609,
+        "ttur_ms": 24545,
+        "verification_ms": 220
+      },
+      "usage": {
+        "cached_tokens": 140498,
+        "estimated_cost": 0.1899594,
+        "input_tokens": 8,
+        "output_tokens": 1002
+      },
+      "workload": "w3-bounded-implementation"
+    },
+    {
+      "arm": "no-skill",
+      "attempt_isolated": true,
+      "diff": {
+        "added": 2,
+        "deleted": 2,
+        "files_changed": 2,
+        "net_loc": 0,
+        "new_dependencies": 0,
+        "new_files": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 1,
+      "pair_id": "claude-w3-bounded-implementation-2",
+      "provider": "claude",
+      "quality": {
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 2,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:49aba59a1347b040afdf8e5b16b4daa5f5cbce73a50584e818a24aa48819d651",
+      "skill": {
+        "args": [],
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "hooks_executed": false,
+        "id": "",
+        "instruction_overhead_ms": null,
+        "materialization_ms": 0,
+        "plugin_installed": false,
+        "resolution_ms": 0,
+        "snapshot_verified": true,
+        "source_revision": ""
+      },
+      "timestamp": "2026-08-19T10:15:34.354079Z",
+      "timing": {
+        "effective_time_ms": 39691,
+        "execution_ms": 37720,
+        "first_event_ms": 2557,
+        "startup_ms": 1,
+        "structured_result_ms": 33660,
+        "total_ms": 39691,
+        "ttur_ms": 38487,
+        "verification_ms": 354
+      },
+      "usage": {
+        "cached_tokens": 215523,
+        "estimated_cost": 0.19731690000000002,
+        "input_tokens": 12,
+        "output_tokens": 1140
+      },
+      "workload": "w3-bounded-implementation"
+    },
+    {
+      "arm": "no-skill",
+      "attempt_isolated": true,
+      "diff": {
+        "added": 1,
+        "deleted": 1,
+        "files_changed": 1,
+        "net_loc": 0,
+        "new_dependencies": 0,
+        "new_files": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 0,
+      "pair_id": "claude-w2-tiny-write-3",
+      "provider": "claude",
+      "quality": {
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 3,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:e0e40b240d5aec92852accbaffe552f2806fe81812a96230f23241275f45cb6c",
+      "skill": {
+        "args": [],
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "hooks_executed": false,
+        "id": "",
+        "instruction_overhead_ms": null,
+        "materialization_ms": 0,
+        "plugin_installed": false,
+        "resolution_ms": 0,
+        "snapshot_verified": true,
+        "source_revision": ""
+      },
+      "timestamp": "2026-08-19T10:16:01.583396Z",
+      "timing": {
+        "effective_time_ms": 26351,
+        "execution_ms": 24241,
+        "first_event_ms": 2866,
+        "startup_ms": 1,
+        "structured_result_ms": 19624,
+        "total_ms": 26351,
+        "ttur_ms": 24899,
+        "verification_ms": 318
+      },
+      "usage": {
+        "cached_tokens": 133972,
+        "estimated_cost": 0.16188659999999996,
+        "input_tokens": 8,
+        "output_tokens": 651
+      },
+      "workload": "w2-tiny-write"
+    },
+    {
+      "arm": "ponytail-full",
+      "attempt_isolated": true,
+      "diff": {
+        "added": 1,
+        "deleted": 1,
+        "files_changed": 1,
+        "net_loc": 0,
+        "new_dependencies": 0,
+        "new_files": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 1,
+      "pair_id": "claude-w2-tiny-write-3",
+      "provider": "claude",
+      "quality": {
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 3,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:1a20d5b33936548b7ecb156725c316aa49f5c4404835a10dc9ba4ce82887e704",
+      "skill": {
+        "args": [
+          "full"
+        ],
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:147d4648f0a0644fb7c8c6d2bdd7afa089f7a97ede7cf385214fde3a6c5533ac",
+        "hooks_executed": false,
+        "id": "ponytail",
+        "instruction_overhead_ms": null,
+        "materialization_ms": 17,
+        "plugin_installed": false,
+        "resolution_ms": 4,
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:40519c9eb29bcbfe225bdf1c3566ecea7916a958f4a65c9ffae2979743cd67e2"
+      },
+      "timestamp": "2026-08-19T10:16:31.006272Z",
+      "timing": {
+        "effective_time_ms": 28800,
+        "execution_ms": 26865,
+        "first_event_ms": 3069,
+        "startup_ms": 2,
+        "structured_result_ms": 22501,
+        "total_ms": 28800,
+        "ttur_ms": 27242,
+        "verification_ms": 148
+      },
+      "usage": {
+        "cached_tokens": 140604,
+        "estimated_cost": 0.1817952,
+        "input_tokens": 8,
+        "output_tokens": 784
+      },
+      "workload": "w2-tiny-write"
+    },
+    {
+      "arm": "no-skill",
+      "attempt_isolated": true,
+      "diff": {
+        "added": 2,
+        "deleted": 2,
+        "files_changed": 2,
+        "net_loc": 0,
+        "new_dependencies": 0,
+        "new_files": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "gpt-5.6-luna",
+      "observed_effort": "unknown",
+      "observed_model": "unknown",
+      "order_index": 0,
+      "pair_id": "codex-w3-bounded-implementation-3",
+      "provider": "codex",
+      "quality": {
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 3,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:f75b72a1a857ca9b680ecbc863b6141e54c4142556daadaa655bcdc97519e6c0",
+      "skill": {
+        "args": [],
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "hooks_executed": false,
+        "id": "",
+        "instruction_overhead_ms": null,
+        "materialization_ms": 0,
+        "plugin_installed": false,
+        "resolution_ms": 0,
+        "snapshot_verified": true,
+        "source_revision": ""
+      },
+      "timestamp": "2026-08-19T10:18:21.831780Z",
+      "timing": {
+        "effective_time_ms": 31385,
+        "execution_ms": 30162,
+        "first_event_ms": 1624,
+        "startup_ms": 8,
+        "structured_result_ms": 27661,
+        "total_ms": 31385,
+        "ttur_ms": 30635,
+        "verification_ms": 245
+      },
+      "usage": {
+        "cached_tokens": 73728,
+        "estimated_cost": null,
+        "input_tokens": 95938,
+        "output_tokens": 823
+      },
+      "workload": "w3-bounded-implementation"
+    },
+    {
+      "arm": "ponytail-full",
+      "attempt_isolated": true,
+      "diff": {
+        "added": 2,
+        "deleted": 2,
+        "files_changed": 2,
+        "net_loc": 0,
+        "new_dependencies": 0,
+        "new_files": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "gpt-5.6-luna",
+      "observed_effort": "unknown",
+      "observed_model": "unknown",
+      "order_index": 1,
+      "pair_id": "codex-w3-bounded-implementation-3",
+      "provider": "codex",
+      "quality": {
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 3,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:6a769c0da7ebed778b5a6162d464e7e69286dd336a7fdf70508929e0d4cc8276",
+      "skill": {
+        "args": [
+          "full"
+        ],
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:147d4648f0a0644fb7c8c6d2bdd7afa089f7a97ede7cf385214fde3a6c5533ac",
+        "hooks_executed": false,
+        "id": "ponytail",
+        "instruction_overhead_ms": null,
+        "materialization_ms": 14,
+        "plugin_installed": false,
+        "resolution_ms": 2,
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:40519c9eb29bcbfe225bdf1c3566ecea7916a958f4a65c9ffae2979743cd67e2"
+      },
+      "timestamp": "2026-08-19T10:18:46.652450Z",
+      "timing": {
+        "effective_time_ms": 23967,
+        "execution_ms": 22503,
+        "first_event_ms": 816,
+        "startup_ms": 1,
+        "structured_result_ms": 20748,
+        "total_ms": 23967,
+        "ttur_ms": 22945,
+        "verification_ms": 195
+      },
+      "usage": {
+        "cached_tokens": 55552,
+        "estimated_cost": null,
+        "input_tokens": 76857,
+        "output_tokens": 679
+      },
+      "workload": "w3-bounded-implementation"
+    },
+    {
+      "arm": "no-skill",
+      "attempt_isolated": true,
+      "diff": {
+        "added": 2,
+        "deleted": 2,
+        "files_changed": 2,
+        "net_loc": 0,
+        "new_dependencies": 0,
+        "new_files": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 0,
+      "pair_id": "claude-w3-bounded-implementation-3",
+      "provider": "claude",
+      "quality": {
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 3,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:c7332f5cb6c2b7e10eec555bf54455b991fb7d7e3f310ca8b8c7b28727c2d2a7",
+      "skill": {
+        "args": [],
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "",
+        "hooks_executed": false,
+        "id": "",
+        "instruction_overhead_ms": null,
+        "materialization_ms": 0,
+        "plugin_installed": false,
+        "resolution_ms": 0,
+        "snapshot_verified": true,
+        "source_revision": ""
+      },
+      "timestamp": "2026-08-19T10:19:13.916236Z",
+      "timing": {
+        "effective_time_ms": 26599,
+        "execution_ms": 24707,
+        "first_event_ms": 2047,
+        "startup_ms": 3,
+        "structured_result_ms": 20640,
+        "total_ms": 26599,
+        "ttur_ms": 25226,
+        "verification_ms": 185
+      },
+      "usage": {
+        "cached_tokens": 134603,
+        "estimated_cost": 0.1723419,
+        "input_tokens": 291,
+        "output_tokens": 940
+      },
+      "workload": "w3-bounded-implementation"
+    },
+    {
+      "arm": "ponytail-full",
+      "attempt_isolated": true,
+      "diff": {
+        "added": 2,
+        "deleted": 2,
+        "files_changed": 2,
+        "net_loc": 0,
+        "new_dependencies": 0,
+        "new_files": 0
+      },
+      "effectiveness_eligible": true,
+      "effort": "medium",
+      "failure_kind": "",
+      "model": "claude-sonnet-5",
+      "observed_effort": "unknown",
+      "observed_model": "claude-sonnet-5",
+      "order_index": 1,
+      "pair_id": "claude-w3-bounded-implementation-3",
+      "provider": "claude",
+      "quality": {
+        "rework": 0,
+        "scope_violation": false,
+        "structured_result_valid": true,
+        "verification": "pass",
+        "worker_report": "succeeded"
+      },
+      "repetition": 3,
+      "replay_digest_matches": true,
+      "run_plan_digest": "sha256:4c2ce84e40086b11dc0659899329dbef0d3a7c762d196bd2a643847c971c9093",
+      "skill": {
+        "args": [
+          "full"
+        ],
+        "binding_rendered": true,
+        "contamination": false,
+        "digest": "sha256:147d4648f0a0644fb7c8c6d2bdd7afa089f7a97ede7cf385214fde3a6c5533ac",
+        "hooks_executed": false,
+        "id": "ponytail",
+        "instruction_overhead_ms": null,
+        "materialization_ms": 7,
+        "plugin_installed": false,
+        "resolution_ms": 2,
+        "snapshot_verified": true,
+        "source_revision": "local-sha256:40519c9eb29bcbfe225bdf1c3566ecea7916a958f4a65c9ffae2979743cd67e2"
+      },
+      "timestamp": "2026-08-19T10:19:35.477937Z",
+      "timing": {
+        "effective_time_ms": 21053,
+        "execution_ms": 19755,
+        "first_event_ms": 1571,
+        "startup_ms": 1,
+        "structured_result_ms": 16925,
+        "total_ms": 21053,
+        "ttur_ms": 20050,
+        "verification_ms": 127
+      },
+      "usage": {
+        "cached_tokens": 141507,
+        "estimated_cost": 0.1889661,
+        "input_tokens": 8,
+        "output_tokens": 1012
+      },
+      "workload": "w3-bounded-implementation"
+    }
+  ],
+  "sampling": {
+    "actual_runs": 22,
+    "maximum_runs": 24,
+    "minimum_runs": 16,
+    "paired_order": "AB/BA"
+  },
+  "schema_version": 1,
+  "skill": {
+    "args": [
+      "full"
+    ],
+    "digest": "sha256:147d4648f0a0644fb7c8c6d2bdd7afa089f7a97ede7cf385214fde3a6c5533ac",
+    "hooks_executed": false,
+    "id": "ponytail",
+    "mode": "full",
+    "plugin_installed": false,
+    "raw_skill_md_digest": "sha256:40519c9eb29bcbfe225bdf1c3566ecea7916a958f4a65c9ffae2979743cd67e2",
+    "source_commit": null,
+    "source_commit_status": "unavailable_local_copy",
+    "source_revision": "local-sha256:40519c9eb29bcbfe225bdf1c3566ecea7916a958f4a65c9ffae2979743cd67e2"
+  },
+  "summary": {
+    "claude": {
+      "w2-tiny-write": {
+        "classification": "no_benefit",
+        "delta": {
+          "loc_percent": 0.0,
+          "ttur_percent": 7.5
+        },
+        "no-skill": {
+          "cost": 0.16188659999999996,
+          "effective_time_ms": 26351,
+          "input_tokens": 8,
+          "loc_changed": 2,
+          "output_tokens": 651,
+          "reworks": 0,
+          "samples": 3,
+          "scope_violations": 0,
+          "structured_failures": 0,
+          "total_ms": 26351,
+          "ttur_ms": 24899,
+          "verification_passes": 3
+        },
+        "ponytail-full": {
+          "cost": 0.1827282,
+          "effective_time_ms": 28467,
+          "input_tokens": 8,
+          "loc_changed": 2,
+          "output_tokens": 784,
+          "reworks": 0,
+          "samples": 3,
+          "scope_violations": 0,
+          "structured_failures": 0,
+          "total_ms": 28467,
+          "ttur_ms": 26754,
+          "verification_passes": 3
+        }
+      },
+      "w3-bounded-implementation": {
+        "classification": "no_benefit",
+        "delta": {
+          "loc_percent": 0.0,
+          "ttur_percent": -2.7
+        },
+        "no-skill": {
+          "cost": 0.1723419,
+          "effective_time_ms": 26599,
+          "input_tokens": 12,
+          "loc_changed": 4,
+          "output_tokens": 940,
+          "reworks": 0,
+          "samples": 3,
+          "scope_violations": 0,
+          "structured_failures": 0,
+          "total_ms": 26599,
+          "ttur_ms": 25226,
+          "verification_passes": 3
+        },
+        "ponytail-full": {
+          "cost": 0.1899594,
+          "effective_time_ms": 25609,
+          "input_tokens": 8,
+          "loc_changed": 4,
+          "output_tokens": 1012,
+          "reworks": 0,
+          "samples": 3,
+          "scope_violations": 0,
+          "structured_failures": 0,
+          "total_ms": 25609,
+          "ttur_ms": 24545,
+          "verification_passes": 3
+        }
+      }
+    },
+    "codex": {
+      "w2-tiny-write": {
+        "classification": "no_benefit",
+        "delta": {
+          "loc_percent": 0.0,
+          "ttur_percent": 19.8
+        },
+        "no-skill": {
+          "cost": null,
+          "effective_time_ms": 22528,
+          "input_tokens": 75588,
+          "loc_changed": 2,
+          "output_tokens": 488,
+          "reworks": 0,
+          "samples": 2,
+          "scope_violations": 0,
+          "structured_failures": 0,
+          "total_ms": 22528,
+          "ttur_ms": 21752,
+          "verification_passes": 2
+        },
+        "ponytail-full": {
+          "cost": null,
+          "effective_time_ms": 26864,
+          "input_tokens": 81462,
+          "loc_changed": 2,
+          "output_tokens": 706,
+          "reworks": 0,
+          "samples": 2,
+          "scope_violations": 0,
+          "structured_failures": 0,
+          "total_ms": 26864,
+          "ttur_ms": 26052,
+          "verification_passes": 2
+        }
+      },
+      "w3-bounded-implementation": {
+        "classification": "no_benefit",
+        "delta": {
+          "loc_percent": 0.0,
+          "ttur_percent": 12.3
+        },
+        "no-skill": {
+          "cost": null,
+          "effective_time_ms": 31385,
+          "input_tokens": 95938,
+          "loc_changed": 4,
+          "output_tokens": 823,
+          "reworks": 0,
+          "samples": 3,
+          "scope_violations": 0,
+          "structured_failures": 0,
+          "total_ms": 31385,
+          "ttur_ms": 30635,
+          "verification_passes": 3
+        },
+        "ponytail-full": {
+          "cost": null,
+          "effective_time_ms": 35909,
+          "input_tokens": 82123,
+          "loc_changed": 4,
+          "output_tokens": 1000,
+          "reworks": 0,
+          "samples": 3,
+          "scope_violations": 0,
+          "structured_failures": 0,
+          "total_ms": 35909,
+          "ttur_ms": 34406,
+          "verification_passes": 3
+        }
+      }
+    }
+  }
+}
