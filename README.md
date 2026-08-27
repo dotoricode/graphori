@@ -142,9 +142,8 @@ Other limits worth knowing before you install:
 - Provider progress can go dark during a long run. A heartbeat means alive,
   not advancing.
 - Optional Skill auto-selection is off on purpose; the measurements above are why.
-- `0.1.0` is the version that opens this source line. Earlier tags such as
-  `v0.9.0-beta.1` predate the public source and do not describe it. No stable
-  API yet.
+- `0.1.0` is the version this package declares. No stable API is promised, and
+  nothing here is published to a package registry yet.
 - Orca integration exists as an optional adapter and is currently disabled.
 
 ## Supported platforms

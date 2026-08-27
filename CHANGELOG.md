@@ -28,9 +28,16 @@
   support the portability contract holds at `deferred/unknown`, presented an
   environment-dependent skip count as fixed, said a run without
   `--verify-command` has nothing to judge by when the runtime picks a default,
-  and called `0.1.0` the first version despite the earlier `v0.9.0-beta.1` tag.
-  The install guide said nothing executes at install time, but the installer
-  runs `validate_skill.py` against the copied Skill.
+  and called `0.1.0` the first public source version even though the
+  `v0.9.0-beta.1` tag sits on this repository's own first commit. The install
+  guide said nothing executes at install time, but the installer runs
+  `validate_skill.py` against the copied Skill.
+
+### Known inconsistency
+
+`pyproject.toml` declares `0.1.0` while the repository's first commit carries a
+`v0.9.0-beta.1` tag. The documents no longer try to reconcile the two; picking
+one scheme is still open.
 
 ### Changed
 
