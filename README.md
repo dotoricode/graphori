@@ -213,11 +213,19 @@ Check the local provider boundary without making a model call:
 
 ```sh
 graphori doctor --json
-graphori plan "Fix authentication permission handling" --cross-review auto
+graphori plan "Fix authentication permission handling" \
+  --criterion "AC-01: permission regression test passes" \
+  --verify-criterion AC-01 \
+  --cross-review auto
 ```
 
 Provider diagnostics expose only compatibility and `ready` / `not_ready`
 authentication state. They do not print credentials or account details.
+
+`--verify-criterion AC-01` explicitly says that the later verification command
+proves AC-01. Put it before `--verify-command`, which consumes the remaining
+arguments. Unmapped criteria stay `NOT_PROVEN`; Graphori never assumes one
+passing command proves every requirement.
 
 ## What was measured
 

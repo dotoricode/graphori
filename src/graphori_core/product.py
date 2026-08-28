@@ -13,7 +13,7 @@ from .presentation import (
     effort_label, normalized_locale, omission_reason_label, route_label, status_label, team_label,
 )
 from .run_plan import NodeSpec, RunPlan, TeamSpec
-from .run_spec import RunSpec
+from .run_spec import RunSpec, criterion_id
 from .execution_engine import GraphExecutionEngine, RunProjection
 
 
@@ -78,16 +78,27 @@ def _objective_title(objective: str, fallback: str) -> str:
     return fallback
 
 
-def _verifier_command(argv: tuple[str, ...], verdict_file: str) -> ProductCommand:
+def _verifier_command(
+        argv: tuple[str, ...], verdict_file: str,
+        criterion_ids: tuple[str, ...] = ()) -> ProductCommand:
     script = (
         "import json,pathlib,subprocess,sys;"
         "command=json.loads(sys.argv[1]);target=pathlib.Path(sys.argv[2]);"
+        "criteria=json.loads(sys.argv[3]);"
         "result=subprocess.run(command,check=False);target.parent.mkdir(parents=True,exist_ok=True);"
         "verdict='pass' if result.returncode==0 else 'revise';"
-        "target.write_text(json.dumps({'verdict':verdict,'evidence_ids':['deterministic:'+str(result.returncode)]}))"
+        "proof_status='PROVEN' if result.returncode==0 else 'FAILED';"
+        "proof={item:{'status':proof_status,'evidence_ids':['subprocess:test:criterion:'"
+        "+item+':exit:'+str(result.returncode)]} for item in criteria};"
+        "target.write_text(json.dumps({'verdict':verdict,'evidence_ids':['deterministic:'"
+        "+str(result.returncode)],'criterion_evidence':proof}))"
     )
     return ProductCommand(
-        (sys.executable, "-c", script, json.dumps(list(argv)), verdict_file), verdict_file,
+        (
+            sys.executable, "-c", script, json.dumps(list(argv)), verdict_file,
+            json.dumps(list(criterion_ids)),
+        ),
+        verdict_file,
     )
 
 
@@ -149,9 +160,17 @@ class ProductPlanCompiler:
             self, spec: RunSpec, *, run_id: str,
             read_scope: tuple[str, ...] = (".",),
             write_scope: tuple[str, ...] = (".",),
-            verification_argv: tuple[str, ...] | None = None) -> ProductPlanBundle:
+            verification_argv: tuple[str, ...] | None = None,
+            verification_criteria: tuple[str, ...] = ()) -> ProductPlanBundle:
         profile = _profile(spec.objective)
         display_title = _objective_title(spec.objective, "the requested change")
+        declared_criteria = {criterion_id(item) for item in spec.acceptance_criteria}
+        mapped_criteria = tuple(sorted(set(verification_criteria)))
+        unknown_criteria = set(mapped_criteria) - declared_criteria
+        if unknown_criteria:
+            raise ValueError(
+                f"unknown verification criteria: {', '.join(sorted(unknown_criteria))}"
+            )
         nodes: list[NodeSpec] = []
         if profile in {"research", "research-and-implementation"}:
             nodes.extend((
@@ -248,10 +267,15 @@ class ProductPlanCompiler:
                 provider="generic-process", task_kind="deterministic",
                 verification_policy="independent", estimated_execution_ms=30_000,
                 routing_reason_codes=("DETERMINISTIC_VERIFIER",),
+                evidence_requirements=tuple(
+                    f"criterion:{identifier}" for identifier in mapped_criteria
+                ),
             )
             routed = replace(routed, nodes=tuple((*routed.nodes, verifier)))
-            commands["v1"] = _verifier_command(argv, verdict_file)
-            commands["v1:rework:1"] = _verifier_command(argv, rework_verdict)
+            commands["v1"] = _verifier_command(argv, verdict_file, mapped_criteria)
+            commands["v1:rework:1"] = _verifier_command(
+                argv, rework_verdict, mapped_criteria,
+            )
         routed = replace(
             routed, teams=self._teams(routed.nodes),
             nodes=tuple(replace(node, acceptance_criteria=spec.acceptance_criteria)

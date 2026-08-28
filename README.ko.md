@@ -197,11 +197,18 @@ Python 런타임을 얹을 수 있는데 선택 사항이고 [INSTALL.md](docs/p
 
 ```sh
 graphori doctor --json
-graphori plan "Fix authentication permission handling" --cross-review auto
+graphori plan "Fix authentication permission handling" \
+  --criterion "AC-01: permission regression test passes" \
+  --verify-criterion AC-01 \
+  --cross-review auto
 ```
 
 provider 진단은 호환 여부와 인증의 `ready` / `not_ready` 상태만 보여 준다. credential이나
 계정 상세 정보는 출력하지 않는다.
+
+`--verify-criterion AC-01`은 뒤의 검증 명령이 AC-01을 증명한다고 명시한다.
+나머지 인자를 모두 받는 `--verify-command`보다 앞에 둔다. 연결하지 않은 기준은
+`NOT_PROVEN`으로 남으며, 명령 하나가 모든 요구사항을 증명한다고 추정하지 않는다.
 
 ## 무엇을 측정했나
 

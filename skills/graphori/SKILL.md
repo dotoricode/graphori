@@ -76,6 +76,7 @@ graphori run "<objective>" \
   --write-scope "<write scope>" \
   --max-parallelism 2 \
   --cross-review auto \
+  --verify-criterion AC-01 \
   --verify-command <explicit argv>
 ```
 
@@ -83,6 +84,10 @@ graphori run "<objective>" \
 the repository does not reveal a valid verification command, omit it. Graphori will
 choose a conservative deterministic check from tests, source inspection, and the Git
 diff; disclose when that check does not prove functional correctness.
+
+Pass `--verify-criterion ID` only for a declared acceptance criterion that the
+command actually proves. Repeat it for multiple criteria. Unmapped criteria remain
+`NOT_PROVEN`; never infer that one successful command proves every requirement.
 
 Before dispatch, summarize in the user's language:
 

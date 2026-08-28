@@ -94,6 +94,8 @@ repo_root="$(pwd -P)"
 graphori run "add a docstring to the parser" \
   --root "$repo_root" \
   --write-scope src/parser.py \
+  --criterion "AC-01: parser test passes" \
+  --verify-criterion AC-01 \
   --cross-review auto \
   --verify-command python -m unittest tests.test_parser
 ```
@@ -108,6 +110,11 @@ graphori plan "add a docstring to the parser" --root $root --lang en
 `--write-scope` bounds what the run may touch. `--verify-command` is the check
 that decides the verdict; leave it out and Graphori picks a default for the
 workspace — the unit test suite, then `compileall`, then `git diff --check`.
+
+`--verify-criterion` explicitly maps that command to a declared criterion and
+is repeatable. It must appear before `--verify-command`, which consumes all
+remaining argv. Criteria without an explicit mapping remain `NOT_PROVEN` even
+when the command exits successfully.
 
 `--cross-review auto` adds a read-only review by the provider opposite the
 implementer for sensitive, broad, or synthesis-heavy changes when both Codex

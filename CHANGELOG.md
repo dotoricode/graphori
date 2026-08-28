@@ -64,6 +64,10 @@
   the only source of final PASS. A missing provider is an explicit
   deterministic-only downgrade; a dispatched unknown outcome is never silently
   rerouted.
+- `--verify-criterion ID` now explicitly maps a deterministic verification
+  command to the acceptance criteria it proves. Mapped criteria become PROVEN
+  or FAILED from that command; unmapped criteria remain NOT_PROVEN. The mapping
+  is stored in the plan's evidence requirements and survives replay.
 
 - The public benchmark now includes the completed 72-run Direct/v1-style/
   Graphori v2 matrix for Codex and Claude. Raw JSONL, deterministic analysis,

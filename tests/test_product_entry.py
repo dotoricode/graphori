@@ -1,7 +1,9 @@
 import asyncio
 import contextlib
 import io
+import json
 import os
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -24,6 +26,7 @@ from graphori_core import (
     SessionHandle,
 )
 from graphori_core.product import ProductPlanCompiler, execute_product, render_plan_preview
+from graphori_core.product import _verifier_command
 from graphori_core import product_cli
 from graphori_core.product_cli import _render_human_status, build_parser
 from graphori_core.presentation import normalized_locale, objective_locale, resolve_locale
@@ -171,6 +174,52 @@ class ProductPlanTests(unittest.TestCase):
         for command in ("plan", "run"):
             args = parser.parse_args([command, "Fix it", "--cross-review", "never"])
             self.assertEqual(args.cross_review, "never")
+
+    def test_verification_criteria_are_explicit_and_part_of_the_plan(self):
+        spec = RunSpec(
+            "Fix it", "codex", "/workspace",
+            acceptance_criteria=("AC-01: focused check", "AC-02: manual inspection"),
+        )
+        bundle = self.compiler.compile(
+            spec, run_id="run-criterion-proof", write_scope=("src/a.py",),
+            verification_criteria=("AC-01",),
+        )
+        verifier = next(node for node in bundle.plan.nodes if node.node_id == "v1")
+        self.assertEqual(verifier.evidence_requirements, ("criterion:AC-01",))
+        command = bundle.process_commands["v1"].argv
+        self.assertIn('["AC-01"]', command)
+
+    def test_unknown_verification_criterion_is_rejected(self):
+        spec = RunSpec(
+            "Fix it", "codex", "/workspace",
+            acceptance_criteria=("AC-01: focused check",),
+        )
+        with self.assertRaisesRegex(ValueError, "unknown verification criteria"):
+            self.compiler.compile(
+                spec, run_id="run-bad-proof", write_scope=("src/a.py",),
+                verification_criteria=("AC-99",),
+            )
+
+    def test_failed_mapped_command_records_failed_criterion(self):
+        with tempfile.TemporaryDirectory() as temp:
+            command = _verifier_command(
+                (sys.executable, "-c", "raise SystemExit(7)"),
+                "verdict.json", ("AC-01",),
+            )
+            result = subprocess.run(command.argv, cwd=temp, check=False)
+            self.assertEqual(result.returncode, 0)
+            verdict = json.loads((Path(temp) / "verdict.json").read_text(encoding="utf-8"))
+            self.assertEqual(verdict["verdict"], "revise")
+            self.assertEqual(
+                verdict["criterion_evidence"]["AC-01"]["status"], "FAILED",
+            )
+
+    def test_verify_criterion_is_repeatable_before_the_command(self):
+        args = build_parser().parse_args([
+            "run", "Fix it", "--criterion", "AC-01: focused check",
+            "--verify-criterion", "AC-01", "--verify-command", "python", "-m", "unittest",
+        ])
+        self.assertEqual(args.verify_criterion, ["AC-01"])
 
     def test_preview_shows_team_model_skill_status_and_graph(self):
         spec = RunSpec("작은 버그를 수정해줘", "codex", "/workspace")
@@ -363,6 +412,7 @@ class ProductPlanTests(unittest.TestCase):
             )
             bundle = self.compiler.compile(
                 spec, run_id="run-product-e2e", write_scope=("result.txt",),
+                verification_criteria=("AC-01",),
                 verification_argv=(
                     sys.executable, "-c",
                     "from pathlib import Path; assert Path('result.txt').read_text() == 'ready\\n'",
@@ -393,11 +443,11 @@ class ProductPlanTests(unittest.TestCase):
             from graphori_core.dashboard import DashboardStore
             read_model, _events = DashboardStore(root).canonical_projection(bundle.plan.run_id)
             self.assertEqual(
-                read_model.verification["requirements_status"], "not_proven",
+                read_model.verification["requirements_status"], "proven",
             )
             self.assertEqual(
                 read_model.verification["acceptance_criteria"][0]["status"],
-                "NOT_PROVEN",
+                "PROVEN",
             )
 
     def test_blocking_cross_review_prevents_the_final_verifier_from_running(self):

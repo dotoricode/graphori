@@ -68,6 +68,10 @@ _HELP_TEXT = {
         "en": "Stable acceptance criterion, for example AC-01: tests pass.",
         "ko": "안정적인 완료 기준입니다. 예: AC-01: 테스트 통과",
     },
+    "verify_criterion": {
+        "en": "Acceptance criterion ID proven by the verification command (repeatable).",
+        "ko": "검증 명령이 증명하는 완료 기준 ID입니다. 여러 번 지정할 수 있습니다.",
+    },
     "language": {
         "en": "Help and output language: auto, en, or ko.",
         "ko": "도움말과 출력 언어: auto, en, ko 중 하나입니다.",
@@ -103,6 +107,7 @@ def _bootstrap_objective(argv: list[str]) -> str:
         "--root", "--host", "--run-id", "--max-parallelism", "--read-scope",
         "--write-scope", "--timeout", "--criterion", "--lang", "--locale",
         "--cross-review",
+        "--verify-criterion",
     }
     flag_options = {"--no-network", "--json", "--help", "-h"}
     objective: list[str] = []
@@ -215,6 +220,7 @@ def _bundle(args: argparse.Namespace, *, probe: bool = True):
         read_scope=tuple(args.read_scope or (".",)),
         write_scope=tuple(args.write_scope or (".",)),
         verification_argv=verify,
+        verification_criteria=tuple(args.verify_criterion),
     )
     return root, spec, bundle, codex, claude
 
@@ -766,6 +772,10 @@ def build_parser(*, locale: str = "en") -> argparse.ArgumentParser:
         )
         command.add_argument("--criterion", action="append", default=[], metavar="ID:DESCRIPTION",
                              help=_help_text("criterion", locale))
+        command.add_argument(
+            "--verify-criterion", action="append", default=[], metavar="ID",
+            help=_help_text("verify_criterion", locale),
+        )
         command.add_argument("--verify-command", nargs=argparse.REMAINDER)
         command.add_argument("--json", action="store_true")
         _add_locale_argument(command, locale=locale)
