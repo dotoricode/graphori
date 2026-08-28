@@ -5,7 +5,7 @@ support claim.
 
 ## 2026-08-28 · macOS portability fixture
 
-- Tree: `0b065cd`
+- Tree: `b7edaea`
 - Command: `python scripts/verify_macos_portability.py`
 - Host: macOS 26.5.2, x86_64
 - Python: 3.11.15 and 3.14.6
@@ -18,7 +18,7 @@ support claim.
   and its SHA-256 hash.
 - The local release verifier preserves these records as
   `macos-portability.json` beside the wheel, sdist, SBOM, and `SHA256SUMS`.
-- Python 3.14.6 full suite after adding the fixture: 415 passed, 5 skipped.
+- Python 3.14.6 full suite after adding the fixture: 416 passed, 5 skipped.
 
 This changes the macOS generic-adapter verdict only for the recorded host and
 fixture scope. It does not establish Linux or Windows release support.
