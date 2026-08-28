@@ -174,6 +174,12 @@ Compared with orchestrators that fan out by default:
 Run this inside your agent. Full details and other routes are in
 [INSTALL.md](docs/public/INSTALL.md).
 
+**Choose one installation route per agent.** The native plugin below is the
+recommended route. Do not also copy `graphori` or `graphori-dashboard` into the
+same agent's standalone Skill directory; both copies will appear in Skill
+completion. The clone installer now detects an enabled plugin and refuses that
+duplicate setup.
+
 ### Claude Code
 
 ```text

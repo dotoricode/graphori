@@ -4,6 +4,24 @@ The [README](../../README.md) covers the two native plugin installs. This page
 collects the rest: previewing before you install, project-local copies, and the
 optional Python runtime.
 
+## Pick exactly one Skill route
+
+For each agent, use either the native plugin or a standalone/project-local
+copy. Do not combine them. The plugin and copied package expose the same
+`graphori` and `graphori-dashboard` Skills, so installing both makes each Skill
+appear twice in completion.
+
+The native plugin is the recommended route. If you intentionally want a
+standalone copy, remove or disable `graphori@graphori` in that agent first. You
+can audit an existing setup from a clone without changing it:
+
+```sh
+python3 scripts/check_skill_install_conflicts.py --target both
+```
+
+The bundled standalone installer runs this check before copying and fails
+closed when the plugin is enabled.
+
 ## Preview before installing
 
 The [`skills`](https://github.com/vercel-labs/skills) CLI lists what a
@@ -16,6 +34,8 @@ npx skills add dotoricode/graphori --list
 Node.js 22.20 or newer is required.
 
 ## Project-local copies
+
+These are alternatives to the native plugin, not an additional install step.
 
 ```sh
 npx skills add dotoricode/graphori --skill graphori --agent codex --copy

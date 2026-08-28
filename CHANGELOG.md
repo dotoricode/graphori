@@ -4,6 +4,10 @@
 
 ### Fixed
 
+- Codex and Claude Code no longer silently accept a standalone Graphori Skill
+  beside an enabled `graphori@graphori` plugin. The standalone installers now
+  fail before copying, and a read-only checker reports existing duplicate
+  discovery paths.
 - The journal writer now works on Windows. It took a POSIX `flock` and failed
   closed everywhere else, so `graphori run` aborted with exit code 2 on Windows
   even though the installers and documentation described PowerShell use. Windows

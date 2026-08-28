@@ -160,6 +160,11 @@ v1.3 스냅샷에서 온다. 나중에 라우팅 판단을 재생할 수 있도�
 
 에이전트 안에서 실행한다. 다른 경로와 자세한 설명은 [INSTALL.md](docs/public/INSTALL.md)에 있다.
 
+**에이전트마다 설치 방식 하나만 고른다.** 아래 native plugin 설치를 권장한다. 같은
+에이전트의 standalone Skill 폴더에 `graphori`나 `graphori-dashboard`를 다시 복사하면
+Skill 자동완성에 두 번 나타난다. clone 설치기는 이제 plugin이 활성화된 상태에서
+standalone 복사를 거부한다.
+
 ### Claude Code
 
 ```text

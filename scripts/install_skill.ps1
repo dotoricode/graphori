@@ -11,6 +11,7 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $source = Join-Path (Join-Path $repoRoot 'skills') $Skill
 $validator = Join-Path $repoRoot 'skills\graphori\scripts\validate_skill.py'
+$conflictChecker = Join-Path $repoRoot 'scripts\check_skill_install_conflicts.py'
 
 function Get-HomePath {
     if ($env:HOME) { return $env:HOME }
@@ -30,6 +31,12 @@ function Get-Destination([string]$kind) {
 function Get-Targets {
     if ($Target -eq 'both') { return @('codex', 'claude') }
     return @($Target)
+}
+
+$homePath = Get-HomePath
+& python -B $conflictChecker --home $homePath --target $Target --skill $Skill --before-standalone-install
+if ($LASTEXITCODE -ne 0) {
+    throw 'Graphori standalone installation would duplicate an enabled plugin. Choose one installation route.'
 }
 
 function Test-SameTree([string]$left, [string]$right) {

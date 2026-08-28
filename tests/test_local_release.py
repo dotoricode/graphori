@@ -115,6 +115,13 @@ class LocalReleaseContractTests(unittest.TestCase):
                 self.assertNotIn("--agent codex --global", combined)
                 self.assertIn("$graphori", readme)
                 self.assertIn("/graphori", readme)
+                self.assertIn(
+                    "Choose one installation route"
+                    if name == "README.md"
+                    else "설치 방식 하나만",
+                    readme,
+                )
+                self.assertIn("check_skill_install_conflicts.py", shared)
                 # Routes stay ordered from least to most manual: the native
                 # plugin install in the README, then preview, then clone.
                 self.assertLess(
