@@ -54,7 +54,8 @@ class LocalReleaseContractTests(unittest.TestCase):
         for token in (
             "unittest", "compileall", "validate_docs_indexes.py",
             "validate_skill.py", "dashboard_smoke.py", "public_release_audit.py",
-            "gitleaks", "pip-audit", "twine", "SHA256SUMS",
+            "verify_macos_portability.py", "gitleaks", "pip-audit", "twine",
+            "SHA256SUMS",
         ):
             self.assertIn(token, text)
 

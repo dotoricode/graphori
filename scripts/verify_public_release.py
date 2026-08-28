@@ -56,6 +56,8 @@ def verify(root: Path, output: Path | None) -> dict[str, object]:
         [sys.executable, "scripts/dashboard_smoke.py"],
         [sys.executable, "scripts/public_release_audit.py"],
     )
+    if sys.platform == "darwin":
+        checks += ([sys.executable, "scripts/verify_macos_portability.py"],)
     for command in checks:
         run(command, cwd=root)
     run([gitleaks, "git", "--redact", "--no-banner"], cwd=root)

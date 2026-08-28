@@ -1,3 +1,4 @@
+import os
 import subprocess
 import sys
 import tempfile
@@ -62,6 +63,20 @@ class PathSecurityTests(unittest.TestCase):
 
         with self.assertRaises(PathSecurityError):
             safe_join(self.root, ".graphori", "runs", "run-junction", "escape_link", "evil.txt")
+
+    @unittest.skipUnless(os.name == "posix", "symlink fixture requires a POSIX host")
+    def test_posix_symlink_escape_is_rejected(self):
+        paths = ensure_run_dirs(self.root, "run-symlink")
+        outside = tempfile.TemporaryDirectory()
+        self.addCleanup(outside.cleanup)
+        link = paths.run_root / "escape_link"
+        link.symlink_to(outside.name, target_is_directory=True)
+
+        with self.assertRaises(PathSecurityError):
+            safe_join(
+                self.root, ".graphori", "runs", "run-symlink",
+                "escape_link", "evil.txt",
+            )
 
 
 if __name__ == "__main__":

@@ -1,8 +1,10 @@
 import hashlib
+import os
 import subprocess
 import sys
 import tempfile
 import textwrap
+import time
 import unittest
 from pathlib import Path
 
@@ -22,6 +24,19 @@ def _pid_is_alive_windows(pid: int) -> bool:
         ["tasklist", "/FI", f"PID eq {pid}"], capture_output=True, text=True,
     )
     return str(pid) in result.stdout
+
+
+def _pid_is_alive_posix(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    result = subprocess.run(
+        ["ps", "-o", "stat=", "-p", str(pid)], capture_output=True, text=True,
+    )
+    return result.returncode == 0 and not result.stdout.strip().startswith("Z")
 
 
 class NormalExecutionTests(unittest.TestCase):
@@ -245,7 +260,13 @@ class TimeoutTreeKillTests(unittest.TestCase):
             self.assertFalse(_pid_is_alive_windows(grandchild_pid),
                              "grandchild process survived the timeout kill")
         else:
-            self.skipTest("POSIX tree-kill verification is deferred/unknown on this Windows host")
+            deadline = time.monotonic() + 3
+            while _pid_is_alive_posix(grandchild_pid) and time.monotonic() < deadline:
+                time.sleep(0.05)
+            self.assertFalse(
+                _pid_is_alive_posix(grandchild_pid),
+                "grandchild process survived the POSIX process-group timeout kill",
+            )
 
 
 class ExternalMarkerInvarianceTests(unittest.TestCase):
