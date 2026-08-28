@@ -1,0 +1,1 @@
+{"schema_version":1,"demo":"crash-resume","evidence_status":"not_recorded","required_story":["cold replay","no duplicate mutation","ambiguous work fails closed"]}

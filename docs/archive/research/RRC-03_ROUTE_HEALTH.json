@@ -1,0 +1,62 @@
+{
+  "schema_version": 2,
+  "environment": {
+    "orca_version": "1.4.184",
+    "runtime_id": "26d74412-b4d4-41e9-9682-bc4073ec15bf",
+    "guide_digest": "sha256:68e11c5761af128b841d618cd6aa6ca4daac452c92be462fa652cab48273b42f"
+  },
+  "direct_routes": {
+    "codex": "ready",
+    "claude": "degraded"
+  },
+  "records": [
+    {
+      "key": {
+        "orca_version": "1.4.184",
+        "runtime_id": "26d74412-b4d4-41e9-9682-bc4073ec15bf",
+        "guide_digest": "sha256:68e11c5761af128b841d618cd6aa6ca4daac452c92be462fa652cab48273b42f",
+        "agent_provider": "codex",
+        "agent_version": "0.147.0",
+        "launch_strategy": "orca_composed"
+      },
+      "status": "blocked",
+      "reason": "RRC-02 fresh worker-start readiness race"
+    },
+    {
+      "key": {
+        "orca_version": "1.4.184",
+        "runtime_id": "26d74412-b4d4-41e9-9682-bc4073ec15bf",
+        "guide_digest": "sha256:68e11c5761af128b841d618cd6aa6ca4daac452c92be462fa652cab48273b42f",
+        "agent_provider": "codex",
+        "agent_version": "0.147.0",
+        "launch_strategy": "orca_ready_terminal"
+      },
+      "status": "blocked",
+      "reason": "Task and local verification completed, but Worker-authored worker_done could not connect to Orca and no Delivery was observed"
+    },
+    {
+      "key": {
+        "orca_version": "1.4.184",
+        "runtime_id": "26d74412-b4d4-41e9-9682-bc4073ec15bf",
+        "guide_digest": "sha256:68e11c5761af128b841d618cd6aa6ca4daac452c92be462fa652cab48273b42f",
+        "agent_provider": "claude",
+        "agent_version": "2.1.220",
+        "launch_strategy": "orca_composed"
+      },
+      "status": "blocked",
+      "reason": "RRC-02 fresh worker-start readiness race"
+    },
+    {
+      "key": {
+        "orca_version": "1.4.184",
+        "runtime_id": "26d74412-b4d4-41e9-9682-bc4073ec15bf",
+        "guide_digest": "sha256:68e11c5761af128b841d618cd6aa6ca4daac452c92be462fa652cab48273b42f",
+        "agent_provider": "claude",
+        "agent_version": "2.1.220",
+        "launch_strategy": "orca_ready_terminal"
+      },
+      "status": "blocked",
+      "reason": "Lifecycle input was accepted but task execution and Worker-authored worker_done were not observed"
+    }
+  ]
+}

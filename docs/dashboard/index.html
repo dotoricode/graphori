@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#172321">
+  <title>Graphori Live Office</title>
+  <link rel="stylesheet" href="./tokens.css">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body data-ui-state="connect">
+  <!--
+    THESIS: The office is one measured world, not an image stretched inside a dashboard.
+    OWN-WORLD: A 1672×941 office stage, warm editorial controls, and spatial truth shown before decoration.
+    STORY: Connect to a run, enter the unchanged office scene, then read real work from that same world.
+    FIRST VIEWPORT: The undistorted office fills the viewport; a compact connection panel is the only overlay.
+    FORM: Living spatial operations room · seed live-office-v2-world-gate.
+    FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+  -->
+  <main class="live-office" id="live-office">
+    <header class="live-hud" id="live-hud" hidden>
+      <strong class="wordmark">GRAPHORI</strong>
+      <span id="active-run">Waiting to connect</span>
+      <button class="graph-summary" id="graph-summary" type="button">Execution graph</button>
+      <span class="transport-state" id="transport-state" role="status" aria-live="polite"><i aria-hidden="true"></i>Ready</span>
+      <time id="office-clock" aria-label="Current time"></time>
+    </header>
+
+    <section class="office-viewport" id="office-viewport" aria-label="Graphori Live Office 공간">
+      <div class="world-scroll-space" id="world-scroll-space">
+      <div class="office-world" id="office-world" data-world-width="1672" data-world-height="941">
+        <img
+          class="office-background"
+          src="./world/office-background.webp"
+          width="1672"
+          height="941"
+          alt="다섯 팀의 방과 중앙 통로가 있는 밝은 현대 회사"
+          draggable="false"
+        >
+        <div class="environment-layer" id="environment-layer" aria-hidden="true"></div>
+        <div class="room-sign-layer" id="room-sign-layer" aria-label="팀 공간"></div>
+        <div class="actor-layer" id="actor-layer" aria-label="Graphori 작업자 11명"></div>
+        <svg
+          class="world-debug debug-layer debug-geometry"
+          id="debug-geometry"
+          viewBox="0 0 1672 941"
+          width="1672"
+          height="941"
+          aria-label="걸을 수 있는 바닥과 벽, 가구, 문을 표시한 충돌 지도"
+          aria-hidden="true"
+        ></svg>
+        <div class="debug-actor-layer debug-layer" id="debug-actors" aria-label="디버그용 작업자 11명"></div>
+        <svg
+          class="world-debug debug-layer debug-markers"
+          id="debug-markers"
+          viewBox="0 0 1672 941"
+          width="1672"
+          height="941"
+          aria-label="작업자 발 위치, 목적지, 실제 경로"
+          aria-hidden="true"
+        ></svg>
+      </div>
+      </div>
+
+      <section class="connect-panel" id="connect-panel" aria-labelledby="connect-title">
+        <strong class="connect-brand">GRAPHORI</strong>
+        <h1 id="connect-title">Live Office</h1>
+        <p>Enter a run ID to see recorded progress in the office.</p>
+        <form id="connect-form">
+          <label for="run-id">Run ID</label>
+          <input id="run-id" name="run-id" autocomplete="off" spellcheck="false" placeholder="run-dashboard">
+          <button type="submit">Connect</button>
+        </form>
+        <a href="?demo=1">View sample office</a>
+        <p class="connect-status" id="connect-status" role="status" aria-live="polite">Waiting for a run ID.</p>
+      </section>
+
+      <aside class="debug-legend" id="debug-legend" hidden aria-label="충돌 지도 범례">
+        <strong>WORLD DEBUG</strong>
+        <div class="debug-toggles">
+          <label><input type="checkbox" data-debug-toggle="walkable" checked><i class="legend-walkable"></i>Walkable</label>
+          <label><input type="checkbox" data-debug-toggle="blocked" checked><i class="legend-blocked"></i>Blocked</label>
+          <label><input type="checkbox" data-debug-toggle="doors" checked><i class="legend-door"></i>Doors</label>
+          <label><input type="checkbox" data-debug-toggle="anchors" checked><i class="legend-anchor"></i>Anchors</label>
+          <label><input type="checkbox" data-debug-toggle="anchor-names"><i class="legend-interaction"></i>Anchor names</label>
+          <label><input type="checkbox" data-debug-toggle="actors" checked><i class="legend-foot"></i>Actors</label>
+          <label><input type="checkbox" data-debug-toggle="actor-names"><i class="legend-foot"></i>Actor names</label>
+          <label><input type="checkbox" data-debug-toggle="actor-radius" checked><i class="legend-radius"></i>Actor radius</label>
+          <label><input type="checkbox" data-debug-toggle="path" checked><i class="legend-path"></i>Path</label>
+          <label><input type="checkbox" data-debug-toggle="rooms"><i class="legend-room"></i>Room bounds</label>
+        </div>
+        <button id="toggle-debug-ui" type="button" aria-expanded="true">범례 접기</button>
+      </aside>
+
+      <section class="path-inspector" id="path-inspector" hidden aria-labelledby="path-inspector-title">
+        <div class="path-inspector-heading">
+          <strong id="path-inspector-title">A* Path Inspector</strong>
+          <output id="path-result">경로를 선택하세요.</output>
+        </div>
+        <div class="path-controls">
+          <label for="path-source">출발 작업자</label>
+          <select id="path-source"></select>
+          <label for="path-destination">목적지</label>
+          <select id="path-destination"></select>
+          <button id="trace-path" type="button">경로 보기</button>
+          <button id="play-path" type="button">실제 이동</button>
+        </div>
+        <div class="path-presets" aria-label="방 사이 경로 표본">
+          <button type="button" data-route-set="required">3개 경로 함께 보기</button>
+          <button type="button" data-route="planning-lead:verification-console-a">기획 → 검증</button>
+          <button type="button" data-route="research-member-a:engineering-desk-a">정보조사 → 구현</button>
+          <button type="button" data-route="design-member-a:plan-console-a">설계 → 기획</button>
+        </div>
+      </section>
+    </section>
+
+    <footer class="live-footer" id="live-footer" hidden>
+      <button class="event-ticker" id="event-ticker" type="button" aria-label="최근 사건 자세히 보기">
+        <time id="event-time">--:--:--</time>
+        <span id="event-type">run_created</span>
+        <strong id="event-summary">The office is waiting for the next event.</strong>
+      </button>
+      <div class="verified-progress" aria-label="검증 진행">
+        <span id="progress-label">Verified 0 / 0</span>
+        <span class="progress-track" aria-hidden="true"><i id="progress-fill"></i></span>
+      </div>
+    </footer>
+
+    <aside class="office-inspector" id="office-inspector" hidden aria-labelledby="inspector-title">
+      <button class="inspector-close" id="inspector-close" type="button" aria-label="Close details">Close</button>
+      <p class="inspector-kicker" id="inspector-kicker">Worker</p>
+      <h2 id="inspector-title">Selected information</h2>
+      <div class="inspector-body" id="inspector-body"></div>
+    </aside>
+  </main>
+  <script src="./app.js" type="module"></script>
+</body>
+</html>

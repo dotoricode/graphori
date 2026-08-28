@@ -1,0 +1,29 @@
+{
+  "records": [
+    {
+      "key": {
+        "agent_provider": "codex",
+        "agent_version": "0.147.0",
+        "guide_digest": "sha256:68e11c5761af128b841d618cd6aa6ca4daac452c92be462fa652cab48273b42f",
+        "orca_version": "1.4.184",
+        "runtime_id": "26d74412-b4d4-41e9-9682-bc4073ec15bf"
+      },
+      "observed_at": "2026-08-18T01:43:58Z",
+      "reason": "Fresh worker-start accepted input before Codex TUI readiness; no sentinel or worker_done. Already-ready terminal control completed successfully.",
+      "status": "blocked"
+    },
+    {
+      "key": {
+        "agent_provider": "claude",
+        "agent_version": "2.1.220",
+        "guide_digest": "sha256:68e11c5761af128b841d618cd6aa6ca4daac452c92be462fa652cab48273b42f",
+        "orca_version": "1.4.184",
+        "runtime_id": "26d74412-b4d4-41e9-9682-bc4073ec15bf"
+      },
+      "observed_at": "2026-08-18T01:43:58Z",
+      "reason": "Fresh worker-start accepted input before Claude TUI readiness; no sentinel or worker_done. Already-ready terminal control completed successfully.",
+      "status": "blocked"
+    }
+  ],
+  "schema_version": 1
+}

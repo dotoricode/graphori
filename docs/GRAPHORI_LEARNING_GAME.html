@@ -1,0 +1,987 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Graphori의 그래프 기반 병렬 작업과 실제 산출물을 픽셀 오피스 게임으로 배우는 오프라인 미션">
+  <title>Graphori / 작업을 따라가는 안내서</title>
+  <link rel="stylesheet" href="../tokens.css">
+  <style id="graphori-workroom-style">
+    /* Graphori's replacement visual world: a flat work order and a real workroom. */
+    :root { color-scheme: light; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { min-width: 320px; overflow-x: clip; scroll-behavior: smooth; }
+    body {
+      min-width: 320px;
+      margin: 0;
+      overflow-x: clip;
+      color: var(--color-text);
+      background: #fff;
+      font-family: var(--font-ui);
+      font-size: var(--text-md);
+      line-height: 1.5;
+    }
+    button, a, summary { font: inherit; }
+    button { color: inherit; }
+    a { color: var(--color-cyan); text-decoration-thickness: 1px; text-underline-offset: .2em; }
+    a:hover { color: var(--color-cyan-deep); }
+    button:focus-visible, a:focus-visible, summary:focus-visible {
+      outline: 3px solid var(--color-amber);
+      outline-offset: 3px;
+    }
+    h1, h2, h3, p { min-width: 0; margin: 0; }
+    h1, h2, h3 { font-style: normal; text-wrap: pretty; word-break: keep-all; overflow-wrap: normal; }
+    h1 { font-size: clamp(2.35rem, 4.8vw, 3.8rem); line-height: 1.04; letter-spacing: -.035em; }
+    h2 { font-size: clamp(1.8rem, 3.1vw, 2.45rem); line-height: 1.14; letter-spacing: -.03em; }
+    h3 { font-size: var(--text-xl); line-height: 1.2; letter-spacing: -.025em; }
+    code, pre { font-family: var(--font-ui); font-variant-numeric: tabular-nums; }
+    code { color: var(--color-cyan-deep); font-weight: 600; }
+    pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+    [hidden] { display: none !important; }
+
+    .app-shell { width: min(1160px, calc(100% - 40px)); margin: 0 auto; padding: 28px 0 64px; }
+    .topbar {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: var(--space-5);
+      align-items: center;
+      padding-bottom: 14px;
+    }
+    .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--color-text); font-size: var(--text-sm); font-weight: 700; text-decoration: none; white-space: nowrap; }
+    .brand-mark { display: inline-block; width: 13px; height: 13px; background: var(--color-cyan); image-rendering: pixelated; }
+    .mission-tabs { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+    .mission-tabs button { min-height: 2.5rem; padding: .65rem .8rem; border: 0; border-radius: 0; color: var(--color-text-muted); background: transparent; cursor: pointer; font-size: var(--text-sm); white-space: nowrap; }
+    .mission-tabs button:hover, .mission-tabs button[aria-selected="true"] { color: var(--color-text); background: var(--color-surface-soft); }
+    .top-status { display: inline-flex; align-items: center; gap: 7px; color: var(--color-green); font-size: var(--text-xs); font-weight: 700; white-space: nowrap; }
+    .top-status::before { width: 8px; height: 8px; background: var(--color-green); content: ""; }
+    .top-status.simulation-status { color: var(--color-amber); }
+    .top-status.simulation-status::before { background: var(--color-amber); }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(18rem, .85fr);
+      gap: var(--space-10);
+      align-items: end;
+      padding: 54px 0 42px;
+    }
+    .hero-copy { max-width: 47rem; }
+    .hero h1 span { color: var(--color-cyan); }
+    .hero-lede { max-width: 39rem; margin-top: var(--space-5); color: var(--color-text-muted); font-size: clamp(1rem, 1.35vw, 1.1rem); line-height: 1.7; }
+    .truth-callout { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-3); align-items: start; max-width: 42rem; margin-top: var(--space-5); padding: 13px 15px; color: var(--color-text-muted); background: var(--color-amber-wash); font-size: var(--text-sm); line-height: 1.55; box-shadow: inset 0 3px 0 var(--color-amber); }
+    .truth-callout strong { color: var(--color-amber); font-size: var(--text-xs); font-weight: 700; white-space: nowrap; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; margin-top: var(--space-6); }
+    .action-button, .mode-button, .answer, .upgrade-button, .map-node { border: 0; border-radius: 2px; cursor: pointer; }
+    .action-button, .mode-button, .answer { min-height: 2.8rem; padding: .72rem 1rem; font-weight: 700; white-space: nowrap; }
+    .action-button { color: #fff; background: var(--color-cyan); }
+    .action-button:hover { color: #fff; background: var(--color-cyan-deep); }
+    .action-button.secondary { color: var(--color-text); background: var(--color-surface-raised); box-shadow: 0 7px 18px rgb(17 30 32 / 9%); }
+    .action-button.secondary:hover { color: var(--color-cyan-deep); background: #fff; }
+    .jump-action { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+    .action-button:disabled, .mode-button:disabled, .answer:disabled { cursor: not-allowed; opacity: .46; }
+
+    .brief-card { padding: var(--space-6); background: var(--color-surface-raised); box-shadow: var(--shadow-soft); }
+    .brief-card-head { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; justify-content: space-between; }
+    .truth-label { display: inline-flex; align-items: center; gap: 6px; min-height: 1.4rem; color: var(--color-text-muted); font-size: var(--text-xs); font-weight: 700; white-space: nowrap; }
+    .truth-label::before { width: 7px; height: 7px; background: currentColor; content: ""; }
+    .truth-label.real { color: var(--color-green); }
+    .truth-label.design { color: var(--color-violet); }
+    .truth-label.todo { color: var(--color-pink); }
+    .brief-card h2 { margin-top: var(--space-5); font-size: var(--text-xl); }
+    .brief-card p { margin-top: var(--space-3); color: var(--color-text-muted); font-size: var(--text-sm); line-height: 1.65; }
+    .brief-request { margin-top: var(--space-5); padding: var(--space-4); color: var(--color-text-muted); background: var(--color-surface-soft); font-size: var(--text-sm); line-height: 1.55; }
+    .brief-request strong { display: block; margin-bottom: var(--space-2); color: var(--color-text); font-size: var(--text-xs); font-weight: 700; }
+
+    .control-strip { display: grid; grid-template-columns: minmax(0, 1.35fr) repeat(3, minmax(7rem, 1fr)); gap: 3px; padding: 3px; background: var(--color-ink); }
+    .control-cell { min-width: 0; padding: 15px 16px; background: var(--color-surface-raised); }
+    .control-cell.primary-cell { color: #fff; background: var(--color-cyan-deep); }
+    .control-label { display: block; color: var(--color-text-muted); font-size: var(--text-xs); font-weight: 700; }
+    .primary-cell .control-label { color: #cbdcf7; }
+    .control-value { display: block; margin-top: 8px; color: var(--color-text); font-size: var(--text-lg); font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
+    .primary-cell .control-value { color: #fff; }
+    .control-note { display: block; margin-top: 4px; color: var(--color-text-muted); font-size: var(--text-xs); line-height: 1.4; }
+    .primary-cell .control-note { color: #dbe6f8; }
+    .progress-track { height: 7px; margin-top: 13px; overflow: hidden; background: rgb(255 255 255 / 24%); }
+    .progress-fill { width: 100%; height: 100%; background: #fff; transform-origin: left center; transition: transform var(--dur-mid) var(--ease-out); transform: scaleX(var(--progress, 0)); }
+
+    .section { --section-accent: var(--color-cyan); margin-top: 74px; scroll-margin-top: 1rem; }
+    #office { --section-accent: var(--color-amber); }
+    #timeline { --section-accent: var(--color-green); }
+    #check { --section-accent: var(--color-violet); }
+    #debrief { --section-accent: var(--color-green); }
+    .section-head { display: grid; grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr); gap: var(--space-8); align-items: end; margin-bottom: 24px; }
+    .section-head p { max-width: 42rem; color: var(--color-text-muted); line-height: 1.65; }
+    .section-head h2 { margin-top: var(--space-2); }
+    .section-head strong { color: var(--section-accent); white-space: nowrap; }
+    #map-title, #timeline-title { white-space: nowrap; font-size: clamp(1.55rem, 2.45vw, 2.05rem); }
+    .section-note { justify-self: end; }
+    .section-note strong { display: block; margin-bottom: var(--space-2); color: var(--color-text); font-size: var(--text-sm); font-weight: 700; }
+    .section-note span { display: block; color: var(--color-text-muted); font-size: var(--text-sm); }
+
+    .map-frame { padding: 19px; background: var(--color-surface-raised); box-shadow: var(--shadow-soft); }
+    .map-toolbar { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; justify-content: space-between; padding-bottom: 16px; }
+    .map-toolbar-copy { color: var(--color-text-muted); font-size: var(--text-sm); }
+    .scene-next { min-height: 2.5rem; padding: .55rem .8rem; border: 0; border-radius: 0; color: var(--color-cyan-deep); background: var(--color-cyan-panel); cursor: pointer; font-size: var(--text-sm); font-weight: 700; }
+    .scene-next:hover { color: #fff; background: var(--color-cyan); }
+    .map-legend { display: flex; flex-wrap: wrap; gap: var(--space-3); color: var(--color-text-dim); font-size: var(--text-xs); }
+    .legend-item { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .legend-swatch { display: inline-block; width: 9px; height: 9px; }
+    .legend-swatch.real { background: var(--color-green); }
+    .legend-swatch.design { background: var(--color-violet); }
+    .legend-swatch.working { background: var(--color-cyan); }
+    .graph-map { display: grid; gap: 0; padding: 34px 16px; background: var(--color-ink-deep); }
+    .map-row { display: flex; justify-content: center; min-width: 0; }
+    .map-connector { display: flex; min-height: 3.4rem; align-items: center; justify-content: center; gap: var(--space-3); color: #9db0b0; font-size: var(--text-xs); font-weight: 700; }
+    .map-connector::before, .map-connector::after { width: min(18vw, 9rem); height: 2px; background: #4a6667; content: ""; }
+    .map-connector span { display: inline-flex; align-items: center; min-height: 1.7rem; padding: .25rem .5rem; color: #d4dfd9; background: #213334; white-space: nowrap; }
+    .parallel-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(8rem, .5fr) minmax(0, 1fr); gap: var(--space-3); align-items: center; max-width: 54rem; margin: 0 auto; }
+    .parallel-label { display: grid; place-items: center; min-height: 5rem; padding: var(--space-3); color: var(--color-cyan-deep); background: var(--color-cyan-panel); text-align: center; }
+    .parallel-label strong { display: block; font-size: var(--text-md); }
+    .parallel-label span { display: block; margin-top: var(--space-1); color: var(--color-text-muted); font-size: var(--text-xs); }
+    .map-output { min-height: 5rem; padding: var(--space-3); color: #f4edf9; background: #4d3869; }
+    .map-output strong { display: block; margin-top: var(--space-2); color: #fff; font-size: var(--text-md); }
+    .map-output small { display: block; margin-top: var(--space-1); color: #e2d8ee; font-size: var(--text-xs); }
+    .map-node { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-3); width: min(100%, 25rem); min-height: 7rem; padding: var(--space-4); color: var(--color-text); background: var(--color-surface-raised); text-align: left; box-shadow: 0 8px 18px rgb(0 0 0 / 16%); }
+    .map-node:hover { background: #fff; }
+    .map-node.selected { box-shadow: inset 0 4px 0 var(--color-amber), 0 8px 18px rgb(0 0 0 / 16%); }
+    .map-node.is-working { background: var(--color-cyan-panel); }
+    .map-node.is-done { background: var(--color-green-panel); }
+    .map-node.is-pass { background: var(--color-violet-panel); }
+    .map-node.is-locked { opacity: .58; }
+    .node-role { display: block; color: var(--color-cyan); font-size: var(--text-xs); font-weight: 700; letter-spacing: .01em; }
+    .map-node h3 { margin-top: var(--space-2); font-size: var(--text-lg); }
+    .map-node small { display: block; margin-top: var(--space-2); color: var(--color-text-muted); font-size: var(--text-xs); line-height: 1.4; }
+    .node-status { align-self: start; color: var(--color-text-muted); font-size: var(--text-xs); font-weight: 700; white-space: nowrap; }
+    .is-working .node-status { color: var(--color-cyan-deep); }
+    .is-done .node-status { color: var(--color-green); }
+    .is-pass .node-status { color: var(--color-violet); }
+    .node-detail { display: grid; grid-template-columns: minmax(0, 1fr) minmax(16rem, .7fr); gap: var(--space-6); margin-top: 18px; padding: 18px 3px 0; background: var(--color-surface-raised); }
+    .node-detail h3 { margin-top: var(--space-2); }
+    .node-detail p { margin-top: var(--space-3); color: var(--color-text-muted); line-height: 1.7; }
+    .detail-list { display: grid; gap: 3px; margin: 0; }
+    .detail-list div { padding: var(--space-3); background: var(--color-surface-soft); }
+    .detail-list dt { color: var(--color-text-dim); font-size: var(--text-xs); font-weight: 700; }
+    .detail-list dd { margin: var(--space-1) 0 0; color: var(--color-text); font-size: var(--text-sm); line-height: 1.4; overflow-wrap: anywhere; }
+
+    .truth-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+    .truth-panel { min-width: 0; padding: 21px; background: var(--color-surface-raised); box-shadow: 0 8px 18px rgb(17 30 32 / 8%); }
+    .truth-panel.real-panel { box-shadow: inset 0 4px 0 var(--color-green), 0 8px 18px rgb(17 30 32 / 8%); }
+    .truth-panel.design-panel { box-shadow: inset 0 4px 0 var(--color-violet), 0 8px 18px rgb(17 30 32 / 8%); }
+    .truth-panel h3 { margin-top: var(--space-4); }
+    .truth-panel p { margin-top: var(--space-3); color: var(--color-text-muted); line-height: 1.65; }
+    .fact-list { display: grid; gap: var(--space-2); margin: var(--space-5) 0 0; padding: 0; list-style: none; }
+    .fact-list li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-2); align-items: start; color: var(--color-text-muted); font-size: var(--text-sm); line-height: 1.45; }
+    .fact-list li::before { width: 8px; height: 8px; margin-top: .42rem; background: var(--color-green); content: ""; }
+    .design-panel .fact-list li::before { background: var(--color-violet); }
+    .evidence-line { margin-top: var(--space-5); padding: var(--space-3); color: #dbe6f8; background: var(--color-ink); font-size: var(--text-sm); line-height: 1.5; overflow-wrap: anywhere; }
+    .evidence-line code { color: #fff; }
+
+    .office-shell { padding: 21px; background: var(--color-surface-raised); box-shadow: var(--shadow-soft); }
+    .office-head { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: end; justify-content: space-between; padding-bottom: 18px; }
+    .office-head p { max-width: 39rem; color: var(--color-text-muted); line-height: 1.6; }
+    .office-head .scene-next { color: var(--color-amber); background: var(--color-amber-wash); }
+    .office-head .scene-next:hover { color: #fff; background: var(--color-amber); }
+    .office-floor { position: relative; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; margin-top: 5px; padding: 4px; background: var(--color-ink-deep); }
+    .office-agent { display: grid; grid-template-rows: minmax(10rem, 1fr) auto auto; min-width: 0; min-height: 18rem; padding: 8px 6px 10px; background: var(--color-office); cursor: pointer; }
+    .office-agent:hover, .office-agent.selected { background: #354b4a; box-shadow: inset 0 4px 0 var(--color-amber); }
+    .office-agent.is-working { background: var(--color-office-working); box-shadow: inset 0 4px 0 var(--color-cyan); }
+    .office-agent.is-done { background: var(--color-office-done); box-shadow: inset 0 4px 0 var(--color-green); }
+    .desk-scene { position: relative; display: grid; min-height: 10rem; place-items: end center; overflow: hidden; }
+    .desk { position: absolute; right: 5%; bottom: 1.6rem; left: 5%; height: .75rem; border: 3px solid var(--color-black-pixel); background: var(--color-desk); image-rendering: pixelated; }
+    .desk::before { position: absolute; right: 10%; bottom: -2rem; width: .45rem; height: 2rem; background: var(--color-desk-dark); box-shadow: -4.2rem 0 var(--color-desk-dark); content: ""; }
+    .desk::after { position: absolute; right: 17%; bottom: .75rem; width: 2rem; height: 1.3rem; border: 3px solid var(--color-black-pixel); background: var(--color-screen); box-shadow: inset 0 0 0 3px var(--color-cyan-deep); content: ""; }
+    .role-sprite { position: relative; z-index: 2; display: block; width: min(100%, 10.5rem); aspect-ratio: 1; background-position: 0 0; background-repeat: no-repeat; background-size: 200% 200%; image-rendering: pixelated; }
+    .office-agent.is-working .role-sprite { animation: role-working 1.8s steps(1, end) infinite; }
+    .office-agent.is-done .role-sprite { animation: role-finished 2.8s steps(1, end) infinite; }
+    .office-name { display: block; overflow: hidden; color: #fff; font-size: var(--text-sm); font-weight: 700; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+    .office-status { display: block; margin-top: var(--space-1); color: #b9c7c4; font-size: var(--text-xs); text-align: center; }
+    .office-status::before { color: #718684; content: "• "; }
+    .is-working .office-status { color: #cfe0ff; }
+    .is-working .office-status::before { color: #79a5ee; }
+    .is-working .office-status::after { color: #cfe0ff; content: " · 도구 활성"; }
+    .is-done .office-status { color: #c4e2d1; }
+    .office-messenger { position: absolute; inset: 0; z-index: 8; pointer-events: none; }
+    .messenger-avatar { position: absolute; top: var(--messenger-y, 52%); left: var(--messenger-x, 8%); display: block; width: clamp(2.4rem, 7vw, 5.2rem); aspect-ratio: 3 / 4; background-image: url("../assets/graphori-messenger-sheet.png"); background-position: 0 0; background-repeat: no-repeat; background-size: 400% 200%; image-rendering: pixelated; transform: translate(-50%, -50%); transition: top 700ms var(--ease-in-out), left 700ms var(--ease-in-out); }
+    .messenger-avatar.is-walking { animation: messenger-walk 1s steps(4, end) infinite; }
+    .messenger-avatar.is-speaking { animation: messenger-talk 1.3s steps(4, end) infinite; }
+    .messenger-bubble { position: absolute; top: var(--bubble-y, 24%); left: var(--bubble-x, 8%); max-width: min(15rem, 42%); padding: .6rem .7rem; color: #fff; background: rgb(13 23 25 / 92%); box-shadow: 0 8px 18px rgb(0 0 0 / 22%); font-size: var(--text-xs); line-height: 1.45; transform: translate(-50%, -100%); transition: top 700ms var(--ease-in-out), left 700ms var(--ease-in-out); }
+    .messenger-bubble::after { position: absolute; bottom: -6px; left: 20%; width: 12px; height: 12px; background: rgb(13 23 25 / 92%); content: ""; transform: rotate(45deg); }
+    .messenger-bubble[hidden] { display: none; }
+    @keyframes role-working { 0%, 24.99% { background-position: 0 0; } 25%, 49.99% { background-position: 100% 0; } 50%, 74.99% { background-position: 0 100%; } 75%, 100% { background-position: 100% 100%; } }
+    @keyframes role-finished { 0%, 49.99% { background-position: 0 0; } 50%, 100% { background-position: 100% 0; } }
+    @keyframes messenger-walk { 0%, 24.99% { background-position: 0 0; } 25%, 49.99% { background-position: 33.333% 0; } 50%, 74.99% { background-position: 66.666% 0; } 75%, 100% { background-position: 100% 0; } }
+    @keyframes messenger-talk { 0%, 24.99% { background-position: 0 100%; } 25%, 49.99% { background-position: 33.333% 100%; } 50%, 74.99% { background-position: 66.666% 100%; } 75%, 100% { background-position: 100% 100%; } }
+
+    .lab-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(18rem, .9fr); gap: 12px; align-items: start; }
+    .lab-panel { min-width: 0; padding: 21px; background: var(--color-surface-raised); box-shadow: 0 8px 18px rgb(17 30 32 / 8%); }
+    .panel-head { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: end; justify-content: space-between; margin-bottom: 17px; }
+    .panel-head p { max-width: 29rem; color: var(--color-text-muted); font-size: var(--text-sm); line-height: 1.55; }
+    .mode-bar { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; }
+    .mode-button { min-height: 2.5rem; padding: .6rem .8rem; color: var(--color-text-muted); background: var(--color-surface-soft); font-size: var(--text-sm); white-space: nowrap; }
+    .mode-button.active { color: #fff; background: var(--color-cyan); }
+    .event-stream { max-height: 25rem; overflow: auto; }
+    .event-item { display: grid; grid-template-columns: minmax(0, 9rem) minmax(0, 1fr); gap: var(--space-3); align-items: start; padding: 12px 0; }
+    .event-item:nth-child(even) { background: var(--color-surface); }
+    .event-item.current { padding-right: 9px; padding-left: 9px; background: var(--color-cyan-wash); box-shadow: inset 4px 0 0 var(--color-cyan); }
+    .event-type { min-width: 0; color: var(--color-cyan-deep); font-size: var(--text-xs); font-weight: 700; line-height: 1.4; overflow-wrap: anywhere; word-break: break-word; }
+    .event-copy { min-width: 0; color: var(--color-text); font-size: var(--text-sm); line-height: 1.45; overflow-wrap: anywhere; }
+    .event-copy small { display: block; margin-top: var(--space-1); color: var(--color-text-muted); font-size: var(--text-xs); line-height: 1.45; }
+    .lesson-box { min-height: 18rem; padding: 21px; background: var(--color-amber-wash); box-shadow: inset 0 4px 0 var(--color-amber), 0 8px 18px rgb(17 30 32 / 8%); }
+    .lesson-box h3 { color: var(--color-amber); }
+    .lesson-box p { margin-top: var(--space-4); color: var(--color-text-muted); line-height: 1.72; }
+    .lesson-box strong { color: var(--color-text); }
+    .next-clue { margin-top: var(--space-5); padding-top: var(--space-4); color: var(--color-text); font-size: var(--text-sm); line-height: 1.6; box-shadow: inset 0 2px 0 var(--color-amber-rule); }
+
+    .quiz-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .quiz-card { min-width: 0; padding: 21px; background: var(--color-surface-raised); box-shadow: 0 8px 18px rgb(17 30 32 / 8%); }
+    .quiz-card h3 { margin-top: var(--space-3); font-size: var(--text-lg); }
+    .answers { display: grid; gap: 5px; margin-top: var(--space-4); }
+    .answer { min-height: 3rem; color: var(--color-text-muted); background: var(--color-surface-soft); font-size: var(--text-sm); line-height: 1.4; text-align: left; }
+    .answer:hover { color: var(--color-text); background: #fff; }
+    .answer.correct { color: #fff; background: var(--color-green); }
+    .answer.wrong { color: var(--color-text); background: var(--color-pink-wash); box-shadow: inset 4px 0 0 var(--color-pink); }
+    .quiz-feedback { min-height: 4.5rem; margin-top: var(--space-3); color: var(--color-text-muted); font-size: var(--text-sm); line-height: 1.55; }
+
+    .report-panel { padding: 25px; background: var(--color-surface-raised); box-shadow: inset 0 5px 0 var(--color-green), var(--shadow-soft); }
+    .report-intro { max-width: 50rem; margin-top: var(--space-4); color: var(--color-text-muted); font-size: var(--text-md); line-height: 1.6; }
+    .report-grid, .upgrade-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-top: var(--space-6); }
+    .report-card, .upgrade-button { min-width: 0; padding: var(--space-4); border: 0; border-radius: 0; background: var(--color-surface-soft); }
+    .report-card:nth-child(2) { background: var(--color-cyan-panel); }
+    .report-card:nth-child(3) { background: var(--color-green-panel); }
+    .report-card h3 { margin-top: var(--space-3); font-size: var(--text-lg); }
+    .report-card p { margin-top: var(--space-2); color: var(--color-text-muted); font-size: var(--text-sm); line-height: 1.6; }
+    .raw-evidence { margin-top: var(--space-5); background: var(--color-ink); }
+    .raw-evidence summary { padding: var(--space-4); cursor: pointer; color: #dbe6f8; font-weight: 700; }
+    .raw-evidence pre { padding: 0 var(--space-4) var(--space-4); color: #cce4d6; font-size: var(--text-sm); line-height: 1.6; }
+    .raw-evidence p { padding: 0 var(--space-4) var(--space-4); color: #b6c6c1; font-size: var(--text-sm); }
+    .upgrade-button { min-height: 7rem; color: var(--color-text-muted); text-align: left; cursor: pointer; }
+    .upgrade-button:hover, .upgrade-button.selected { color: var(--color-text); background: var(--color-cyan-panel); }
+    .upgrade-button strong { display: block; color: var(--color-text); font-size: var(--text-md); line-height: 1.35; overflow-wrap: anywhere; }
+    .upgrade-button span { display: block; margin-top: var(--space-2); font-size: var(--text-sm); line-height: 1.5; }
+    .upgrade-result { min-height: 2rem; margin-top: var(--space-4); color: var(--color-cyan-deep); font-size: var(--text-sm); line-height: 1.55; }
+
+    .report-lock { padding: 21px; color: var(--color-text-muted); background: var(--color-surface-soft); box-shadow: var(--shadow-soft); }
+    .report-lock strong { display: block; margin-bottom: var(--space-2); color: var(--color-green); }
+    .footer { margin-top: 84px; padding-top: 23px; background: var(--color-ink); }
+    .footer-statement { max-width: 38ch; padding: 25px; color: #fff; font-size: clamp(1.6rem, 3.2vw, 2.7rem); font-weight: 700; line-height: 1.1; letter-spacing: -.03em; }
+    .footer-meta { display: flex; flex-wrap: wrap; gap: var(--space-4); justify-content: space-between; padding: 0 25px 22px; color: #aebdb9; font-size: var(--text-sm); }
+    .footer-meta a { color: #dbe6f8; }
+    .noscript { padding: var(--space-6); color: #fff; background: var(--color-red); }
+
+    @media (max-width: 900px) {
+      .hero { gap: var(--space-8); }
+      .control-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .primary-cell { grid-column: 1 / -1; }
+      .office-floor { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .office-agent:last-child { grid-column: 2; }
+      .quiz-grid, .report-grid, .upgrade-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .quiz-card:last-child, .report-card:last-child { grid-column: 1 / -1; }
+    }
+    @media (max-width: 700px) {
+      .app-shell { width: min(100% - 24px, 40rem); padding-top: var(--space-4); }
+      .topbar { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
+      .top-status { justify-self: start; }
+      .mission-tabs { justify-content: flex-start; }
+      .hero, .section-head, .lab-grid, .node-detail { grid-template-columns: minmax(0, 1fr); }
+      #map-title, #timeline-title { white-space: normal; }
+      .hero { padding-top: 34px; }
+      .hero h1 { font-size: clamp(2.1rem, 10vw, 3.15rem); }
+      .hero h1 br { display: none; }
+      .control-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .primary-cell { grid-column: 1 / -1; }
+      .section-note { justify-self: start; }
+      .parallel-row { grid-template-columns: minmax(0, 1fr); }
+      .parallel-label { min-height: 3.5rem; }
+      .parallel-label span { margin-top: 0; }
+      .map-connector::before, .map-connector::after { width: 10vw; }
+      .truth-grid { grid-template-columns: minmax(0, 1fr); }
+      .office-floor { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .office-agent:last-child { grid-column: 1 / -1; }
+      .quiz-grid, .report-grid, .upgrade-grid { grid-template-columns: minmax(0, 1fr); }
+      .quiz-card:last-child, .report-card:last-child { grid-column: auto; }
+      .event-item { grid-template-columns: minmax(0, 6.5rem) minmax(0, 1fr); }
+      .messenger-bubble { max-width: 48%; }
+    }
+    @media (max-width: 420px) {
+      .app-shell { width: calc(100% - 16px); }
+      .hero-actions { display: grid; grid-template-columns: minmax(0, 1fr); }
+      .action-button { width: 100%; }
+      .control-strip { grid-template-columns: minmax(0, 1fr); }
+      .primary-cell { grid-column: auto; }
+      .office-floor { gap: 3px; padding: 3px; }
+      .office-agent { min-height: 16rem; padding-inline: 3px; }
+      .map-frame, .office-shell, .lab-panel, .report-panel { padding: 15px; }
+      .map-toolbar { align-items: flex-start; }
+      .map-legend { gap: var(--space-2); }
+      .truth-callout { grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }
+      .office-floor { grid-template-columns: 1fr 1fr; }
+      .messenger-avatar { width: 3.2rem; }
+      .messenger-bubble { max-width: 58%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .progress-fill,
+      .role-sprite,
+      .messenger-avatar,
+      .messenger-bubble {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+
+    /* The office is a small management-game floor. The map is authored art;
+       the people are separate sprites so their paths and speech can change
+       with the simulated graph instead of becoming a poster. */
+    .office-floor {
+      position: relative;
+      display: block;
+      width: 100%;
+      min-height: 0;
+      aspect-ratio: 16 / 9;
+      margin-top: 5px;
+      padding: 0;
+      overflow: hidden;
+      background: var(--color-ink-deep);
+      isolation: isolate;
+    }
+
+    .company-floor-art {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      image-rendering: pixelated;
+    }
+
+    .company-roaming,
+    .office-messenger {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    .office-messenger { z-index: 6; }
+
+    .roaming-agent {
+      position: absolute;
+      top: var(--roamer-y, 50%);
+      left: var(--roamer-x, 50%);
+      display: block;
+      width: 0;
+      height: 0;
+      padding: 0;
+      border: 0;
+      color: #fff;
+      background: transparent;
+      cursor: pointer;
+      pointer-events: none;
+      transition: top 1500ms cubic-bezier(.2, .75, .25, 1), left 1500ms cubic-bezier(.2, .75, .25, 1);
+    }
+
+    .roaming-agent:hover,
+    .roaming-agent.selected { z-index: 3; }
+
+    .roaming-sprite {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
+      width: clamp(36px, 4vw, 58px);
+      aspect-ratio: 10 / 11;
+      background-image: url("./dashboard/assets/graphori-human-team-v4.png");
+      background-position: 0 var(--sprite-row, 0%);
+      background-repeat: no-repeat;
+      background-size: 800% 500%;
+      image-rendering: pixelated;
+      pointer-events: auto;
+      transform: translate(-50%, -94%);
+    }
+
+    .roamer-plan { --sprite-row: 0%; }
+    .roamer-research { --sprite-row: 25%; }
+    .roamer-design { --sprite-row: 50%; }
+    .roamer-implementation { --sprite-row: 75%; }
+    .roamer-verifier { --sprite-row: 100%; }
+
+    .roaming-agent:not(.is-working) .roaming-sprite { filter: saturate(.82) brightness(.92); }
+    .roaming-agent.is-locked .roaming-sprite { filter: saturate(.72) brightness(.88); }
+    .roaming-agent.is-moving .roaming-sprite { animation: staff-walk 1000ms steps(1, end) infinite; }
+    .roaming-agent.is-working .roaming-sprite { animation: staff-work 1500ms steps(1, end) infinite; }
+    .roaming-agent.is-resting .roaming-sprite { background-position: 57.143% var(--sprite-row); }
+    .roaming-agent.is-sleeping .roaming-sprite { animation: staff-sleep 2200ms steps(1, end) infinite; }
+    .roaming-agent.selected .roaming-sprite { filter: drop-shadow(0 0 0.25rem rgb(243 187 85 / 80%)); }
+
+    .roaming-name {
+      position: absolute;
+      top: 28px;
+      left: 50%;
+      max-width: 7rem;
+      padding: 3px 5px;
+      color: #fff8e9;
+      background: rgb(8 17 26 / 82%);
+      font-size: clamp(7px, .78vw, 10px);
+      font-weight: 700;
+      line-height: 1.2;
+      white-space: nowrap;
+      transform: translateX(-50%);
+    }
+
+    .roaming-agent.selected .roaming-name { color: #182126; background: #f3bb55; }
+    .roaming-state { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+    .messenger-bubble {
+      position: absolute;
+      top: var(--bubble-y, 25%);
+      left: var(--bubble-x, 50%);
+      display: block;
+      max-width: min(16rem, 28%);
+      padding: .58rem .7rem;
+      color: #fff8e9;
+      background: #12232b;
+      box-shadow: 4px 4px 0 rgb(7 17 30 / 72%);
+      font-size: var(--text-xs);
+      line-height: 1.45;
+      transform: translate(-50%, -100%);
+      transition: top 1500ms cubic-bezier(.2, .75, .25, 1), left 1500ms cubic-bezier(.2, .75, .25, 1);
+      clip-path: polygon(0 0, calc(100% - 7px) 0, calc(100% - 7px) 5px, 100% 5px, 100% 100%, 9px 100%, 9px calc(100% + 6px), 0 calc(100% + 6px));
+    }
+
+    @keyframes staff-walk {
+      0%, 49.99% { background-position: 0 var(--sprite-row); }
+      50%, 100% { background-position: 14.286% var(--sprite-row); }
+    }
+
+    @keyframes staff-work {
+      0%, 49.99% { background-position: 28.571% var(--sprite-row); }
+      50%, 100% { background-position: 42.857% var(--sprite-row); }
+    }
+
+    @keyframes staff-sleep {
+      0%, 49.99% { background-position: 71.429% var(--sprite-row); }
+      50%, 100% { background-position: 85.714% var(--sprite-row); }
+    }
+
+    @media (max-width: 700px) {
+      .office-floor { aspect-ratio: 16 / 11; }
+      .roaming-name { display: none; }
+      .messenger-bubble { max-width: 48%; font-size: 8px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .roaming-agent,
+      .roaming-sprite,
+      .messenger-bubble { animation: none !important; transition: none !important; }
+    }
+
+    /* A continuous reading surface replaces generic card decks and accent stripes. */
+    .mission-tabs button,
+    .scene-next,
+    .mode-button { min-height: 44px; }
+    .brief-card,
+    .map-frame,
+    .truth-panel,
+    .office-shell,
+    .lab-panel,
+    .quiz-card,
+    .report-panel,
+    .report-lock {
+      box-shadow: none;
+    }
+    .truth-callout,
+    .map-node.selected,
+    .truth-panel.real-panel,
+    .truth-panel.design-panel,
+    .event-item.current,
+    .lesson-box,
+    .report-panel {
+      box-shadow: none;
+    }
+    .control-strip { gap: 0; padding: 8px 0; background: var(--color-surface-soft); }
+    .control-cell { background: transparent; }
+    .truth-grid,
+    .quiz-grid,
+    .report-grid,
+    .upgrade-grid { gap: var(--space-8); }
+    .truth-panel,
+    .quiz-card,
+    .report-card,
+    .upgrade-button {
+      padding-right: 0;
+      padding-left: 0;
+      background: transparent;
+    }
+    .report-card:nth-child(2),
+    .report-card:nth-child(3),
+    .upgrade-button:hover,
+    .upgrade-button.selected { background: transparent; }
+    .map-node { box-shadow: none; }
+    .answer.wrong { box-shadow: none; }
+    .roaming-agent { width: 0; height: 0; }
+    .roaming-agent .roaming-sprite {
+      inset: auto;
+      top: 0;
+      left: 0;
+      width: clamp(54px, 7vw, 96px);
+      height: auto;
+    }
+    .messenger-bubble {
+      top: clamp(8%, var(--bubble-y, 25%), 90%);
+      left: clamp(12%, var(--bubble-x, 50%), 88%);
+    }
+    .messenger-bubble.is-below { transform: translate(-50%, 0); }
+    .office-context {
+      display: grid;
+      grid-template-columns: minmax(10rem, .42fr) minmax(0, 1fr);
+      gap: var(--space-4) var(--space-6);
+      padding: 18px 0 0;
+    }
+    .office-context h3 { align-self: start; }
+    .office-context p { color: var(--color-text-muted); font-size: var(--text-sm); line-height: 1.6; }
+    .office-context-facts { grid-column: 2; color: var(--color-text) !important; }
+    @media (max-width: 700px) {
+      .office-floor { aspect-ratio: 16 / 9; }
+      .office-context { grid-template-columns: minmax(0, 1fr); }
+      .office-context-facts { grid-column: auto; }
+    }
+  </style>
+</head>
+<body>
+  <!--
+    Graphori visual contract
+    THESIS: A printed work order unfolds into a graph and then a plain-language result; this refuses the game-as-dashboard default.
+    OWN-WORLD: White paper, ink, cobalt, signal orange, and a pixel workroom with no decorative grid.
+    STORY: The learner opens one scene at a time: work order, graph, office, footprints, questions, and debrief.
+    FIRST VIEWPORT: The request and one clear start action make the first choice obvious; tabs reveal the rest when needed.
+    FORM: Interactive flipbook · grounded direction 6 · seed 0b35480f · scene tabs, visible states, evidence drawer.
+    FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+  -->
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#mission" data-action="tab" data-tab="mission" aria-label="Graphori 미션 시작으로 이동"><span class="brand-mark" aria-hidden="true"></span>Graphori / 작업 현장</a>
+      <nav class="mission-tabs" role="tablist" aria-label="미션 장면">
+        <button id="mission-tab" type="button" role="tab" aria-selected="true" aria-controls="mission" data-action="tab" data-tab="mission">작업지</button>
+        <button type="button" role="tab" aria-selected="false" aria-controls="map" data-action="tab" data-tab="map">그래프</button>
+        <button type="button" role="tab" aria-selected="false" aria-controls="office" data-action="tab" data-tab="office">현장</button>
+        <button type="button" role="tab" aria-selected="false" aria-controls="timeline" data-action="tab" data-tab="timeline">사건</button>
+        <button type="button" role="tab" aria-selected="false" aria-controls="check" data-action="tab" data-tab="check">퀴즈</button>
+        <button type="button" role="tab" aria-selected="false" aria-controls="debrief" data-action="tab" data-tab="debrief">결과</button>
+      </nav>
+      <span class="top-status simulation-status" aria-label="학습용 관제입니다. 실제 대시보드에는 연결하지 않습니다.">학습용 관제 · 오프라인</span>
+    </header>
+
+    <section class="hero tab-panel" id="mission" data-tab-panel="mission" role="tabpanel" aria-labelledby="mission-tab mission-title">
+      <div class="hero-copy">
+        <h1 id="mission-title">큰 일을 <span>작은 노드</span>로 나눠<br>동시에 움직입니다.</h1>
+        <p class="hero-lede">Graphori는 한 사람이 모든 일을 순서대로 하는 대신, 작업 지시를 그래프로 나눕니다. 이 미션에서는 기획팀이 관제탑을 켜고, 필요한 팀이 앉아서 일하는 모습을 따라갑니다.</p>
+        <div class="truth-callout" role="note"><strong>현재 사실</strong><span>실제 CLI는 worker 1개 · 아래 다섯 팀은 병렬 구조를 배우는 설계 시뮬레이션</span></div>
+        <div class="hero-actions">
+          <button class="action-button" type="button" data-action="start">작업 출발</button>
+          <button class="action-button secondary" type="button" data-action="step">사건 한 칸</button>
+          <button class="action-button secondary" type="button" data-action="reset">처음부터</button>
+          <button class="action-button secondary jump-action" type="button" data-action="tab" data-tab="map">그래프부터 보기</button>
+        </div>
+      </div>
+      <aside class="brief-card" aria-label="이번 미션 설명">
+        <div class="brief-card-head"><span class="truth-label design">학습 미션</span><span class="truth-label real">실행 증거 포함</span></div>
+        <h2>검색창에 “hello”를 출력하라</h2>
+        <p>이 작은 부탁도 Graphori에서는 목표, 조사, 구조, 구현, 검증이라는 작업 지도로 바뀝니다.</p>
+        <div class="brief-request"><strong>먼저 관찰할 것</strong>대시보드는 작업이 끝난 뒤 생기는 화면이 아닙니다. 기획팀이 시작부터 관제 상태를 관리하고, 사건이 들어올 때마다 지도를 다시 그립니다.</div>
+      </aside>
+    </section>
+
+    <section class="control-strip" aria-label="미션 상태">
+      <div class="control-cell primary-cell"><span class="control-label">현재 작업</span><span class="control-value" id="run-phase">출발선</span><span class="control-note" id="run-state-note">대시보드가 먼저 켜짐</span><div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div></div>
+      <div class="control-cell"><span class="control-label">학습용 PULSE</span><span class="control-value" id="pulse-count">0</span><span class="control-note" id="last-sync">실제 연결이 아닌 화면 연습용</span></div>
+      <div class="control-cell"><span class="control-label">배운 점수</span><span class="control-value" id="score">0</span><span class="control-note">노드·사건·퀴즈</span></div>
+      <div class="control-cell"><span class="control-label">설계 사건 수</span><span class="control-value" id="event-count">1</span><span class="control-note">시뮬레이션 흐름 기록</span></div>
+    </section>
+
+    <section class="section tab-panel" id="map" data-tab-panel="map" role="tabpanel" aria-labelledby="map-title" hidden>
+      <div class="section-head">
+        <div><h2 id="map-title">일이 이동하는 <strong>그래프 지도</strong></h2></div>
+        <p class="section-note"><strong>읽는 법</strong><span>선은 “다음에 갈 수 있음”, 잠금은 “필요한 결과를 아직 기다림”입니다. 노드를 눌러 담당 팀과 산출물을 확인하세요.</span></p>
+      </div>
+      <div class="map-frame">
+        <div class="map-toolbar"><p class="map-toolbar-copy">한 요청이 작은 작업으로 변하고, 독립된 가지가 같은 시간에 움직입니다.</p><div class="map-legend"><span class="legend-item"><i class="legend-swatch working"></i>작업 중</span><span class="legend-item"><i class="legend-swatch real"></i>완료</span><span class="legend-item"><i class="legend-swatch design"></i>설계 목표</span></div><button class="scene-next" type="button" data-action="tab" data-tab="office">현장으로 이동 →</button></div>
+        <div class="graph-map" aria-label="Graphori 작업 그래프">
+          <div class="map-row"><button class="map-node is-working selected" type="button" data-node="plan" aria-pressed="true"><span><span class="node-role">기획팀 / ROUTER</span><h3>작업 지도 만들기</h3><small>graph version을 만들고 대시보드를 계속 관리</small></span><span class="node-status" data-node-status>작업 중</span></button></div>
+          <div class="map-connector" aria-hidden="true"><span>graph_published</span></div>
+          <div class="parallel-row">
+            <button class="map-node" type="button" data-node="research" aria-pressed="false"><span><span class="node-role">정보조사팀 / RESEARCH</span><h3>근거 찾기</h3><small>규칙과 위험을 독립적으로 조사</small></span><span class="node-status" data-node-status>대기</span></button>
+            <div class="parallel-label"><strong>동시에</strong><span>parallel_started</span></div>
+            <div class="map-output"><span class="node-role">기획 결과</span><strong>작업 카드</strong><small>다음 문을 열 준비</small></div>
+          </div>
+          <div class="map-connector" aria-hidden="true"><span>fan-in · 모두 도착</span></div>
+          <div class="map-row"><button class="map-node is-locked" type="button" data-node="design" aria-pressed="false"><span><span class="node-role">설계팀 / DESIGN</span><h3>만드는 방법 그리기</h3><small>기획 + 조사 결과를 청사진으로 합침</small></span><span class="node-status" data-node-status>잠김</span></button></div>
+          <div class="map-connector" aria-hidden="true"><span>blueprint_ready</span></div>
+          <div class="map-row"><button class="map-node is-locked" type="button" data-node="implementation" aria-pressed="false"><span><span class="node-role">구현팀 / WORKER</span><h3>실제로 만들기</h3><small>파일과 명령으로 산출물을 제출</small></span><span class="node-status" data-node-status>잠김</span></button></div>
+          <div class="map-connector" aria-hidden="true"><span>worker_finished</span></div>
+          <div class="map-row"><button class="map-node is-locked" type="button" data-node="verifier" aria-pressed="false"><span><span class="node-role">검증팀 / VERIFIER</span><h3>다른 사람이 다시 시험하기</h3><small>독립된 시선으로 PASS 또는 REVISE</small></span><span class="node-status" data-node-status>잠김</span></button></div>
+        </div>
+        <div class="node-detail" id="node-detail" aria-live="polite" aria-atomic="true"></div>
+      </div>
+      <div class="truth-grid">
+        <article class="truth-panel real-panel"><span class="truth-label real">지금 실제로 실행 가능</span><h3>기본 CLI는 안전하게 worker 한 명을 실행합니다.</h3><p>현재 저장소에서 바로 확인할 수 있는 최소 실행 경로입니다. 화면에 팀 다섯 명이 보여도, 기본 CLI가 자동으로 다섯 세션을 띄운다는 뜻은 아닙니다.</p><ul class="fact-list"><li>터미널 명령 실행과 종료 결과 수집</li><li>JSONL journal에 사건과 digest 연결</li><li>status·replay --verify로 다시 계산</li><li>대시보드 snapshot·SSE로 현재 상태 보기</li></ul><div class="evidence-line">실제 결과: <code>learning-success</code> · worker 1개 · <code>terminal_status = succeeded</code></div></article>
+        <article class="truth-panel design-panel"><span class="truth-label design">앞으로 만들고 싶은 구조</span><h3>역할별 팀이 그래프의 각 노드에서 동시에 일합니다.</h3><p>Graphori의 목표 경험입니다. 기획팀이 대시보드를 시작부터 관리하고, 독립 작업은 기다리지 않고 출발하며, 마지막에는 사람이 결과를 쉽게 이해합니다.</p><ul class="fact-list"><li>기획팀이 graph version과 의존성 관리</li><li>정보조사·설계·구현·검증 팀을 역할별로 분리</li><li>독립 가지는 parallel_started로 함께 시작</li><li>fan-in 뒤에 다음 단계가 열리고 검증이 PASS</li></ul><div class="evidence-line">이 장면은 현재 기능이 아니라 <strong>설계 시뮬레이션</strong>입니다.</div></article>
+      </div>
+    </section>
+
+    <section class="section tab-panel" id="office" data-tab-panel="office" role="tabpanel" aria-labelledby="office-title" hidden>
+      <div class="section-head"><div><h2 id="office-title">글자를 읽기 전에, <strong>일하는 모습을 보세요</strong></h2></div><p class="section-note">팀마다 자기 방과 중앙 복도를 오갑니다. 작업 중인 팀은 계속 걷고, 기다리는 팀은 방 안에서 멈춰 다음 사건을 기다립니다.</p></div>
+      <div class="office-shell">
+        <div class="office-head"><div><h3>기획팀이 관리하는 비동기 관제 오피스</h3><p>다섯 팀이 자기 방에서 중앙 복도로 나와 실제 회사처럼 이동합니다. 캐릭터를 눌러 담당 노드의 일을 보고, 말풍선으로 혼잣말을 들어 보세요.</p></div><button class="scene-next" type="button" data-action="tab" data-tab="timeline">사건 기록 보기 →</button></div>
+        <div class="office-floor" id="pixel-yard" aria-label="다섯 작업실과 중앙 복도가 있는 픽셀 회사">
+          <img class="company-floor-art" src="./dashboard/assets/graphori-modern-office-v3.png" alt="햇빛이 들어오는 Graphori의 현대적인 픽셀 회사">
+          <div class="company-roaming" id="company-roaming" aria-label="각자 방에서 일하거나 쉬는 다섯 팀">
+          </div>
+          <div class="office-messenger" aria-hidden="true"><span class="messenger-bubble" id="messenger-bubble">기획팀이 관제실로 걸어갑니다.</span></div>
+        </div>
+        <div class="office-context" id="office-context" tabindex="-1" aria-live="polite" aria-atomic="true"></div>
+      </div>
+    </section>
+
+    <section class="section tab-panel" id="timeline" data-tab-panel="timeline" role="tabpanel" aria-labelledby="timeline-title" hidden>
+      <div class="section-head"><div><h2 id="timeline-title">사건은 <strong>작업의 발자국</strong>입니다</h2></div><p class="section-note">설계 시뮬레이션과 실제 실행을 번갈아 보세요. 같은 “완료”라는 말도 어떤 근거를 가지고 있는지에 따라 뜻이 달라집니다.</p></div>
+      <div class="lab-grid">
+        <article class="lab-panel"><div class="panel-head"><div><h3>이벤트 스트림</h3><p id="timeline-caption">설계 시뮬레이션 사건 · 실제 팀 세션의 기록이 아님</p></div><button class="scene-next" type="button" data-action="tab" data-tab="check">내가 이해했는지 확인 →</button></div><div class="mode-bar"><button class="mode-button active" type="button" data-action="mode" data-mode="design" aria-pressed="true">설계 시뮬레이션</button><button class="mode-button" type="button" data-action="mode" data-mode="actual" aria-pressed="false">실제 산출물 사례</button></div><div class="event-stream" id="event-stream" role="log" aria-label="Graphori 사건 기록"></div></article>
+        <aside class="lesson-box" aria-live="polite" aria-atomic="true"><h3 id="lesson-title">첫 번째 힌트</h3><p id="lesson-copy">대시보드는 <strong>작업이 끝난 뒤 켜지는 화면</strong>이 아닙니다. 기획팀이 먼저 켜고, 사건이 들어올 때마다 현재 지도를 다시 그립니다.</p><p class="next-clue" id="next-clue">다음 사건을 예측하려면 “작업 출발” 또는 “사건 한 칸”을 눌러 보세요.</p></aside>
+      </div>
+    </section>
+
+    <section class="section tab-panel" id="check" data-tab-panel="check" role="tabpanel" aria-labelledby="quiz-title" hidden>
+      <div class="section-head"><div><h2 id="quiz-title">작업이 끝난 뒤, <strong>무엇을 물어볼까요?</strong></h2></div><p class="section-note">정답을 맞히는 것보다 “왜 그렇게 생각했는지”가 중요합니다. 선택하면 실제 Graphori 코드와 연결된 설명이 열립니다.</p></div>
+      <div class="quiz-grid">
+        <article class="quiz-card"><span class="truth-label design">질문 1 · 현실과 목표</span><h3>화면에 다섯 팀이 보이면, 지금 기본 CLI가 다섯 세션을 실행한 걸까요?</h3><div class="answers"><button class="answer" type="button" data-action="answer" data-question="runtime" data-choice="yes" data-correct="no" aria-pressed="false">네, 다섯 팀이 모두 실행됨</button><button class="answer" type="button" data-action="answer" data-question="runtime" data-choice="no" data-correct="yes" aria-pressed="false">아니요, 현재는 worker 하나</button></div><p class="quiz-feedback" id="feedback-runtime" role="status">선택하면 실행 코드와 연결해 설명합니다.</p></article>
+        <article class="quiz-card"><span class="truth-label design">질문 2 · 세 가지 시계</span><h3>학습용 pulse가 올라가면 진행률도 자동으로 올라가야 할까요?</h3><div class="answers"><button class="answer" type="button" data-action="answer" data-question="signals" data-choice="yes" data-correct="no" aria-pressed="false">네, 화면이 움직이면 진행됨</button><button class="answer" type="button" data-action="answer" data-question="signals" data-choice="no" data-correct="yes" aria-pressed="false">아니요, pulse와 결과는 달라요</button></div><p class="quiz-feedback" id="feedback-signals" role="status">liveness·progress·verdict를 구분해 보세요.</p></article>
+        <article class="quiz-card"><span class="truth-label design">질문 3 · fan-in</span><h3>fan-in은 어떤 순간에 필요한 문일까요?</h3><div class="answers"><button class="answer" type="button" data-action="answer" data-question="fanin" data-choice="yes" data-correct="yes" aria-pressed="false">독립 결과가 모두 도착할 때</button><button class="answer" type="button" data-action="answer" data-question="fanin" data-choice="no" data-correct="no" aria-pressed="false">결과 없이 실패를 성공으로 바꿀 때</button></div><p class="quiz-feedback" id="feedback-fanin" role="status">의존성이 모두 끝났는지 생각해 보세요.</p></article>
+      </div>
+      <div class="hero-actions"><button class="action-button" type="button" data-action="tab" data-tab="debrief">결과 설명으로 가기 →</button></div>
+    </section>
+
+    <section class="section tab-panel" id="debrief" data-tab-panel="debrief" role="tabpanel" aria-labelledby="debrief-title" hidden>
+      <div class="report-lock" id="report-lock"><strong>완료 보고는 마지막 문 뒤에 있습니다.</strong><span>작업 출발 버튼으로 사건을 끝까지 재생하면, 코드 diff 없이 결과를 설명하는 보고서가 열립니다.</span></div>
+      <div class="report-panel" id="report-panel" role="region" aria-labelledby="debrief-title" hidden>
+        <span class="truth-label real">실제 산출물 · 읽기 쉬운 완료 보고</span>
+        <h2 id="debrief-title">코드 diff 대신, 끝난 일을 설명합니다.</h2>
+        <p class="report-intro">미션이 완료되면 다음 세 문장으로 결과를 이해할 수 있습니다. “무슨 일을 했나?” “어떤 구조로 만들었나?” “왜 믿어도 되나?”를 먼저 보고, 원할 때만 raw evidence를 펼치세요.</p>
+        <div class="report-grid"><article class="report-card"><span class="truth-label real">무엇을 했나</span><h3>worker가 hello를 출력</h3><p>Graphori가 명령을 전달하고 stdout과 종료 상태를 모았습니다. 실제 자식 명령은 <code>exit_code = 0</code>으로 끝났습니다.</p></article><article class="report-card"><span class="truth-label real">어떤 구조인가</span><h3>10줄 사건 공책으로 연결</h3><p><code>run_created</code>부터 <code>run_terminal</code>까지 앞 사건의 digest와 다음 사건이 이어집니다. 이것이 현재 기본 CLI의 one-worker 구조입니다.</p></article><article class="report-card"><span class="truth-label real">왜 믿나</span><h3>다시 읽어도 같은 결과</h3><p><code>replay --verify</code>가 같은 projection digest를 확인했고 worker는 passed입니다. 독립 verifier의 최종 verdict는 아직 없습니다.</p></article></div>
+        <details class="raw-evidence"><summary>기술 증거를 펼쳐 보기</summary><pre>{
+  "run_id": "learning-success",
+  "command": "python3 -c 'print(\"Graphori worker created result\")'",
+  "terminal_status": "succeeded",
+  "exit_code": 0,
+  "event_count": 10,
+  "worker": "passed",
+  "replay_verified": true,
+  "independent_verdict": "pending",
+  "journal": ".graphori/runs/learning-success/journal/journal.jsonl"
+}</pre><p>이 숫자는 화면 장식이 아니라 저장소에서 실제 실행한 성공 산출물의 핵심 값입니다. 현재 실행은 worker 한 명이며, 다섯 팀 장면은 설계 목표와 학습용 시뮬레이션으로 표시됩니다.</p></details>
+        <div class="upgrade-grid"><button class="upgrade-button" type="button" data-action="upgrade" data-upgrade="parallel" aria-pressed="false"><strong>다음 개선: 실제 branch 실행</strong><span>독립 작업을 실제 세션으로 fan-out하고 결과를 다시 모읍니다.</span></button><button class="upgrade-button" type="button" data-action="upgrade" data-upgrade="verifier" aria-pressed="false"><strong>다음 개선: 독립 Verifier</strong><span>만든 팀과 다른 검증 팀이 PASS 근거를 남깁니다.</span></button><button class="upgrade-button" type="button" data-action="upgrade" data-upgrade="report" aria-pressed="false"><strong>다음 개선: 자동 완료 보고</strong><span>diff를 읽지 않아도 결과·구조·증거를 설명하는 보고서를 만듭니다.</span></button></div><p class="upgrade-result" id="upgrade-result" role="status"></p>
+      </div>
+    </section>
+
+    <footer class="footer"><p class="footer-statement">Graphori는 일을 작게 나누고, 이해는 크게 만듭니다.</p><div class="footer-meta"><span>Graphori / 작업 결과</span><span>오프라인 학습 게임 · 실제 기능과 설계 목표를 구분해 표시</span><a href="#mission">처음으로</a></div></footer>
+  </main>
+  <noscript><p class="noscript">이 게임은 JavaScript가 필요합니다. JavaScript를 켠 뒤 다시 열어 주세요.</p></noscript>
+
+  <script>
+    "use strict";
+
+    const NODE_DEFS = {
+      plan: { role: "기획팀 / ROUTER", title: "작업 지도 만들기", dependency: "없음 · 가장 먼저 시작", lesson: "큰 지시를 작은 노드로 나누고, 기획팀이 작업 지도를 계속 관리합니다. 대시보드는 일이 끝난 뒤 켜지는 결과 화면이 아니라 시작부터 살아 있는 관제탑입니다.", output: "작업 카드와 graph version", evidence: "run_created · graph_published", action: "plan", label: "기획팀" },
+      research: { role: "정보조사팀 / RESEARCH", title: "근거 찾기", dependency: "기획 카드 · 독립 조사", lesson: "다른 팀의 파일을 바꾸지 않고 규칙·위험·기존 자료를 찾습니다. 서로 영향을 주지 않으면 parallel_started로 함께 출발할 수 있습니다.", output: "근거 카드와 조사 메모", evidence: "parallel_started · node_completed", action: "read", label: "정보조사팀" },
+      design: { role: "설계팀 / DESIGN", title: "만드는 방법 그리기", dependency: "기획 + 조사 결과", lesson: "입력 카드가 모두 도착한 뒤 구현팀이 따라갈 청사진을 만듭니다. 이 문이 바로 fan-in 뒤에 열리는 문입니다.", output: "구현 청사진과 구조 설명", evidence: "fan-in · node_started", action: "draw", label: "설계팀" },
+      implementation: { role: "구현팀 / WORKER", title: "실제로 만들기", dependency: "설계 결과", lesson: "설계를 실제 파일과 명령으로 바꾸고, 무엇을 했는지 증거를 제출합니다. 현재 기본 CLI에서 실제로 실행되는 핵심 역할입니다.", output: "코드·문서·실행 결과", evidence: "worker_finished", action: "type", label: "구현팀" },
+      verifier: { role: "검증팀 / VERIFIER", title: "다른 사람이 다시 시험하기", dependency: "구현 결과", lesson: "만든 사람과 독립된 시선으로 결과를 다시 확인합니다. Worker가 성공했다고 말하는 것과 독립 verifier가 PASS를 기록하는 것은 다릅니다.", output: "PASS 또는 REVISE verdict", evidence: "verdict_recorded", action: "scan", label: "검증팀" }
+    };
+
+    const DESIGN_EVENTS = [
+      { at: 0, type: "dashboard_started", node: "plan", phase: "관제탑", label: "기획팀 대시보드가 먼저 켜짐", detail: "작업을 기다리지 않고 상태 관제를 시작합니다.", status: "working" },
+      { at: 1, type: "run_created", node: "plan", phase: "목표 설정", label: "새 작업이 접수됨", detail: "기획팀이 작업 지시를 읽고 graph version을 준비합니다.", status: "working" },
+      { at: 2, type: "graph_published", node: "plan", phase: "지도 공개", label: "작업 카드와 의존성이 공개됨", detail: "대시보드에 노드·의존성·담당 역할을 그립니다.", status: "working" },
+      { at: 3, type: "parallel_started", node: "research", phase: "동시 준비", label: "정보조사팀이 같이 출발함", detail: "기획팀을 기다리지 않고 독립적인 자료를 찾습니다.", status: "working" },
+      { at: 4, type: "node_completed", node: "plan", phase: "동시 준비", label: "기획 카드가 준비됨", detail: "기획 결과가 다음 의존성으로 넘어갑니다.", status: "done" },
+      { at: 5, type: "node_completed", node: "research", phase: "동시 준비", label: "조사 카드가 준비됨", detail: "독립 조사 결과가 fan-in 대기열에 도착했습니다.", status: "done" },
+      { at: 6, type: "fan-in", node: "design", phase: "결과 합치기", label: "두 입력이 모두 도착함", detail: "기획과 정보조사가 끝나서 설계 문이 열렸습니다.", status: "working" },
+      { at: 7, type: "node_completed", node: "design", phase: "결과 합치기", label: "구현 청사진이 완성됨", detail: "이제 구현팀이 따라갈 구조가 생겼습니다.", status: "done" },
+      { at: 8, type: "node_started", node: "implementation", phase: "실제 만들기", label: "구현팀이 작업을 시작함", detail: "설계 결과를 실제 파일과 명령으로 바꿉니다.", status: "working" },
+      { at: 9, type: "worker_finished", node: "implementation", phase: "실제 만들기", label: "구현 산출물이 제출됨", detail: "코드·문서와 실행 증거가 검증팀으로 넘어갑니다.", status: "done" },
+      { at: 10, type: "node_started", node: "verifier", phase: "독립 검증", label: "검증팀이 새 시선으로 시험함", detail: "작성자와 다른 팀이 결과를 다시 확인합니다.", status: "working" },
+      { at: 11, type: "verdict_recorded", node: "verifier", phase: "독립 검증", label: "검증 PASS", detail: "실행 결과와 evidence를 확인했습니다.", status: "pass" },
+      { at: 12, type: "run_completed", node: "verifier", phase: "완료 보고", label: "완료 보고가 열림", detail: "이제 작업 지시자가 결과와 다음 개선을 설명할 수 있습니다.", status: "pass" }
+    ];
+
+    const ACTUAL_EVENTS = [
+      { seq: 0, type: "run_created", label: "작업 접수", detail: "learning-success run을 만들었습니다." },
+      { seq: 1, type: "graph_published", label: "최소 graph 공개", detail: "현재 기본 CLI의 one-worker graph입니다." },
+      { seq: 2, type: "node_status_changed", label: "worker 준비", detail: "worker → ready" },
+      { seq: 3, type: "attempt_dispatched", label: "명령 전달", detail: "python3 -c print(...)을 실행하도록 전달했습니다." },
+      { seq: 4, type: "node_status_changed", label: "worker 배정", detail: "worker → assigned" },
+      { seq: 5, type: "node_status_changed", label: "worker 실행 중", detail: "worker → running" },
+      { seq: 6, type: "worker_finished", label: "자식 명령 종료", detail: "exit_code = 0 · stdout 수집" },
+      { seq: 7, type: "node_status_changed", label: "검증 대기", detail: "worker → awaiting_verification" },
+      { seq: 8, type: "node_status_changed", label: "실행 node 통과", detail: "worker → passed · 독립 verdict와는 다름" },
+      { seq: 9, type: "run_terminal", label: "run 종료", detail: "terminal_status = succeeded" }
+    ];
+
+    const QUIZ_FEEDBACK = {
+      runtime: { yes: "아직 아닙니다. 화면에 여러 역할이 보여도 현재 기본 CLI의 실제 graph는 worker 하나입니다. 실행 가능한 기능과 목표 설계를 구분해야 합니다.", no: "정답입니다. 현재 cli.py의 _build_single_worker_run은 worker 하나를 만들고, 일반 터미널 명령을 실행합니다. 여러 팀 흐름은 아직 설계 시뮬레이션입니다." },
+      signals: { yes: "아직 아닙니다. pulse는 관제탑과 연락 중이라는 liveness입니다. progress는 새 결과물, verdict는 독립 검증의 합격 도장입니다.", no: "정답입니다. heartbeat는 연락 신호라서 progress를 올리지 않습니다. 화면이 움직여도 검증 사건이 없으면 완료가 아닙니다." },
+      fanin: { yes: "정답입니다. 독립 branch가 모두 필요한 결과를 내면 fan-in이 그 결과를 모아 다음 node를 엽니다. 실패를 몰래 성공으로 바꾸지는 않습니다.", no: "아직 아닙니다. fan-in은 결과를 합치는 문입니다. 결과가 없거나 같은 파일을 동시에 고치는 일을 자동으로 안전하게 만들지는 않습니다." }
+    };
+
+    const state = { mission: "ready", nextEvent: 1, selectedNode: "plan", viewMode: "design", activeTab: "mission", messengerBeat: 0, learningPulse: 0, events: [], nodes: {}, score: 0, checkpoints: new Set(), missionTimer: null };
+    const GAME_ROOM_BOUNDS = {
+      plan: { x: [30, 37], y: [25, 31] }, research: { x: [87, 93], y: [25, 31] },
+      design: { x: [84, 92], y: [50, 57] }, implementation: { x: [8, 13], y: [78, 89] }, verifier: { x: [84, 90], y: [76, 84] }
+    };
+    const GAME_WALKWAY_POINTS = {
+      planWork: ["31%", "26%"], planEast: ["36%", "26%"], planRest: ["36%", "30%"], planSouth: ["31%", "30%"], planWest: ["31%", "28%"],
+      researchWork: ["88%", "26%"], researchEast: ["92%", "26%"], researchRest: ["92%", "30%"], researchNorth: ["88%", "30%"], researchWest: ["88%", "28%"],
+      designWork: ["85%", "51%"], designEast: ["91%", "51%"], designRest: ["91%", "56%"], designSouth: ["85%", "56%"], designWest: ["85%", "53%"],
+      implementationWork: ["9%", "79%"], implementationEast: ["12%", "79%"], implementationRest: ["12%", "88%"], implementationNorth: ["9%", "88%"], implementationWest: ["9%", "84%"], implementationSouth: ["12%", "84%"],
+      verifierWork: ["85%", "77%"], verifierEast: ["89%", "77%"], verifierRest: ["89%", "83%"], verifierSouth: ["85%", "83%"], verifierWest: ["85%", "80%"], verifierNorth: ["89%", "80%"]
+    };
+    const gameRoute = (...names) => names.map((name) => GAME_WALKWAY_POINTS[name]);
+    const GAME_ROAM_PATHS = {
+      plan: gameRoute("planWork", "planEast", "planRest", "planSouth", "planWest"),
+      research: gameRoute("researchWork", "researchEast", "researchRest", "researchNorth", "researchWest"),
+      design: gameRoute("designWork", "designEast", "designRest", "designSouth", "designWest"),
+      implementation: gameRoute("implementationWork", "implementationEast", "implementationRest", "implementationNorth", "implementationWest", "implementationSouth"),
+      verifier: gameRoute("verifierWork", "verifierEast", "verifierRest", "verifierSouth", "verifierWest", "verifierNorth")
+    };
+    const GAME_REST_MODES = { research: "resting", design: "sleeping", implementation: "resting", verifier: "sleeping" };
+    function gamePointInsideRoom(role, point) {
+      const bounds = GAME_ROOM_BOUNDS[role];
+      const x = Number.parseFloat(point[0]);
+      const y = Number.parseFloat(point[1]);
+      return x >= bounds.x[0] && x <= bounds.x[1] && y >= bounds.y[0] && y <= bounds.y[1];
+    }
+    Object.entries(GAME_ROAM_PATHS).forEach(([role, path]) => {
+      if (!path.every((point) => gamePointInsideRoom(role, point))) throw new Error(`Invalid ${role} room path`);
+    });
+    const GAME_MUMBLES = {
+      plan: ["이 그래프면 먼저 길을 열어야겠군.", "관제탑은 계속 켜 두자.", "다음 팀이 갈 문을 표시해 둘까?"],
+      research: ["이 자료도 연결해 볼까?", "규칙을 하나 더 찾아보자.", "근거 카드가 여기 있었군."],
+      design: ["이 흐름이면 여기서 갈라지겠군.", "이런 구조는 어떨까?", "청사진을 조금 다듬어야겠군."],
+      implementation: ["이 구조라면 바로 만들 수 있겠군.", "이 부분부터 타이핑해 볼까?", "작은 함수로 나누면 되겠군."],
+      verifier: ["이 결과, 조건을 다시 볼까?", "다른 눈으로 한 번 더 보자.", "PASS 근거를 찾아야겠군."]
+    };
+    const MESSENGER_BEATS = ["plan", "research", "design", "implementation", "verifier"];
+    const $ = (id) => document.getElementById(id);
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const statusText = (status) => ({ waiting: "대기", working: "작업 중", done: "완료", pass: "PASS", locked: "잠김" }[status] || status);
+    const statusClass = (status) => status === "working" ? "is-working" : status === "done" ? "is-done" : status === "pass" ? "is-pass" : status === "locked" ? "is-locked" : "";
+
+    function resetNodes() {
+      state.nodes = {};
+      Object.keys(NODE_DEFS).forEach((id) => { state.nodes[id] = { status: id === "plan" ? "working" : "locked", lastEvent: "아직 사건 없음" }; });
+    }
+    function addScore(points, checkpoint) {
+      if (checkpoint && state.checkpoints.has(checkpoint)) return;
+      if (checkpoint) state.checkpoints.add(checkpoint);
+      state.score += points;
+    }
+    function applyDesignEvent(event) {
+      state.events.push(event);
+      if (event.node && state.nodes[event.node]) {
+        state.nodes[event.node].status = event.status;
+        state.nodes[event.node].lastEvent = event.label;
+      }
+      if (event.type === "parallel_started") addScore(1, "parallel");
+      if (event.type === "fan-in") addScore(1, "fanin");
+      if (event.type === "verdict_recorded") addScore(1, "verdict");
+      if (event.type === "run_completed") { state.mission = "complete"; state.activeTab = "debrief"; addScore(1, "complete"); $("report-panel").hidden = false; $("report-lock").hidden = true; }
+    }
+    function resetMission() {
+      if (state.missionTimer) window.clearInterval(state.missionTimer);
+      state.missionTimer = null; state.mission = "ready"; state.nextEvent = 1; state.viewMode = "design"; state.activeTab = "mission"; state.messengerBeat = 0; state.events = []; state.score = 0; state.checkpoints = new Set(); state.learningPulse = 0; resetNodes();
+      applyDesignEvent(DESIGN_EVENTS[0]);
+      $("report-panel").hidden = true;
+      $("report-lock").hidden = false;
+      $("lesson-title").textContent = "첫 번째 힌트";
+      $("lesson-copy").innerHTML = "대시보드는 <strong>작업이 끝난 뒤 켜지는 화면</strong>이 아닙니다. 기획팀이 먼저 켜고, 사건이 들어올 때마다 현재 지도를 다시 그립니다.";
+      $("next-clue").textContent = "다음 사건을 예측하려면 “작업 출발” 또는 “사건 한 칸”을 눌러 보세요.";
+      document.querySelectorAll(".answer").forEach((button) => { button.classList.remove("correct", "wrong"); button.setAttribute("aria-pressed", "false"); });
+      $("feedback-runtime").textContent = "선택하면 실행 코드와 연결해 설명합니다.";
+      $("feedback-signals").textContent = "liveness·progress·verdict를 구분해 보세요.";
+      $("feedback-fanin").textContent = "의존성이 모두 끝났는지 생각해 보세요.";
+      $("last-sync").textContent = "실제 연결이 아닌 화면 연습용";
+      document.querySelectorAll("[data-action='upgrade']").forEach((button) => { button.classList.remove("selected"); button.setAttribute("aria-pressed", "false"); });
+      $("upgrade-result").textContent = "";
+      render();
+    }
+    function stepMission() {
+      if (state.mission === "complete") return;
+      if (state.nextEvent >= DESIGN_EVENTS.length) return;
+      applyDesignEvent(DESIGN_EVENTS[state.nextEvent]); state.nextEvent += 1; state.mission = "paused";
+      render();
+    }
+    function startMission() {
+      if (state.mission === "complete") resetMission();
+      if (state.missionTimer) return;
+      state.activeTab = "map";
+      state.mission = "running";
+      state.missionTimer = window.setInterval(() => {
+        if (state.nextEvent >= DESIGN_EVENTS.length) { window.clearInterval(state.missionTimer); state.missionTimer = null; render(); return; }
+        applyDesignEvent(DESIGN_EVENTS[state.nextEvent]); state.nextEvent += 1; render();
+      }, 820);
+      render();
+    }
+    function syncLearningPulse() {
+      state.learningPulse += 1;
+      const time = new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      $("pulse-count").textContent = String(state.learningPulse);
+      $("last-sync").textContent = "마지막 학습 pulse " + time;
+    }
+    function renderYard() {
+      const roaming = $("company-roaming");
+      if (!roaming) return;
+      Object.keys(NODE_DEFS).forEach((id, index) => {
+        const def = NODE_DEFS[id]; const node = state.nodes[id];
+        const path = GAME_ROAM_PATHS[id];
+        const working = node.status === "working";
+        const canMove = !reducedMotion.matches && !working && node.status !== "locked" && state.messengerBeat % 3 === 0;
+        const position = working ? path[0] : canMove ? path[(state.messengerBeat + index) % path.length] : path[Math.min(2, path.length - 1)];
+        let agent = roaming.querySelector(`[data-roamer="${id}"]`);
+        if (!agent) {
+          agent = document.createElement("button");
+          agent.type = "button";
+          agent.dataset.roamer = id;
+          const sprite = document.createElement("span"); sprite.className = "roaming-sprite"; sprite.setAttribute("aria-hidden", "true");
+          const name = document.createElement("span"); name.className = "roaming-name"; name.textContent = def.label;
+          const status = document.createElement("span"); status.className = "roaming-state";
+          agent.append(sprite, name, status);
+          agent.addEventListener("click", () => { state.selectedNode = id; render(); $("office-context")?.focus({ preventScroll: true }); });
+          roaming.append(agent);
+        }
+        const restMode = GAME_REST_MODES[id] === "sleeping" ? "is-sleeping" : "is-resting";
+        agent.className = `roaming-agent roamer-${id} ${statusClass(node.status)} ${working ? "is-working" : canMove ? "is-moving" : restMode}${state.selectedNode === id ? " selected" : ""}`;
+        agent.style.setProperty("--roamer-x", position[0]);
+        agent.style.setProperty("--roamer-y", position[1]);
+        agent.setAttribute("aria-pressed", String(state.selectedNode === id));
+        agent.setAttribute("aria-label", `${def.role} · ${statusText(node.status)} · ${GAME_MUMBLES[id][state.messengerBeat % GAME_MUMBLES[id].length]}`);
+        agent.querySelector(".roaming-state").textContent = statusText(node.status);
+      });
+    }
+    function renderMessenger() {
+      const role = MESSENGER_BEATS[state.messengerBeat % MESSENGER_BEATS.length];
+      const path = GAME_ROAM_PATHS[role];
+      const index = Object.keys(NODE_DEFS).indexOf(role);
+      const node = state.nodes[role];
+      const working = node.status === "working";
+      const canMove = !reducedMotion.matches && !working && node.status !== "locked" && state.messengerBeat % 3 === 0;
+      const position = working ? path[0] : canMove ? path[(state.messengerBeat + index) % path.length] : path[Math.min(2, path.length - 1)];
+      const bubble = $("messenger-bubble");
+      if (!bubble) return;
+      bubble.style.setProperty("--bubble-x", position[0]);
+      const below = Number.parseFloat(position[1]) < 32;
+      bubble.classList.toggle("is-below", below);
+      bubble.style.setProperty("--bubble-y", below ? `calc(${position[1]} + 8%)` : `calc(${position[1]} - 7%)`);
+      bubble.textContent = `${NODE_DEFS[role].label} · ${GAME_MUMBLES[role][state.messengerBeat % GAME_MUMBLES[role].length]}`;
+    }
+    function renderTabs() {
+      document.querySelectorAll("[data-tab-panel]").forEach((panel) => {
+        const active = panel.dataset.tabPanel === state.activeTab;
+        panel.hidden = !active; panel.classList.toggle("is-active", active);
+      });
+      document.querySelectorAll("[role='tab'][data-tab]").forEach((tab) => {
+        const active = tab.dataset.tab === state.activeTab;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+      });
+    }
+    function setTab(tab) {
+      if (!document.querySelector(`[data-tab-panel="${tab}"]`)) return;
+      state.activeTab = tab; renderTabs();
+      const panel = document.querySelector(`[data-tab-panel="${tab}"]`);
+      if (panel) panel.scrollIntoView({ behavior: reducedMotion.matches ? "auto" : "smooth", block: "start" });
+    }
+    function renderEvents() {
+      const stream = $("event-stream"); stream.replaceChildren();
+      const source = state.viewMode === "actual" ? ACTUAL_EVENTS : state.events;
+      const rows = state.viewMode === "actual" ? source : source.slice().reverse();
+      rows.forEach((event, index) => {
+        const row = document.createElement("div"); row.className = "event-item" + (state.viewMode === "design" && index === 0 ? " current" : "");
+        const type = document.createElement("span"); type.className = "event-type"; type.textContent = state.viewMode === "actual" ? "seq " + event.seq + " · " + event.type : event.type;
+        const copy = document.createElement("div"); copy.className = "event-copy"; copy.textContent = event.label;
+        const detail = document.createElement("small"); detail.textContent = event.detail; copy.append(detail); row.append(type, copy); stream.append(row);
+      });
+      if (!rows.length) { const empty = document.createElement("p"); empty.className = "event-copy"; empty.textContent = "아직 사건이 없습니다."; stream.append(empty); }
+    }
+    function renderMap() {
+      document.querySelectorAll("[data-node]").forEach((button) => {
+        const node = state.nodes[button.dataset.node]; button.className = "map-node " + statusClass(node.status) + (state.selectedNode === button.dataset.node ? " selected" : ""); button.setAttribute("aria-pressed", String(state.selectedNode === button.dataset.node));
+        const status = button.querySelector("[data-node-status]"); if (status) status.textContent = statusText(node.status);
+      });
+    }
+    function renderDetail() {
+      const id = state.selectedNode; const def = NODE_DEFS[id]; const node = state.nodes[id];
+      const left = document.createElement("div"); const title = document.createElement("h3"); title.textContent = def.title + " · " + statusText(node.status); const lesson = document.createElement("p"); lesson.textContent = def.lesson; left.append(title, lesson);
+      const list = document.createElement("dl"); list.className = "detail-list";
+      [["담당", def.role], ["필요한 것", def.dependency], ["산출물", def.output], ["근거 사건", def.evidence]].forEach(([key, value]) => { const item = document.createElement("div"); const dt = document.createElement("dt"); dt.textContent = key; const dd = document.createElement("dd"); dd.textContent = value; item.append(dt, dd); list.append(item); });
+      $("node-detail").replaceChildren(left, list);
+    }
+    function renderOfficeContext() {
+      const id = state.selectedNode; const def = NODE_DEFS[id]; const node = state.nodes[id];
+      const heading = document.createElement("h3"); heading.textContent = `${def.label} · ${statusText(node.status)}`;
+      const copy = document.createElement("p"); copy.textContent = def.lesson;
+      const facts = document.createElement("p"); facts.className = "office-context-facts"; facts.textContent = `지금 하는 일: ${def.title} · 산출물: ${def.output} · 근거: ${def.evidence}`;
+      $("office-context").replaceChildren(heading, copy, facts);
+    }
+    function render() {
+      renderTabs(); renderYard(); renderMessenger(); renderEvents(); renderMap(); renderDetail(); renderOfficeContext();
+      const checkpointCount = state.checkpoints.size;
+      $("progress-fill").style.setProperty("--progress", String(Math.min(1, checkpointCount / 6)));
+      $("score").textContent = String(state.score); $("event-count").textContent = String(state.events.length);
+      $("run-phase").textContent = state.events.length ? state.events[state.events.length - 1].phase : "출발선";
+      $("run-state-note").textContent = state.mission === "complete" ? "완료 보고 열림" : state.mission === "paused" ? "다음 사건 선택 대기" : state.mission === "running" ? "설계 사건 재생 중" : "기획팀 관제 상태 확인";
+      $("timeline-caption").textContent = state.viewMode === "actual" ? "실제 learning-success 실행에서 확인한 journal 사건" : "설계 시뮬레이션 사건 · 실제 팀 세션의 기록이 아님";
+      document.querySelectorAll("[data-action='mode']").forEach((button) => { const selected = button.dataset.mode === state.viewMode; button.classList.toggle("active", selected); button.setAttribute("aria-pressed", String(selected)); });
+      if (state.mission === "complete") { $("lesson-title").textContent = "미션 완료"; $("lesson-copy").innerHTML = "이제 <strong>EXPLAINABLE RESULT</strong>를 열어 코드 diff 대신 작업의 목적·구조·근거를 설명할 수 있습니다."; $("next-clue").textContent = "아래 결과 설명에서 다음 Graphori 개선 후보를 골라 보세요."; }
+      $("report-lock").hidden = state.mission === "complete";
+    }
+    function answerQuestion(button) {
+      const question = button.dataset.question; const choice = button.dataset.choice; const correct = button.dataset.correct === "yes";
+      document.querySelectorAll("[data-question='" + question + "']").forEach((item) => { item.classList.remove("correct", "wrong"); item.setAttribute("aria-pressed", "false"); });
+      button.setAttribute("aria-pressed", "true");
+      button.classList.add(correct ? "correct" : "wrong"); $("feedback-" + question).textContent = QUIZ_FEEDBACK[question][choice];
+      if (correct) addScore(2, "quiz-" + question); render();
+    }
+    document.addEventListener("click", (event) => {
+      const nodeButton = event.target.closest("[data-node]");
+      if (nodeButton) { state.selectedNode = nodeButton.dataset.node; render(); return; }
+      const action = event.target.closest("[data-action]"); if (!action) return;
+      const name = action.dataset.action;
+      if (name === "tab") { setTab(action.dataset.tab); return; }
+      if (name === "start") startMission();
+      if (name === "step") stepMission();
+      if (name === "reset") resetMission();
+      if (name === "mode") { state.viewMode = action.dataset.mode; render(); }
+      if (name === "answer") answerQuestion(action);
+      if (name === "upgrade") {
+        const names = { parallel: "실제 branch 실행", verifier: "독립 Verifier", report: "자동 완료 보고" };
+        document.querySelectorAll("[data-action='upgrade']").forEach((item) => { item.classList.remove("selected"); item.setAttribute("aria-pressed", "false"); }); action.classList.add("selected"); action.setAttribute("aria-pressed", "true");
+        $("upgrade-result").textContent = names[action.dataset.upgrade] + "를 다음 개선으로 고르면 좋습니다. 이유를 말할 때 ‘실제 사건 → 필요한 adapter → 완료 보고’ 순서로 설명해 보세요.";
+        addScore(1, "upgrade"); render();
+      }
+    });
+    document.querySelector(".mission-tabs")?.addEventListener("keydown", (event) => {
+      const tabs = [...document.querySelectorAll("[role='tab'][data-tab]")];
+      const current = tabs.indexOf(document.activeElement);
+      if (current < 0 || !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+      event.preventDefault();
+      const next = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : (current + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+      setTab(tabs[next].dataset.tab);
+      tabs[next].focus();
+    });
+    resetMission();
+    window.setInterval(syncLearningPulse, 1800);
+    window.setInterval(() => {
+      if (reducedMotion.matches) return;
+      state.messengerBeat = (state.messengerBeat + 1) % 20; renderYard(); renderMessenger();
+    }, 2600);
+  </script>
+</body>
+</html>

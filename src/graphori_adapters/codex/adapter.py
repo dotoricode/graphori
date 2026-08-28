@@ -1,0 +1,42 @@
+"""Execution adapter for the official non-interactive Codex CLI boundary."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+from graphori_core.run_plan import NodeSpec
+
+from graphori_adapters.agent_contract import AgentTaskEnvelope
+from graphori_adapters.structured_cli import StructuredCliAdapter
+
+from .protocol import CodexProtocolParser, render_codex_prompt
+
+
+class CodexExecutionAdapter(StructuredCliAdapter):
+    provider = "codex"
+    adapter_id = "codex-cli"
+    parser = CodexProtocolParser()
+    required_help_tokens = ("--json", "--output-schema", "--ephemeral")
+
+    def _help_argv(self) -> tuple[str, ...]:
+        return (*self.executable, "exec", "--help")
+
+    def _command(
+            self, envelope: AgentTaskEnvelope, schema_path: Path,
+            node: NodeSpec) -> tuple[str, ...]:
+        sandbox = "workspace-write" if node.write_scope else "read-only"
+        command = [
+            *self.executable,
+            "exec",
+            "--json",
+            "--ephemeral",
+            "--output-schema", str(schema_path),
+            "--color", "never",
+            "--sandbox", sandbox,
+        ]
+        if node.model:
+            command.extend(("--model", node.model))
+        if node.effort:
+            command.extend(("-c", f'model_reasoning_effort="{node.effort}"'))
+        command.append(render_codex_prompt(envelope))
+        return tuple(command)

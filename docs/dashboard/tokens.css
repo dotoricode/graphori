@@ -1,0 +1,25 @@
+@font-face {
+  font-family: "SUIT";
+  src: url("./assets/fonts/SUIT-Variable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  --font-ui: "SUIT", sans-serif;
+  --color-letterbox: #dce5e8;
+  --color-paper-soft: #f2f4f1;
+  --color-ink: #172321;
+  --color-muted: #5f6b68;
+  --color-rule-strong: #bac6c2;
+  --color-live: #3476c8;
+  --color-live-deep: #285c9d;
+  --color-blocked: #bf4b43;
+  --color-focus: #f2b84a;
+  --color-hud: rgba(19, 32, 30, .94);
+  --color-hud-text: #f5f4ec;
+  --color-hud-muted: #bdc9c5;
+  --shadow-hud: 0 10px 26px rgba(20, 34, 33, .24);
+  --shadow-panel: 0 24px 64px rgba(20, 34, 33, .28);
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Graphori Dashboard"
+  short_description: "Open a local read-only dashboard for a Graphori run"
+  default_prompt: "Use $graphori-dashboard to open the dashboard for the current Graphori run."

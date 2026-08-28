@@ -1,0 +1,1175 @@
+{
+  "contract": {
+    "states": [
+      "idle",
+      "walk",
+      "work",
+      "talk",
+      "blocked",
+      "complete"
+    ],
+    "cell": {
+      "width": 96,
+      "height": 128
+    },
+    "visibleIdleWidth": 48,
+    "footAnchor": {
+      "x": 48,
+      "y": 120
+    },
+    "placementBasis": "visible-body-bounds-and-foot-anchor"
+  },
+  "actors": {
+    "planning-lead": {
+      "idle": {
+        "visibleBounds": [
+          23,
+          30,
+          70,
+          121
+        ],
+        "visibleWidth": 47,
+        "visibleHeight": 91,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "walk": {
+        "visibleBounds": [
+          22,
+          31,
+          80,
+          121
+        ],
+        "visibleWidth": 58,
+        "visibleHeight": 90,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "work": {
+        "visibleBounds": [
+          23,
+          29,
+          83,
+          121
+        ],
+        "visibleWidth": 60,
+        "visibleHeight": 92,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "talk": {
+        "visibleBounds": [
+          21,
+          30,
+          89,
+          121
+        ],
+        "visibleWidth": 68,
+        "visibleHeight": 91,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "blocked": {
+        "visibleBounds": [
+          22,
+          29,
+          70,
+          121
+        ],
+        "visibleWidth": 48,
+        "visibleHeight": 92,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "complete": {
+        "visibleBounds": [
+          23,
+          29,
+          89,
+          121
+        ],
+        "visibleWidth": 66,
+        "visibleHeight": 92,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      }
+    },
+    "planning-member": {
+      "idle": {
+        "visibleBounds": [
+          23,
+          42,
+          71,
+          121
+        ],
+        "visibleWidth": 48,
+        "visibleHeight": 79,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "walk": {
+        "visibleBounds": [
+          19,
+          41,
+          68,
+          121
+        ],
+        "visibleWidth": 49,
+        "visibleHeight": 80,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "work": {
+        "visibleBounds": [
+          23,
+          40,
+          83,
+          121
+        ],
+        "visibleWidth": 60,
+        "visibleHeight": 81,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "talk": {
+        "visibleBounds": [
+          22,
+          41,
+          84,
+          121
+        ],
+        "visibleWidth": 62,
+        "visibleHeight": 80,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "blocked": {
+        "visibleBounds": [
+          22,
+          41,
+          70,
+          121
+        ],
+        "visibleWidth": 48,
+        "visibleHeight": 80,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "complete": {
+        "visibleBounds": [
+          21,
+          40,
+          81,
+          121
+        ],
+        "visibleWidth": 60,
+        "visibleHeight": 81,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      }
+    },
+    "research-lead": {
+      "idle": {
+        "visibleBounds": [
+          25,
+          45,
+          73,
+          121
+        ],
+        "visibleWidth": 48,
+        "visibleHeight": 76,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "walk": {
+        "visibleBounds": [
+          22,
+          43,
+          73,
+          121
+        ],
+        "visibleWidth": 51,
+        "visibleHeight": 78,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "work": {
+        "visibleBounds": [
+          26,
+          43,
+          79,
+          121
+        ],
+        "visibleWidth": 53,
+        "visibleHeight": 78,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "talk": {
+        "visibleBounds": [
+          27,
+          45,
+          84,
+          121
+        ],
+        "visibleWidth": 57,
+        "visibleHeight": 76,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "blocked": {
+        "visibleBounds": [
+          26,
+          45,
+          67,
+          121
+        ],
+        "visibleWidth": 41,
+        "visibleHeight": 76,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "complete": {
+        "visibleBounds": [
+          26,
+          45,
+          86,
+          121
+        ],
+        "visibleWidth": 60,
+        "visibleHeight": 76,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      }
+    },
+    "research-member": {
+      "idle": {
+        "visibleBounds": [
+          24,
+          55,
+          72,
+          121
+        ],
+        "visibleWidth": 48,
+        "visibleHeight": 66,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "walk": {
+        "visibleBounds": [
+          20,
+          55,
+          70,
+          121
+        ],
+        "visibleWidth": 50,
+        "visibleHeight": 66,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "work": {
+        "visibleBounds": [
+          23,
+          55,
+          73,
+          121
+        ],
+        "visibleWidth": 50,
+        "visibleHeight": 66,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "talk": {
+        "visibleBounds": [
+          24,
+          55,
+          83,
+          121
+        ],
+        "visibleWidth": 59,
+        "visibleHeight": 66,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "blocked": {
+        "visibleBounds": [
+          24,
+          55,
+          69,
+          121
+        ],
+        "visibleWidth": 45,
+        "visibleHeight": 66,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "complete": {
+        "visibleBounds": [
+          23,
+          55,
+          80,
+          121
+        ],
+        "visibleWidth": 57,
+        "visibleHeight": 66,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      }
+    },
+    "design-lead": {
+      "idle": {
+        "visibleBounds": [
+          23,
+          40,
+          71,
+          121
+        ],
+        "visibleWidth": 48,
+        "visibleHeight": 81,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "walk": {
+        "visibleBounds": [
+          18,
+          39,
+          73,
+          121
+        ],
+        "visibleWidth": 55,
+        "visibleHeight": 82,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "work": {
+        "visibleBounds": [
+          24,
+          41,
+          86,
+          121
+        ],
+        "visibleWidth": 62,
+        "visibleHeight": 80,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "talk": {
+        "visibleBounds": [
+          21,
+          42,
+          87,
+          121
+        ],
+        "visibleWidth": 66,
+        "visibleHeight": 79,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "blocked": {
+        "visibleBounds": [
+          24,
+          40,
+          71,
+          121
+        ],
+        "visibleWidth": 47,
+        "visibleHeight": 81,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "complete": {
+        "visibleBounds": [
+          22,
+          40,
+          85,
+          121
+        ],
+        "visibleWidth": 63,
+        "visibleHeight": 81,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      }
+    },
+    "design-member": {
+      "idle": {
+        "visibleBounds": [
+          24,
+          42,
+          72,
+          121
+        ],
+        "visibleWidth": 48,
+        "visibleHeight": 79,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "walk": {
+        "visibleBounds": [
+          18,
+          41,
+          70,
+          121
+        ],
+        "visibleWidth": 52,
+        "visibleHeight": 80,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "work": {
+        "visibleBounds": [
+          25,
+          43,
+          86,
+          121
+        ],
+        "visibleWidth": 61,
+        "visibleHeight": 78,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "talk": {
+        "visibleBounds": [
+          24,
+          43,
+          85,
+          121
+        ],
+        "visibleWidth": 61,
+        "visibleHeight": 78,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "blocked": {
+        "visibleBounds": [
+          25,
+          43,
+          72,
+          121
+        ],
+        "visibleWidth": 47,
+        "visibleHeight": 78,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "complete": {
+        "visibleBounds": [
+          24,
+          43,
+          83,
+          121
+        ],
+        "visibleWidth": 59,
+        "visibleHeight": 78,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      }
+    },
+    "engineering-lead": {
+      "idle": {
+        "visibleBounds": [
+          22,
+          25,
+          70,
+          121
+        ],
+        "visibleWidth": 48,
+        "visibleHeight": 96,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "walk": {
+        "visibleBounds": [
+          21,
+          25,
+          74,
+          121
+        ],
+        "visibleWidth": 53,
+        "visibleHeight": 96,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "work": {
+        "visibleBounds": [
+          23,
+          25,
+          89,
+          121
+        ],
+        "visibleWidth": 66,
+        "visibleHeight": 96,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "talk": {
+        "visibleBounds": [
+          22,
+          25,
+          90,
+          121
+        ],
+        "visibleWidth": 68,
+        "visibleHeight": 96,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "blocked": {
+        "visibleBounds": [
+          21,
+          25,
+          69,
+          121
+        ],
+        "visibleWidth": 48,
+        "visibleHeight": 96,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "complete": {
+        "visibleBounds": [
+          21,
+          25,
+          87,
+          121
+        ],
+        "visibleWidth": 66,
+        "visibleHeight": 96,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      }
+    },
+    "engineer-a": {
+      "idle": {
+        "visibleBounds": [
+          24,
+          23,
+          72,
+          121
+        ],
+        "visibleWidth": 48,
+        "visibleHeight": 98,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "walk": {
+        "visibleBounds": [
+          18,
+          22,
+          75,
+          121
+        ],
+        "visibleWidth": 57,
+        "visibleHeight": 99,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "work": {
+        "visibleBounds": [
+          25,
+          23,
+          89,
+          121
+        ],
+        "visibleWidth": 64,
+        "visibleHeight": 98,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "talk": {
+        "visibleBounds": [
+          23,
+          22,
+          90,
+          121
+        ],
+        "visibleWidth": 67,
+        "visibleHeight": 99,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "blocked": {
+        "visibleBounds": [
+          22,
+          23,
+          69,
+          121
+        ],
+        "visibleWidth": 47,
+        "visibleHeight": 98,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "complete": {
+        "visibleBounds": [
+          22,
+          22,
+          86,
+          121
+        ],
+        "visibleWidth": 64,
+        "visibleHeight": 99,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      }
+    },
+    "engineer-b": {
+      "idle": {
+        "visibleBounds": [
+          19,
+          37,
+          67,
+          121
+        ],
+        "visibleWidth": 48,
+        "visibleHeight": 84,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "walk": {
+        "visibleBounds": [
+          17,
+          37,
+          69,
+          121
+        ],
+        "visibleWidth": 52,
+        "visibleHeight": 84,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "work": {
+        "visibleBounds": [
+          20,
+          37,
+          81,
+          121
+        ],
+        "visibleWidth": 61,
+        "visibleHeight": 84,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "talk": {
+        "visibleBounds": [
+          19,
+          37,
+          82,
+          121
+        ],
+        "visibleWidth": 63,
+        "visibleHeight": 84,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "blocked": {
+        "visibleBounds": [
+          19,
+          37,
+          67,
+          121
+        ],
+        "visibleWidth": 48,
+        "visibleHeight": 84,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "complete": {
+        "visibleBounds": [
+          18,
+          37,
+          81,
+          121
+        ],
+        "visibleWidth": 63,
+        "visibleHeight": 84,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      }
+    },
+    "verification-lead": {
+      "idle": {
+        "visibleBounds": [
+          23,
+          42,
+          71,
+          121
+        ],
+        "visibleWidth": 48,
+        "visibleHeight": 79,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "walk": {
+        "visibleBounds": [
+          22,
+          43,
+          71,
+          121
+        ],
+        "visibleWidth": 49,
+        "visibleHeight": 78,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "work": {
+        "visibleBounds": [
+          24,
+          43,
+          75,
+          121
+        ],
+        "visibleWidth": 51,
+        "visibleHeight": 78,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "talk": {
+        "visibleBounds": [
+          23,
+          43,
+          81,
+          121
+        ],
+        "visibleWidth": 58,
+        "visibleHeight": 78,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "blocked": {
+        "visibleBounds": [
+          24,
+          43,
+          65,
+          121
+        ],
+        "visibleWidth": 41,
+        "visibleHeight": 78,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "complete": {
+        "visibleBounds": [
+          24,
+          43,
+          79,
+          121
+        ],
+        "visibleWidth": 55,
+        "visibleHeight": 78,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      }
+    },
+    "verification-member": {
+      "idle": {
+        "visibleBounds": [
+          25,
+          40,
+          73,
+          121
+        ],
+        "visibleWidth": 48,
+        "visibleHeight": 81,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "walk": {
+        "visibleBounds": [
+          22,
+          40,
+          72,
+          121
+        ],
+        "visibleWidth": 50,
+        "visibleHeight": 81,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "work": {
+        "visibleBounds": [
+          25,
+          40,
+          77,
+          121
+        ],
+        "visibleWidth": 52,
+        "visibleHeight": 81,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "talk": {
+        "visibleBounds": [
+          23,
+          40,
+          81,
+          121
+        ],
+        "visibleWidth": 58,
+        "visibleHeight": 81,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "blocked": {
+        "visibleBounds": [
+          23,
+          40,
+          65,
+          121
+        ],
+        "visibleWidth": 42,
+        "visibleHeight": 81,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      },
+      "complete": {
+        "visibleBounds": [
+          24,
+          40,
+          79,
+          121
+        ],
+        "visibleWidth": 55,
+        "visibleHeight": 81,
+        "footY": 120,
+        "borderPixels": 0,
+        "componentCount": 1,
+        "tinyDetachedComponents": [],
+        "artifactPass": true,
+        "footAnchorPass": true,
+        "frameBleedPass": true
+      }
+    }
+  },
+  "summary": {
+    "actorCount": 11,
+    "frameCount": 66,
+    "failureCount": 0,
+    "failures": [],
+    "pass": true
+  }
+}
