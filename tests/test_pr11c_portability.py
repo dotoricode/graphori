@@ -220,8 +220,9 @@ asyncio.run(main())
             # A closed writer proves ownership was released before process exit.
             from graphori_core.journal import JournalWriter, RunPaths
             JournalWriter(RunPaths(root.resolve(), plan.run_id)).close()
-            with self.assertRaisesRegex(ValueError, "terminal run"):
+            with self.assertRaises(ValueError) as caught:
                 product_cli._recorded_run(root, plan.run_id)
+            self.assertEqual(caught.exception.key, "resume_terminal")
 
     def test_post_dispatch_unknown_is_not_automatically_redispatched(self):
         with tempfile.TemporaryDirectory() as temp:

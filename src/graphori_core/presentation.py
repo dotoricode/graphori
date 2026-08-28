@@ -82,6 +82,109 @@ OMISSION_REASON_LABELS: Mapping[str, Mapping[str, str]] = {
 }
 
 
+RUNTIME_LABELS: Mapping[str, Mapping[str, str]] = {
+    # Errors raised by the product CLI.
+    "no_direct_provider": {
+        "ko": "사용 가능한 Direct provider가 없습니다. Codex 또는 Claude Code CLI를 설치·로그인하세요.",
+        "en": "No Direct provider is available. Install and sign in to the Codex "
+              "or Claude Code CLI.",
+    },
+    "resume_no_journal": {
+        "ko": "재개할 journal이 없습니다.",
+        "en": "There is no journal to resume.",
+    },
+    "resume_empty_journal": {
+        "ko": "빈 journal은 안전하게 재개할 수 없습니다.",
+        "en": "An empty journal cannot be resumed safely.",
+    },
+    "resume_run_identity": {
+        "ko": "저장된 plan의 run identity가 일치하지 않습니다.",
+        "en": "The stored plan's run identity does not match.",
+    },
+    "resume_plan_digest": {
+        "ko": "저장된 plan과 journal의 plan digest가 일치하지 않습니다.",
+        "en": "The stored plan and the journal disagree on the plan digest.",
+    },
+    "resume_workspace": {
+        "ko": "저장된 RunSpec workspace가 현재 --root와 일치하지 않습니다.",
+        "en": "The stored RunSpec workspace does not match the current --root.",
+    },
+    "resume_terminal": {
+        "ko": "terminal run은 재실행할 수 없습니다.",
+        "en": "A run that already reached a terminal state cannot be resumed.",
+    },
+    "resume_skill_missing": {
+        "ko": "Skill snapshot을 확인할 수 없습니다",
+        "en": "The Skill snapshot could not be read",
+    },
+    "resume_skill_changed": {
+        "ko": "Skill snapshot이 변경되었습니다",
+        "en": "The Skill snapshot changed since the run was planned",
+    },
+    "resume_no_command": {
+        "ko": "저장된 process command가 없어 안전하게 재개할 수 없습니다.",
+        "en": "No stored process command, so the run cannot be resumed safely.",
+    },
+    "resume_bad_command": {
+        "ko": "저장된 process command 형식이 올바르지 않습니다.",
+        "en": "The stored process command is not in a valid form.",
+    },
+    "resume_unclear_command": {
+        "ko": "저장된 process command가 불명확합니다",
+        "en": "The stored process command is ambiguous",
+    },
+    # Doctor detail prefixes.
+    "mismatch": {"ko": "불일치", "en": "mismatch"},
+    "check_failed": {"ko": "점검 실패", "en": "check failed"},
+    # Durations.
+    "unknown": {"ko": "알 수 없음", "en": "unknown"},
+    "hours": {"ko": "시간", "en": "h"},
+    "minutes": {"ko": "분", "en": "m"},
+    "seconds": {"ko": "초", "en": "s"},
+    "ago": {"ko": "전", "en": "ago"},
+    # Human status report.
+    "status_title": {"ko": "지금 작업 상황", "en": "Where this run stands"},
+    "status_overall": {"ko": "전체", "en": "Overall"},
+    "status_running_for": {"ko": "시작한 지", "en": "Running for"},
+    "status_last_change": {"ko": "마지막 변화", "en": "Last change"},
+    "status_not_observed": {"ko": "아직 확인하지 못함", "en": "not observed yet"},
+    "status_worker": {"ko": "작업자", "en": "Worker"},
+    "status_progress": {"ko": "진행 정도", "en": "Progress"},
+    "status_no_number": {"ko": "숫자로 확인할 수 없음", "en": "no number reported"},
+    "status_by_step": {"ko": "단계별 상황", "en": "Step by step"},
+    "status_untitled": {"ko": "제목 없음", "en": "untitled"},
+    "status_route": {"ko": "담당", "en": "Route"},
+    "status_effort": {"ko": "살펴보는 정도", "en": "Effort"},
+    "status_criteria": {"ko": "끝나기 전에 확인할 내용", "en": "Before this can finish"},
+    "live_working": {"ko": "정상적으로 일하는 중", "en": "working"},
+    "live_done": {"ko": "일을 마침", "en": "finished"},
+    "live_stale": {"ko": "멈췄는지 확인 필요", "en": "may have stalled"},
+    "proof_proven": {"ko": "확인함", "en": "proven"},
+    "proof_not_proven": {"ko": "아직 확인 전", "en": "not proven yet"},
+    "proof_failed": {"ko": "조건을 만족하지 못함", "en": "not satisfied"},
+    "proof_not_applicable": {"ko": "확인할 필요 없음", "en": "not applicable"},
+    # Dashboard command.
+    "dashboard_assets_missing": {
+        "ko": "대시보드 화면 파일을 찾을 수 없습니다. Graphori를 다시 설치하거나 개발 checkout에서 실행하세요.",
+        "en": "The dashboard assets are missing. Reinstall Graphori, or run it "
+              "from a development checkout.",
+    },
+    "dashboard_run_missing": {
+        "ko": "실행 기록을 찾을 수 없습니다",
+        "en": "No run record found",
+    },
+    "dashboard_serving": {"ko": "Graphori 대시보드", "en": "Graphori dashboard"},
+    "dashboard_showing": {"ko": "표시할 작업", "en": "Showing run"},
+    "dashboard_no_runs": {
+        "ko": "표시할 실행 기록이 없어 작업 ID 입력 화면을 엽니다.",
+        "en": "No run to show, so the dashboard opens on its run-id prompt.",
+    },
+    "dashboard_no_browser": {
+        "ko": "브라우저를 자동으로 열지 못했습니다. 위 주소를 직접 여세요.",
+        "en": "Could not open a browser. Open the address above yourself.",
+    },
+}
+
 JOURNAL_LABELS = {
     "writer_busy": {
         "ko": "이 작업은 다른 Graphori에서 실행 중입니다. 실행 기록은 변경하지 않았습니다.",
@@ -222,4 +325,11 @@ def doctor_label(key: str, locale: str) -> str:
 
 
 def journal_label(key: str, locale: str) -> str:
+    return label(JOURNAL_LABELS, key, locale)
+
+
+def runtime_label(key: str, locale: str) -> str:
+    """Look up a runtime message, falling back to the journal's own keys."""
+    if key in RUNTIME_LABELS:
+        return label(RUNTIME_LABELS, key, locale)
     return label(JOURNAL_LABELS, key, locale)

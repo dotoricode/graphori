@@ -35,6 +35,14 @@
 
 ### Changed
 
+- Runtime output follows the language you work in. Journal, resume, provider,
+  doctor, and dashboard messages carry a condition key with an English default
+  and are rendered in the resolved locale at the point of display, so no locale
+  reaches the writer or the journal. `graphori status` used to print a readable
+  report in Korean and raw JSON in English; both languages now get the report.
+  Keyword lists that match Korean input are unchanged — they read the objective
+  rather than write output. Argparse help text is still Korean only, because it
+  is built before a locale is resolved.
 - The declared version is now `0.9.0-beta.1`, matching the tag on the first
   public commit. `pyproject.toml` spells it `0.9.0b1` because PEP 440
   normalizes it that way; the two are the same version. Calling a beta `0.1.0`

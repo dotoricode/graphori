@@ -22,8 +22,8 @@ from .journal import ensure_run_dirs
 from .journal import RunPaths, replay_journal
 from .model_routing import Availability
 from .process_supervisor import ProcessLimits
-from .presentation import (doctor_label, effort_label, journal_label,
-                           normalized_locale, resolve_locale, route_label,
+from .presentation import (doctor_label, effort_label, normalized_locale,
+                           resolve_locale, route_label, runtime_label,
                            status_label, team_label)
 from .product import ProductPlanCompiler, execute_product, render_plan_preview
 from .run_spec import RunConstraints, RunSpec, extract_acceptance_criteria
@@ -75,8 +75,8 @@ def _bundle(args: argparse.Namespace, *, probe: bool = True):
     codex, claude = _direct_adapters(root, args.timeout)
     availability = _availability(codex, claude) if probe else {}
     if probe and not any(value is Availability.AVAILABLE for value in availability.values()):
-        raise RuntimeError(
-            "사용 가능한 Direct provider가 없습니다. Codex 또는 Claude Code CLI를 설치·로그인하세요."
+        raise LocalizedRuntimeError(
+            "no_direct_provider"
         )
     compiler = ProductPlanCompiler(availability=availability)
     spec = _spec(args, root)
@@ -187,14 +187,14 @@ def _recorded_run(root: Path, run_id: str) -> tuple[RunSpec, object, list[dict]]
     """
     paths = RunPaths(root.resolve(), run_id)
     if not paths.journal_file.is_file():
-        raise ValueError("재개할 journal이 없습니다.")
+        raise LocalizedValueError("resume_no_journal")
     events, _digest = replay_journal(paths)
     if not events:
-        raise ValueError("빈 journal은 안전하게 재개할 수 없습니다.")
+        raise LocalizedValueError("resume_empty_journal")
     metadata = resolve_projection_metadata(root, run_id, events)
     plan = metadata.plan
     if plan.run_id != run_id:
-        raise ValueError("저장된 plan의 run identity가 일치하지 않습니다.")
+        raise LocalizedValueError("resume_run_identity")
     recorded_digests = {
         payload.get("plan_digest")
         for event in events
@@ -203,11 +203,11 @@ def _recorded_run(root: Path, run_id: str) -> tuple[RunSpec, object, list[dict]]
         if payload.get("plan_digest")
     }
     if recorded_digests != {plan.digest()}:
-        raise ValueError("저장된 plan과 journal의 plan digest가 일치하지 않습니다.")
+        raise LocalizedValueError("resume_plan_digest")
     if metadata.spec.workspace != str(root.resolve()):
-        raise ValueError("저장된 RunSpec workspace가 현재 --root와 일치하지 않습니다.")
+        raise LocalizedValueError("resume_workspace")
     if any(event.get("type") == "run_terminal" for event in events):
-        raise ValueError("terminal run은 재실행할 수 없습니다.")
+        raise LocalizedValueError("resume_terminal")
     return metadata.spec, plan, events
 
 
@@ -222,11 +222,11 @@ def _verify_pinned_skills(plan, root: Path) -> None:
                 actual = _package_digest(snapshot)
             except SkillRegistryError as exc:
                 raise ValueError(
-                    f"Skill snapshot을 확인할 수 없습니다: {binding.skill_id}"
+                    "resume_skill_missing", binding.skill_id
                 ) from exc
             if actual != binding.digest:
                 raise ValueError(
-                    f"Skill snapshot이 변경되었습니다: {binding.skill_id}"
+                    "resume_skill_changed", binding.skill_id
                 )
 
 
@@ -251,15 +251,15 @@ async def _resume(args: argparse.Namespace) -> int:
     try:
         recorded_commands = json.loads(commands_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        raise ValueError("저장된 process command가 없어 안전하게 재개할 수 없습니다.") from exc
+        raise LocalizedValueError("resume_no_command") from exc
     if not isinstance(recorded_commands, dict):
-        raise ValueError("저장된 process command 형식이 올바르지 않습니다.")
+        raise LocalizedValueError("resume_bad_command")
     for node_id in commands:
         value = recorded_commands.get(node_id)
         if (not isinstance(value, dict) or not isinstance(value.get("argv"), list)
                 or not all(isinstance(item, str) for item in value["argv"])
                 or not isinstance(value.get("verdict_file"), str)):
-            raise ValueError(f"저장된 process command가 불명확합니다: {node_id}")
+            raise LocalizedValueError("resume_unclear_command", node_id)
         commands[node_id] = ProcessCommand(
             tuple(value["argv"]), verdict_file=value["verdict_file"],
             env={"PYTHONDONTWRITEBYTECODE": "1"},
@@ -313,9 +313,27 @@ def _error_text(exc: BaseException, locale: str) -> str:
     key = getattr(exc, "key", "")
     if not key:
         return str(exc)
-    text = journal_label(key, normalized_locale(locale or "auto"))
+    text = runtime_label(key, normalized_locale(locale or "auto"))
     detail = getattr(exc, "detail", "")
     return f"{text}: {detail}" if detail else text
+
+
+class LocalizedError(Exception):
+    """An error whose text is chosen at display time, not where it is raised."""
+
+    def __init__(self, key: str, detail: str = "") -> None:
+        text = runtime_label(key, "en")
+        super().__init__(f"{text}: {detail}" if detail else text)
+        self.key = key
+        self.detail = detail
+
+
+class LocalizedValueError(LocalizedError, ValueError):
+    pass
+
+
+class LocalizedRuntimeError(LocalizedError, RuntimeError):
+    pass
 
 
 def cmd_doctor(args: argparse.Namespace) -> int:
@@ -367,9 +385,9 @@ def cmd_doctor(args: argparse.Namespace) -> int:
                     journal["plan_digest"] = metadata.plan.digest()
                     journal["schema_lock"] = doctor_label("compatible", locale)
                 except ValueError as exc:
-                    journal["schema_lock"] = f"불일치: {exc}"
+                    journal["schema_lock"] = f'{runtime_label("mismatch", locale)}: {exc}'
             except Exception as exc:
-                journal["status"] = f"점검 실패: {exc}"
+                journal["status"] = f'{runtime_label("check_failed", locale)}: {exc}'
         values["journal"] = journal
     runs_root = root / ".graphori" / "runs"
     interrupted: list[dict[str, object]] = []
@@ -417,60 +435,85 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     return 0
 
 
-def _format_duration(milliseconds) -> str:
+def _format_duration(milliseconds, locale: str = "ko") -> str:
     if not isinstance(milliseconds, (int, float)):
-        return "알 수 없음"
+        return runtime_label("unknown", locale)
     seconds = max(0, round(milliseconds / 1000))
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
+    hour_unit = runtime_label("hours", locale)
+    minute_unit = runtime_label("minutes", locale)
+    second_unit = runtime_label("seconds", locale)
     if hours:
-        return f"{hours}시간 {minutes}분 {seconds}초"
+        return f"{hours}{hour_unit} {minutes}{minute_unit} {seconds}{second_unit}"
     if minutes:
-        return f"{minutes}분 {seconds}초"
-    return f"{seconds}초"
+        return f"{minutes}{minute_unit} {seconds}{second_unit}"
+    return f"{seconds}{second_unit}"
 
 
 def _render_human_status(snapshot: dict, *, locale: str) -> str:
+    """Explain a run in plain language, in the reader's language.
+
+    English used to get raw JSON here while Korean got this report, which made
+    the English experience strictly worse for no reason. Both now render the
+    same layout from the same labels.
+    """
     locale = normalized_locale(locale)
-    if locale != "ko":
-        return json.dumps({
-            "run_id": snapshot.get("run_id"), "status": snapshot.get("status"),
-            "terminal_status": snapshot.get("terminal_status"),
-            "projection_digest": snapshot.get("projection_digest"),
-        }, indent=2, sort_keys=True, ensure_ascii=False)
-    lines = ["지금 작업 상황", "", f"전체  {status_label(snapshot.get('status', 'unknown'), locale)}"]
+
+    def text(key: str) -> str:
+        return runtime_label(key, locale)
+
+    lines = [text("status_title"), "",
+             f"{text('status_overall')}  "
+             f"{status_label(snapshot.get('status', 'unknown'), locale)}"]
     activity = snapshot.get("activity") or {}
-    lines.append(f"시작한 지  {_format_duration(activity.get('elapsed_ms'))}")
+    lines.append(f"{text('status_running_for')}  "
+                 f"{_format_duration(activity.get('elapsed_ms'), locale)}")
     age = activity.get("last_activity_age_seconds")
-    lines.append(f"마지막 변화  {_format_duration(age * 1000) + ' 전' if isinstance(age, (int, float)) else '아직 확인하지 못함'}")
+    if isinstance(age, (int, float)):
+        elapsed = f"{_format_duration(age * 1000, locale)} {text('ago')}"
+    else:
+        elapsed = text("status_not_observed")
+    lines.append(f"{text('status_last_change')}  {elapsed}")
     liveness = (snapshot.get("liveness") or {}).get("status", "unknown")
-    liveness_text = {"heartbeat_recent": "정상적으로 일하는 중", "completed": "일을 마침", "stale": "멈췄는지 확인 필요"}.get(liveness, "아직 확인하지 못함")
-    lines.extend((f"작업자  {liveness_text}", "진행 정도  " + (
-        f"{snapshot['provider_progress']['percent']}%" if isinstance(
-            (snapshot.get("provider_progress") or {}).get("percent"), (int, float),
-        ) else "숫자로 확인할 수 없음"
-    ), "", "단계별 상황"))
+    liveness_text = {
+        "heartbeat_recent": text("live_working"),
+        "completed": text("live_done"),
+        "stale": text("live_stale"),
+    }.get(liveness, text("status_not_observed"))
+    percent = (snapshot.get("provider_progress") or {}).get("percent")
+    progress = (f"{percent}%" if isinstance(percent, (int, float))
+                else text("status_no_number"))
+    lines.extend((f"{text('status_worker')}  {liveness_text}",
+                  f"{text('status_progress')}  {progress}",
+                  "", text("status_by_step")))
     for node in snapshot.get("nodes", []):
-        lines.append(f"- {team_label(node.get('team_id', ''), locale)}: {status_label(node.get('status', 'unknown'), locale)}")
-        lines.append(f"  {node.get('display_title') or node.get('title') or '제목 없음'}")
-        lines.append(f"  담당: {route_label(node.get('selected_route') or '', locale)}")
+        lines.append(f"- {team_label(node.get('team_id', ''), locale)}: "
+                     f"{status_label(node.get('status', 'unknown'), locale)}")
+        lines.append("  " + (node.get("display_title") or node.get("title")
+                             or text("status_untitled")))
+        lines.append(f"  {text('status_route')}: "
+                     f"{route_label(node.get('selected_route') or '', locale)}")
         if node.get("requested_effort"):
-            lines.append(f"  살펴보는 정도: {effort_label(node.get('requested_effort') or '', locale)}")
+            lines.append(f"  {text('status_effort')}: "
+                         f"{effort_label(node.get('requested_effort') or '', locale)}")
     criteria = ((snapshot.get("verification") or {}).get("acceptance_criteria") or [])
     if criteria:
-        lines.extend(("", "끝나기 전에 확인할 내용"))
+        lines.extend(("", text("status_criteria")))
         proof_labels = {
-            "PROVEN": "확인함", "NOT_PROVEN": "아직 확인 전",
-            "FAILED": "조건을 만족하지 못함", "NOT_APPLICABLE": "확인할 필요 없음",
+            "PROVEN": text("proof_proven"),
+            "NOT_PROVEN": text("proof_not_proven"),
+            "FAILED": text("proof_failed"),
+            "NOT_APPLICABLE": text("proof_not_applicable"),
         }
         for criterion in criteria:
-            mark = {"PROVEN": "✓", "FAILED": "✗", "NOT_APPLICABLE": "-"}.get(
+            mark = {"PROVEN": "\u2713", "FAILED": "\u2717", "NOT_APPLICABLE": "-"}.get(
                 criterion.get("status"), "?",
             )
             description = str(criterion.get("criterion", "")).partition(":")[2].strip()
             lines.append(
-                f"{mark} {criterion.get('criterion_id')} {description} — "
-                f"{proof_labels.get(criterion.get('status'), '아직 확인 전')}"
+                f"{mark} {criterion.get('criterion_id')} {description} - "
+                f"{proof_labels.get(criterion.get('status'), text('proof_not_proven'))}"
             )
     return "\n".join(lines)
 
@@ -507,8 +550,7 @@ def _dashboard_static_dir() -> Path:
         if (candidate / "index.html").is_file():
             return candidate
     raise ValueError(
-        "대시보드 화면 파일을 찾을 수 없습니다. Graphori를 다시 설치하거나 "
-        "개발 checkout에서 실행하세요."
+        runtime_label("dashboard_assets_missing", "auto")
     )
 
 
@@ -530,12 +572,13 @@ def _latest_dashboard_run(root: Path) -> str | None:
 
 def cmd_dashboard(args: argparse.Namespace) -> int:
     """Serve the canonical dashboard and optionally open the selected Run."""
+    locale = normalized_locale(getattr(args, "locale", "auto") or "auto")
     root = args.root.resolve()
     run_id = args.run_id or _latest_dashboard_run(root)
     if args.run_id:
         journal = RunPaths(root, args.run_id).journal_file
         if not journal.is_file():
-            raise ValueError(f"실행 기록을 찾을 수 없습니다: {args.run_id}")
+            raise LocalizedValueError("dashboard_run_missing", args.run_id)
 
     server = create_server(
         root,
@@ -546,13 +589,13 @@ def cmd_dashboard(args: argparse.Namespace) -> int:
     host, port = server.server_address[:2]
     query = "?" + urlencode({"run": run_id}) if run_id else ""
     url = f"http://{host}:{port}/{query}"
-    print(f"Graphori 대시보드: {url}", flush=True)
+    print(f'{runtime_label("dashboard_serving", locale)}: {url}', flush=True)
     if run_id:
-        print(f"표시할 작업: {run_id}", flush=True)
+        print(f'{runtime_label("dashboard_showing", locale)}: {run_id}', flush=True)
     else:
-        print("표시할 실행 기록이 없어 작업 ID 입력 화면을 엽니다.", flush=True)
+        print(runtime_label("dashboard_no_runs", locale), flush=True)
     if not args.no_open and not webbrowser.open(url):
-        print("브라우저를 자동으로 열지 못했습니다. 위 주소를 직접 여세요.", flush=True)
+        print(runtime_label("dashboard_no_browser", locale), flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
@@ -625,6 +668,9 @@ def build_parser() -> argparse.ArgumentParser:
     command.add_argument("--run-id", help="표시할 작업 ID (기본: 가장 최근 작업)")
     command.add_argument("--port", type=int, default=8765)
     command.add_argument("--no-open", action="store_true", help="브라우저를 자동으로 열지 않습니다.")
+    command.add_argument("--lang", "--locale", dest="locale",
+                         choices=("auto", "ko", "en"), default="auto",
+                         help="output language: auto, en, or ko")
     command.set_defaults(func=cmd_dashboard)
     return parser
 

@@ -53,7 +53,8 @@ class DashboardCommandTests(unittest.TestCase):
             root = Path(temp)
             self._journal(root, "run-dashboard")
             server = FakeServer()
-            args = argparse.Namespace(root=root, run_id=None, port=0, no_open=False)
+            args = argparse.Namespace(root=root, run_id=None, port=0, no_open=False,
+                                      locale="ko")
             output = io.StringIO()
             with (
                 patch.object(product_cli, "create_server", return_value=server) as create,
@@ -76,7 +77,8 @@ class DashboardCommandTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             server = FakeServer()
-            args = argparse.Namespace(root=root, run_id=None, port=0, no_open=True)
+            args = argparse.Namespace(root=root, run_id=None, port=0, no_open=True,
+                                      locale="ko")
             with (
                 patch.object(product_cli, "create_server", return_value=server),
                 patch.object(product_cli.webbrowser, "open") as open_browser,
@@ -86,12 +88,14 @@ class DashboardCommandTests(unittest.TestCase):
             open_browser.assert_not_called()
 
             missing = argparse.Namespace(
-                root=root, run_id="run-missing", port=0, no_open=True,
+                root=root, run_id="run-missing", port=0, no_open=True, locale="ko",
             )
-            with self.assertRaisesRegex(ValueError, "실행 기록을 찾을 수 없습니다"):
+            # Assert the condition, not one language's wording for it.
+            with self.assertRaises(ValueError) as caught:
                 product_cli.cmd_dashboard(missing)
+            self.assertEqual(caught.exception.key, "dashboard_run_missing")
             traversal = argparse.Namespace(
-                root=root, run_id="../outside", port=0, no_open=True,
+                root=root, run_id="../outside", port=0, no_open=True, locale="ko",
             )
             with self.assertRaisesRegex(ValueError, "invalid path component"):
                 product_cli.cmd_dashboard(traversal)

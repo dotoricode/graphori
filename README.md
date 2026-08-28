@@ -59,10 +59,20 @@ run uses only the ones the task needs.
 | Team | What it does | When it appears |
 | --- | --- | --- |
 | **Planning** | Builds the graph, assigns roles, collects results. Your agent session is this role. | Always |
-| **Research** | Gathers what the change depends on — external sources, or the current shape of the code. | Only when the task needs facts it doesn't have |
-| **Design** | Decides an approach before code is written. | Only when the change isn't already bounded |
+| **Research** | Gathers what the change depends on — external sources, or the current shape of the code. | When your wording asks for it (`research`, `조사`, `리서치`, "check the docs") |
+| **Design** | Decides an approach before code is written. | When your wording asks for it (`design`, `architecture`, `설계`) alongside a change |
 | **Implementation** | Writes the change, inside a declared write scope. | Almost always |
-| **Verification** | Runs the check and records an independent verdict. Cannot verify its own work. | Whenever something was implemented |
+| **Verification** | Runs the check and records an independent verdict. | Whenever something was implemented |
+
+Which teams appear is decided by matching words in what you wrote, not by the
+planner judging your task. Asking to "research the rate limit options and then
+implement them" gets you a research phase; "fix the typo" does not. That is
+worth knowing, because it means you can ask for a phase and get it.
+
+Implementation and verification are always separate nodes with separate roles,
+so nothing signs off on its own work. That separation comes from the planner
+building the graph that way — the event layer checks that a verdict comes from
+a verifier, not that the verifier is a different agent than the worker.
 
 A typical small fix uses Planning, Implementation, and Verification, and says
 so:
@@ -119,21 +129,25 @@ The scores come from a pinned snapshot of the
 
 Three rules sit on top of the scores:
 
-**Faster wins.** A model far above the bar is not better for a node that only
-needs the bar, so among everything that qualifies Graphori takes the lowest
-expected wall time. Routine work goes to a fast model; the slow, strong one is
-saved for the node that actually needs it.
+**Faster wins, but the current route gets the benefit of the doubt.** Among
+everything that qualifies, Graphori takes the lowest expected wall time. A
+model far above the bar is not better for a node that only needs the bar. One
+exception keeps routes from flapping: if the run already prefers a model, a
+rival has to be more than 10% faster to displace it.
 
-**Normal before premium.** `gpt-5.6-sol` and `claude-opus-5` are gated, and
-Graphori only considers them when no normal-class model clears the bar. When it
-does reach for one, it stops and asks. The approval it gets is bounded to that
-node, model family, effort ceiling, and write scope — it is not reusable for
-the rest of the run.
+**Normal before premium.** `gpt-5.6-sol` and `claude-opus-5` are gated.
+Graphori considers them only when the qualifying set contains no normal-class
+model at all, and when it does reach for one it stops and asks. The approval is
+bounded to that node, model family, effort ceiling, and write scope — it is not
+reusable for the rest of the run.
 
 **An unscored model is marked as such.** `claude-sonnet-5` has no entry in the
-pinned snapshot, so a node routed to it is recorded with
-`BENCHMARK_PARTIAL_PROVIDER_ONLY` and partial confidence rather than a borrowed
-score. Graphori does not invent a number for a model it has not measured.
+pinned snapshot. Rather than borrowing a number, Graphori lets an unscored
+model qualify — always for research, design, and verification, and for coding
+only when nothing scored is available — and records the node as
+`BENCHMARK_PARTIAL_PROVIDER_ONLY` with partial confidence. So a route can be
+chosen without clearing a floor; when that happens the plan says so instead of
+inventing a score.
 
 If a provider CLI is missing or not signed in, the route falls back to an
 available one and records why, instead of failing the node.
@@ -230,10 +244,10 @@ deliberately.
 - `0.9.0-beta.1` is a beta and the name says so. No stable API, and nothing is
   published to a package registry yet.
 - Orca integration exists as an optional adapter and is currently off.
-- Windows and Linux are exercised. macOS runs the same POSIX path but its
-  platform fixtures have not been run, so the
+- Windows and Linux are exercised, and the maintainer develops on macOS. What
+  macOS does not have is a recorded fixture run, so the
   [portability contract](docs/architecture/PORTABILITY_CONTRACT.md) still lists
-  it as unverified.
+  it as unverified — daily use is not the same evidence as a platform suite.
 
 ## Documentation
 
