@@ -694,9 +694,7 @@ class GraphExecutionEngine:
                 payload={"terminal_status": "blocked", "blocking_reason": "retry exhausted"},
                 event_id=f"engine:{run.plan.run_id}:terminal:blocked",
             )
-        elif states and all(state in {
-                "passed", "failed", "cancelled", "rejected", "inconclusive"}
-                for state in states) and any(state == "failed" for state in states):
+        elif any(state == "failed" for state in states):
             self._append(
                 run, event_type="run_terminal", node_id=None, actor_role="router",
                 payload={"terminal_status": "failed"},

@@ -153,6 +153,39 @@ class ProductPlanTests(unittest.TestCase):
         self.assertEqual(review.dependencies, ("i1",))
         self.assertEqual(verifier.dependencies, ("cr1", "i1"))
 
+    def test_claude_implementation_is_cross_reviewed_by_codex(self):
+        compiler = ProductPlanCompiler(availability={
+            "gpt-5.6-terra": Availability.AVAILABLE,
+            "claude-sonnet-5": Availability.AVAILABLE,
+        })
+        bundle = compiler.compile(
+            RunSpec(
+                "Fix authentication permission handling", "codex", "/workspace",
+                constraints=RunConstraints(
+                    cross_review="always", implementation_provider="claude",
+                ),
+            ),
+            run_id="run-claude-cross-review", write_scope=("src/auth.py",),
+        )
+        implementation = next(node for node in bundle.plan.nodes if node.node_id == "i1")
+        review = next(node for node in bundle.plan.nodes if node.node_id == "cr1")
+        self.assertEqual((implementation.adapter, review.adapter), ("claude", "codex"))
+
+    def test_auto_cross_review_includes_two_files_broad_scope_and_high_uncertainty(self):
+        cases = (
+            (RunConstraints(), ("src/a.py", "src/b.py")),
+            (RunConstraints(), ("src/",)),
+            (RunConstraints(uncertainty="high"), ("src/a.py",)),
+        )
+        for index, (constraints, scope) in enumerate(cases):
+            with self.subTest(scope=scope, uncertainty=constraints.uncertainty):
+                bundle = self.compiler.compile(
+                    RunSpec("Implement the change", "codex", "/workspace",
+                            constraints=constraints),
+                    run_id=f"run-auto-review-{index}", write_scope=scope,
+                )
+                self.assertIn("cr1", {node.node_id for node in bundle.plan.nodes})
+
     def test_cross_review_degrades_explicitly_when_only_one_provider_is_ready(self):
         compiler = ProductPlanCompiler(availability={
             "gpt-5.6-luna": Availability.AVAILABLE,
@@ -174,6 +207,12 @@ class ProductPlanTests(unittest.TestCase):
         for command in ("plan", "run"):
             args = parser.parse_args([command, "Fix it", "--cross-review", "never"])
             self.assertEqual(args.cross_review, "never")
+        routed = parser.parse_args([
+            "plan", "Fix it", "--implementation-provider", "claude",
+            "--uncertainty", "high",
+        ])
+        self.assertEqual(routed.implementation_provider, "claude")
+        self.assertEqual(routed.uncertainty, "high")
 
     def test_verification_criteria_are_explicit_and_part_of_the_plan(self):
         spec = RunSpec(
@@ -474,6 +513,7 @@ class ProductPlanTests(unittest.TestCase):
             projection = asyncio.run(execute_product(engine, spec, bundle.plan))
             self.assertEqual(projection.node_states["cr1"], "failed")
             self.assertEqual(projection.node_states["v1"], "pending")
+            self.assertEqual(projection.terminal_status, "failed")
             self.assertEqual(generic.started, [])
 
     def test_contending_product_run_does_not_persist_sidecars_before_lock(self):

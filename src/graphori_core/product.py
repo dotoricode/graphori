@@ -88,7 +88,7 @@ def _verifier_command(
         "result=subprocess.run(command,check=False);target.parent.mkdir(parents=True,exist_ok=True);"
         "verdict='pass' if result.returncode==0 else 'revise';"
         "proof_status='PROVEN' if result.returncode==0 else 'FAILED';"
-        "proof={item:{'status':proof_status,'evidence_ids':['subprocess:test:criterion:'"
+        "proof={item:{'status':proof_status,'evidence_ids':['subprocess:criterion-command:'"
         "+item+':exit:'+str(result.returncode)]} for item in criteria};"
         "target.write_text(json.dumps({'verdict':verdict,'evidence_ids':['deterministic:'"
         "+str(result.returncode)],'criterion_evidence':proof}))"
@@ -116,15 +116,12 @@ class ProductPlanCompiler:
 
     def __init__(self, *, availability: Mapping[str, Availability] | None = None) -> None:
         known = dict(availability or {})
-        self.router = ModelRouter(default_model_catalog(known))
-        ready: set[str] = set()
-        if any(known.get(model) is Availability.AVAILABLE
-               for model in ("gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.6-sol")):
-            ready.add("openai")
-        if any(known.get(model) is Availability.AVAILABLE
-               for model in ("claude-sonnet-5", "claude-opus-5")):
-            ready.add("anthropic")
-        self.ready_provider_families = frozenset(ready)
+        catalog = default_model_catalog(known)
+        self.router = ModelRouter(catalog)
+        self.ready_provider_families = frozenset(
+            model.provider for model in catalog.provider_catalog.models
+            if model.availability is Availability.AVAILABLE
+        )
 
     @staticmethod
     def _cross_review_warranted(
@@ -138,9 +135,16 @@ class ProductPlanCompiler:
             "security", "authentication", "authorization", "permission", "secret",
             "보안", "인증", "인가", "권한", "비밀",
         ))
-        broad_scope = "." in write_scope or len(set(write_scope)) >= 3
+        broad_scope = len(set(write_scope)) >= 2 or any(
+            scope in {".", "**", "**/*"}
+            or scope.endswith("/")
+            or any(marker in scope for marker in "*?[")
+            or not Path(scope.rstrip("/")).suffix
+            for scope in write_scope
+        )
         synthesis = profile in {"research-and-implementation", "design-and-implementation"}
-        return sensitive or broad_scope or synthesis
+        high_uncertainty = spec.constraints.uncertainty == "high"
+        return sensitive or broad_scope or synthesis or high_uncertainty
 
     @staticmethod
     def _teams(nodes: tuple[NodeSpec, ...]) -> tuple[TeamSpec, ...]:
@@ -202,13 +206,20 @@ class ProductPlanCompiler:
             ))
         if profile != "research":
             dependency = "d1" if profile in {"design-and-implementation", "research-and-implementation"} else ""
+            implementation_adapter = spec.constraints.implementation_provider
+            uncertainty = {
+                "auto": 0, "low": 1, "medium": 2, "high": 3,
+            }[spec.constraints.uncertainty]
             nodes.append(NodeSpec(
                 "i1", "implementation", display_title, spec.objective, "worker",
                 role="implementer",
                 dependencies=(dependency,) if dependency else (), read_scope=read_scope,
                 write_scope=write_scope, task_kind="bounded_implementation",
+                adapter_requirements=(
+                    () if implementation_adapter == "auto" else (implementation_adapter,)
+                ),
                 verification_policy="independent", estimated_startup_ms=5_000,
-                estimated_execution_ms=90_000,
+                estimated_execution_ms=90_000, uncertainty=uncertainty,
             ))
 
         unrouted = RunPlan(
@@ -242,6 +253,7 @@ class ProductPlanCompiler:
                     permission_profile="read_only", requires_cross_provider=True,
                     excluded_provider=implementation.provider_family,
                     evidence_requirements=("cross-provider-review-report",),
+                    reviews_unverified_dependencies=True,
                 )
                 unrouted = replace(unrouted, nodes=tuple((*unrouted.nodes, review)))
                 routed = self.router.route_plan(unrouted)

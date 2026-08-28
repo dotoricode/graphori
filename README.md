@@ -76,10 +76,13 @@ is `implementation -> other provider's read-only review -> deterministic check`.
 The AI review can block the check, but it cannot issue the final PASS.
 
 `--cross-review auto` is the default. It adds the other provider for security,
-authentication, authorization, permission, broad-scope, and research/design
-synthesis work. Use `always` to require it for any implementation or `never` to
-disable it. If both providers are not ready, Graphori records the reason and
-continues with deterministic verification; it never hides the downgrade.
+authentication, authorization, permission, two or more write scopes, directory
+or glob scopes, high-uncertainty work, and research/design synthesis. Use
+`always` to require it for any implementation or `never` to disable it. If both
+providers are not ready, Graphori records the reason and continues with
+deterministic verification; it never hides the downgrade. Implementation routes
+automatically by default; `--implementation-provider claude` or `codex` pins it,
+and the review uses the opposite ready provider.
 
 A typical small fix uses Planning, Implementation, and Verification, and says
 so:
@@ -216,7 +219,9 @@ graphori doctor --json
 graphori plan "Fix authentication permission handling" \
   --criterion "AC-01: permission regression test passes" \
   --verify-criterion AC-01 \
-  --cross-review auto
+  --cross-review auto \
+  --implementation-provider claude \
+  --uncertainty high
 ```
 
 Provider diagnostics expose only compatibility and `ready` / `not_ready`

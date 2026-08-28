@@ -71,10 +71,12 @@ Graphori는 다섯 역할을 두고 계획한다. 노드는 하나의 팀에 속
 교차 리뷰가 켜지면 그래프는 `구현 -> 다른 provider의 읽기 전용 리뷰 -> deterministic
 검사`가 된다. AI 리뷰는 다음 검사를 막을 수 있지만 최종 PASS를 줄 수는 없다.
 
-기본값은 `--cross-review auto`다. 보안·인증·인가·권한, 넓은 변경 범위, 조사/설계
-종합 작업에 다른 provider를 붙인다. 모든 구현에 강제하려면 `always`, 끄려면 `never`를
-쓴다. 둘 다 준비되지 않았으면 이유를 계획에 기록하고 deterministic 검증만 계속한다.
-축소됐다는 사실을 숨기지 않는다.
+기본값은 `--cross-review auto`다. 보안·인증·인가·권한, write scope 2개 이상,
+디렉터리·glob 범위, 불확실성이 높은 작업, 조사/설계 종합 작업에 다른 provider를 붙인다.
+모든 구현에 강제하려면 `always`, 끄려면 `never`를 쓴다. 둘 다 준비되지 않았으면 이유를
+계획에 기록하고 deterministic 검증만 계속한다. 축소됐다는 사실을 숨기지 않는다.
+구현 provider는 기본적으로 자동 배정하며 `--implementation-provider claude` 또는
+`codex`로 고정하면 준비된 반대 provider가 리뷰한다.
 
 작은 수정이면 운영실·제작팀·품질관리팀만 쓰고, 그렇다고 말한다.
 
@@ -200,7 +202,9 @@ graphori doctor --json
 graphori plan "Fix authentication permission handling" \
   --criterion "AC-01: permission regression test passes" \
   --verify-criterion AC-01 \
-  --cross-review auto
+  --cross-review auto \
+  --implementation-provider claude \
+  --uncertainty high
 ```
 
 provider 진단은 호환 여부와 인증의 `ready` / `not_ready` 상태만 보여 준다. credential이나

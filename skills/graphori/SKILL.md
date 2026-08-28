@@ -76,6 +76,8 @@ graphori run "<objective>" \
   --write-scope "<write scope>" \
   --max-parallelism 2 \
   --cross-review auto \
+  --implementation-provider auto \
+  --uncertainty auto \
   --verify-criterion AC-01 \
   --verify-command <explicit argv>
 ```
@@ -98,10 +100,14 @@ Before dispatch, summarize in the user's language:
 Use `graphori plan` when the user only wants a preview. Planning must not start an
 external provider.
 
-For security, authentication, authorization, permission, broad-scope, or
-research/design synthesis work, keep `--cross-review auto`. Runtime checks the
-Codex and Claude Code CLI contracts and authentication locally. When both are
-ready, the provider that did not implement the change performs a read-only review.
+For security, authentication, authorization, permission, two-or-more write scopes,
+directory or glob scopes, high-uncertainty work, or research/design synthesis,
+keep `--cross-review auto`. Runtime checks the Codex and Claude Code CLI contracts
+and authentication locally. When both are ready, the provider that did not
+implement the change performs a read-only review. Use `--implementation-provider
+codex|claude` only when the user wants to pin the implementer; otherwise keep
+`auto`. Set `--uncertainty high` only when that uncertainty is known rather than
+inferred.
 Use `--cross-review always` only when the user wants this for every implementation,
 and `never` only when the user explicitly opts out. If one provider is unavailable,
 report the deterministic-only downgrade and its sanitized reason.

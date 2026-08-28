@@ -58,10 +58,16 @@ class RunConstraints:
     allow_external_effects: bool = False
     allow_network: bool = True
     cross_review: str = "auto"
+    implementation_provider: str = "auto"
+    uncertainty: str = "auto"
 
     def __post_init__(self) -> None:
         if self.cross_review not in {"auto", "always", "never"}:
             raise ValueError("cross_review must be auto, always, or never")
+        if self.implementation_provider not in {"auto", "codex", "claude"}:
+            raise ValueError("implementation_provider must be auto, codex, or claude")
+        if self.uncertainty not in {"auto", "low", "medium", "high"}:
+            raise ValueError("uncertainty must be auto, low, medium, or high")
         if self.max_parallelism < 1:
             raise ValueError("max_parallelism must be at least 1")
         if self.time_budget_ms is not None and self.time_budget_ms < 0:

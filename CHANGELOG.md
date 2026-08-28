@@ -68,6 +68,10 @@
   command to the acceptance criteria it proves. Mapped criteria become PROVEN
   or FAILED from that command; unmapped criteria remain NOT_PROVEN. The mapping
   is stored in the plan's evidence requirements and survives replay.
+- Cross-provider review now supports both Codex-to-Claude and Claude-to-Codex
+  paths through `--implementation-provider`. Auto review also covers two-file,
+  directory, glob, and explicitly high-uncertainty changes. A blocking review
+  terminates the run as failed instead of leaving pending descendants stranded.
 
 - The public benchmark now includes the completed 72-run Direct/v1-style/
   Graphori v2 matrix for Codex and Claude. Raw JSONL, deterministic analysis,

@@ -441,11 +441,12 @@ class DashboardTests(unittest.TestCase):
         self.execute(plan, adapter=FailedAdapter())
         snapshot, _ = DashboardStore(self.root).snapshot(plan.run_id)
         nodes = {item["node_id"]: item for item in snapshot["nodes"]}
-        self.assertIsNone(snapshot["terminal_status"])
-        self.assertEqual(snapshot["status"], "blocked")
+        self.assertEqual(snapshot["terminal_status"], "failed")
+        self.assertEqual(snapshot["status"], "failed")
         self.assertEqual(nodes["work"]["status"], "failed")
         self.assertEqual(nodes["work"]["execution"]["status"], "failed")
-        self.assertEqual(nodes["verify"]["scheduler_status"], "blocked")
+        self.assertEqual(nodes["verify"]["status"], "pending")
+        self.assertIsNone(nodes["verify"]["scheduler_status"])
 
     def test_rework_nodes_and_edges_remain_visible_after_cold_replay(self):
         plan = RunPlan(
@@ -582,6 +583,26 @@ class PresentationEvidenceTests(unittest.TestCase):
         },))
         self.assertEqual(weak[0]["status"], "NOT_PROVEN")
         self.assertEqual(strong[0]["status"], "PROVEN")
+
+    def test_explicit_criterion_command_requires_matching_plan_requirement(self):
+        evidence = ({
+            "actor": {"role": "verifier"},
+            "payload": {"criterion_evidence": {"AC-12": {
+                "status": "PROVEN",
+                "evidence_ids": ["subprocess:criterion-command:AC-12:exit:0"],
+            }}},
+        },)
+        unmapped = NodeSpec(
+            "verify", "verification", "Verify", "verify", "verifier",
+            acceptance_criteria=("AC-12: cold process check",),
+        )
+        mapped = NodeSpec(
+            "verify", "verification", "Verify", "verify", "verifier",
+            acceptance_criteria=("AC-12: cold process check",),
+            evidence_requirements=("criterion:AC-12",),
+        )
+        self.assertEqual(_criterion_evidence(unmapped, evidence)[0]["status"], "NOT_PROVEN")
+        self.assertEqual(_criterion_evidence(mapped, evidence)[0]["status"], "PROVEN")
 
 
 if __name__ == "__main__":

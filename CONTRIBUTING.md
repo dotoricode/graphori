@@ -13,7 +13,7 @@ python -m unittest discover -s tests -v
 python scripts/validate_docs_indexes.py
 ```
 
-The suite is 397 tests and takes a couple of minutes. Some fixtures skip rather
+The suite contains hundreds of tests and takes a couple of minutes. Some fixtures skip rather
 than fail when the platform cannot support them — macOS-only image tools, and
 symlink creation on Windows without Developer Mode. A skip is expected; a
 failure is not.

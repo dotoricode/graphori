@@ -89,7 +89,7 @@ class V2SchedulerContractTests(unittest.TestCase):
             NodeSpec(
                 "review", "verification", "Review", "review", "worker",
                 role="reviewer", dependencies=("implement",), read_scope=("src/",),
-                verification_policy="deterministic",
+                verification_policy="deterministic", reviews_unverified_dependencies=True,
             ),
         )
         batch = scheduler.decide(

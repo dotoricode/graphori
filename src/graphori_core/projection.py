@@ -461,17 +461,31 @@ def _criterion_evidence(node: NodeSpec, history: Sequence[Mapping[str, Any]]) ->
                 continue
             status = str(claim.get("status", "NOT_PROVEN")).upper()
             evidence_ids = [str(value) for value in claim.get("evidence_ids", ())]
+            criterion_command = any(
+                value.startswith("subprocess:criterion-command:") for value in evidence_ids
+            )
+            mapped_command = (
+                f"criterion:{identifier}" in node.evidence_requirements
+                and any(value.startswith(
+                    f"subprocess:criterion-command:{identifier}:"
+                ) for value in evidence_ids)
+            )
             # A Worker self-report is never proof. Process-boundary criteria
             # need evidence from the test itself, not merely the verifier
             # command's own process exit.
             if status == "PROVEN" and source not in {"verifier", "coordinator", "independent_verifier"}:
+                status = "NOT_PROVEN"
+            if status == "PROVEN" and criterion_command and not mapped_command:
                 status = "NOT_PROVEN"
             criterion_text = str(item["criterion"]).casefold()
             requires_process_boundary = any(token in criterion_text for token in (
                 "subprocess", "cold process", "cold-process", "별도 프로세스",
             ))
             if (status == "PROVEN" and requires_process_boundary
-                    and not any(value.startswith("subprocess:test:") for value in evidence_ids)):
+                    and not (
+                        any(value.startswith("subprocess:test:") for value in evidence_ids)
+                        or mapped_command
+                    )):
                 status = "NOT_PROVEN"
             if status not in {"PROVEN", "NOT_PROVEN", "FAILED", "NOT_APPLICABLE"}:
                 status = "NOT_PROVEN"

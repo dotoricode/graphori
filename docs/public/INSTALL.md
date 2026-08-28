@@ -97,6 +97,8 @@ graphori run "add a docstring to the parser" \
   --criterion "AC-01: parser test passes" \
   --verify-criterion AC-01 \
   --cross-review auto \
+  --implementation-provider auto \
+  --uncertainty auto \
   --verify-command python -m unittest tests.test_parser
 ```
 
@@ -117,10 +119,13 @@ remaining argv. Criteria without an explicit mapping remain `NOT_PROVEN` even
 when the command exits successfully.
 
 `--cross-review auto` adds a read-only review by the provider opposite the
-implementer for sensitive, broad, or synthesis-heavy changes when both Codex
-and Claude Code are installed, compatible, and authenticated. `always` applies
-the policy to every implementation; `never` disables it. Run `graphori doctor
---json` to inspect the sanitized readiness state without making a model call.
+implementer for sensitive changes, two or more write scopes, directory or glob
+scopes, high-uncertainty work, and synthesis-heavy changes when both Codex and
+Claude Code are installed, compatible, and authenticated. `always` applies the
+policy to every implementation; `never` disables it. Implementation routing is
+automatic unless `--implementation-provider codex|claude` pins it. Use
+`--uncertainty high` to declare known uncertainty. Run `graphori doctor --json`
+to inspect the sanitized readiness state without making a model call.
 
 ## Choosing the output language
 
