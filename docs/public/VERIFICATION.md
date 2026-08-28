@@ -3,6 +3,20 @@
 This page records commands that actually ran. It is evidence, not a platform-wide
 support claim.
 
+## 2026-08-28 · macOS portability fixture
+
+- Command: `python scripts/verify_macos_portability.py`
+- Host: macOS 26.5.2, x86_64
+- Python: 3.11.15 and 3.14.6
+- PASS: process-tree termination, path escape, POSIX symlink escape, case
+  collision, JSONL tmp→ready publication, replay, and idempotency.
+- Output: one contract-shaped record per fixture with `platform`, `fixture`,
+  `verdict`, `evidence_id`, `command`, `host`, self-contained test evidence,
+  and its SHA-256 hash.
+
+This changes the macOS generic-adapter verdict only for the recorded host and
+fixture scope. It does not establish Linux or Windows release support.
+
 ## 2026-08-28 · public-release follow-up candidate
 
 - Tree: `312bea4`
@@ -38,7 +52,6 @@ steps after that gate are not claimed by this record.
 
 ## Evidence boundary
 
-These commands do not satisfy the dedicated process-tree termination, path-escape,
-and symlink acceptance fixture in the portability contract. The macOS platform
-verdict remains deferred. No Linux release gate is claimed, and Windows installation
-and Job Object behavior remain experimental.
+The dedicated macOS fixture now has a scoped pass on the host above. No Linux
+release gate is claimed, and Windows installation and Job Object behavior remain
+experimental.

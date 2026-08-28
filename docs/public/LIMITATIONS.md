@@ -7,5 +7,5 @@
 - The dashboard and learning game are explanatory interfaces, not evidence that an external provider is active.
 - The repository publishes one small historical v1-style/v2 comparison. The three-arm public benchmark remains scaffolding without published results.
 - Public-release evidence is produced by the local verifier; this repository does not use GitHub Actions.
-- The full test suite has run on macOS, but the dedicated process-tree, path-escape, and symlink portability fixture has not. The macOS platform verdict therefore remains deferred. No Linux release gate is claimed; Windows installation and Job Object behavior remain experimental.
+- The dedicated generic-adapter fixture passed on one macOS 26.5.2 x86_64 host with Python 3.11 and 3.14. That is scoped evidence, not a claim about every macOS version or architecture. No Linux release gate is claimed; Windows installation and Job Object behavior remain experimental.
 - CodeQL, OpenSSF Scorecard, and OIDC build attestations are not part of this no-Actions release. Gitleaks, `pip-audit`, an SBOM, artifact hashes, and reproducible local commands are the published evidence boundary.

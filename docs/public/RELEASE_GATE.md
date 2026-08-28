@@ -16,7 +16,7 @@ The verifier does not publish a package, create a GitHub repository, change visi
 
 ## Evidence boundary
 
-- Recorded local commands have run on macOS with Python 3.11 and 3.14. See [VERIFICATION.md](VERIFICATION.md). This does not satisfy the dedicated portability fixture.
+- Recorded local commands and the dedicated generic-adapter fixture have run on macOS 26.5.2 x86_64 with Python 3.11 and 3.14. See [VERIFICATION.md](VERIFICATION.md). This is a scoped host verdict, not a claim about every Mac.
 - Windows installation and Windows Job Object behavior are experimental and are not release claims.
 - CodeQL, OpenSSF Scorecard, and OIDC provenance are not claimed because this no-Actions release does not run them.
 - Gitleaks, `pip-audit`, SBOM, artifact hashes, clean-history inspection, and local test output are the release evidence.

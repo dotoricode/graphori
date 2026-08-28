@@ -9,15 +9,15 @@ Graphori의 핵심은 콘센트가 아니라 장난감 자체다. Orca라는 멋
 규칙은 같아야 한다.
 
 처음 MVP는 Python 표준 라이브러리만 사용한다. Orca adapter는 있으면 좋지만
-필수품이 아니다. Windows 실제 검증을 먼저 하고, macOS는 실행 환경에서 같은
-fixture를 돌리기 전까지 `deferred/unknown`이다.
+필수품이 아니다. 플랫폼 판정은 같은 fixture를 실제 환경에서 실행한 기록으로만
+올린다.
 
 ## 2. 지원 경계
 
 | 환경 | 범위 | 현재 판정 |
 |---|---|---|
 | Windows PowerShell | generic process/file adapter, junction/symlink fixture | 설계; F01 증거는 별도 제품의 Windows 관찰(E1) |
-| macOS zsh | 같은 core와 generic adapter 목표 | 실제 실행 전 `deferred/unknown` |
+| macOS zsh | core와 generic adapter | `pass(scope=macos-26.5.2-x86_64, python=3.11/3.14)` |
 | Orca | optional Run/Task/Dispatch/heartbeat/worker_done adapter | Orca 로컬 관찰; 일반 보장 아님 |
 
 이 표는 플랫폼 판정을 합치지 않는다. `complete(scope=windows, exclusions=[macos])`
@@ -41,8 +41,8 @@ fixture를 돌리기 전까지 `deferred/unknown`이다.
 
 - Windows: 가능하면 Job Object로 child tree를 묶고, 정상 종료 요청→grace→강제
   종료 순서를 기록한다. `TerminateProcess`는 마지막 수단이다.
-- macOS: POSIX process group에 signal을 보내고 grace 후 kill한다. 실제 macOS
-  동작은 호스트/CI fixture로 확인하기 전까지 deferred다.
+- macOS: POSIX process group에 signal을 보내고 grace 후 kill한다. macOS 26.5.2
+  x86_64 fixture에서 자식 프로세스 종료까지 확인했다.
 - interactive PTY/ConPTY, tmux, GUI/browser 자동화는 core MVP가 아니다.
 
 ## 5. 경로·symlink·junction 규칙
@@ -98,8 +98,9 @@ evidence에 기록하며, 실패하면 `adapter_unavailable`이지 core 상태 c
 
 - Windows generic: process tree 종료, path escape, symlink/junction, case collision,
   JSONL tmp→ready, replay/idempotency.
-- macOS generic: 같은 fixture를 실제 macOS host 또는 CI에서 실행. 실행 전에는
-  `not_verified/deferred`다.
+- macOS generic: `scripts/verify_macos_portability.py`가 process tree 종료, path
+  escape, POSIX symlink, case collision, JSONL tmp→ready, replay/idempotency를
+  실행한다. macOS 26.5.2 x86_64에서 Python 3.11·3.14로 `pass`했다.
 - Orca: Orca adapter가 없거나 꺼진 상태에서 core CLI replay가 성공한 뒤, Orca를
   연결해 동일 event projection을 비교한다.
 - provider usage: provider가 보고하지 않는 fixture에서는 `usage.status=unknown`이

@@ -16,7 +16,7 @@ python3.11 scripts/verify_public_release.py --output <새로운-산출물-폴더
 
 ## 공개 근거의 경계
 
-- 기록된 로컬 명령은 macOS의 Python 3.11과 3.14에서 실행했습니다. [VERIFICATION.ko.md](VERIFICATION.ko.md)를 참고하세요. 이 결과만으로 전용 이식성 검사를 통과한 것은 아닙니다.
+- 기록된 로컬 명령과 generic adapter 전용 검사는 macOS 26.5.2 x86_64에서 Python 3.11·3.14로 실행했습니다. [VERIFICATION.ko.md](VERIFICATION.ko.md)를 참고하세요. 이는 해당 호스트 범위의 판정이지 모든 Mac을 보장하는 주장은 아닙니다.
 - Windows 설치와 Windows Job Object 동작은 실험적이며 검증 완료라고 주장하지 않습니다.
 - Actions를 사용하지 않으므로 CodeQL, OpenSSF Scorecard, OIDC provenance는 근거로 주장하지 않습니다.
 - Gitleaks, `pip-audit`, SBOM, 산출물 해시, 깨끗한 이력 검사와 로컬 테스트 결과가 릴리스 근거입니다.

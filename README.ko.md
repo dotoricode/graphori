@@ -237,11 +237,11 @@ python benchmarks/v1_v2/verify_results.py
 - `0.9.0-beta.1`은 베타고 이름이 그렇게 말하고 있다. 안정 API는 없고, 패키지
   레지스트리에 올린 것도 아직 없다.
 - Orca 연동은 선택 adapter로 있고 지금은 꺼져 있다.
-- 로컬 전체 테스트는 macOS에서 실행했다. 다만 이 결과는
-  [이식성 계약](docs/architecture/PORTABILITY_CONTRACT.md)의 프로세스 트리 종료·경로
-  이탈·심볼릭 링크 전용 검사를 수행했다는 뜻이 아니므로 macOS 플랫폼 판정은 아직
-  보류다. Linux 릴리스 검사는 통과했다고 주장하지 않으며, Windows 설치와 Job
-  Object 동작은 실험적 범위다.
+- macOS generic adapter 전용 검사는 macOS 26.5.2 x86_64와 Python 3.11·3.14에서
+  통과했다. 프로세스 트리 종료, 경로·심볼릭 링크 이탈, 대소문자 충돌, journal 공개,
+  replay, idempotency를 확인했다. 이는 기록된 Mac 한 대의 결과이지 모든 Mac을
+  보장하지 않는다. Linux 릴리스 검사는 통과했다고 주장하지 않으며, Windows 설치와
+  Job Object 동작은 실험적 범위다.
 
 ## 문서
 

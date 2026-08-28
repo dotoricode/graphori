@@ -2,6 +2,19 @@
 
 실제로 실행한 명령만 기록합니다. 특정 플랫폼 전체를 지원한다는 주장은 아닙니다.
 
+## 2026-08-28 · macOS 이식성 전용 검사
+
+- 명령: `python scripts/verify_macos_portability.py`
+- 환경: macOS 26.5.2, x86_64
+- Python: 3.11.15, 3.14.6
+- PASS: 프로세스 트리 종료, 경로 이탈, POSIX 심볼릭 링크 이탈, 대소문자 충돌,
+  JSONL tmp→ready 공개, replay, idempotency.
+- 출력: fixture마다 `platform`, `fixture`, `verdict`, `evidence_id`, `command`,
+  `host`, 자체 포함된 테스트 근거와 SHA-256 hash를 기록합니다.
+
+이 결과는 기록된 호스트와 generic adapter fixture 범위의 macOS 판정만 바꿉니다.
+Linux나 Windows 릴리스 지원 근거는 아닙니다.
+
 ## 2026-08-28 · 공개 릴리스 후속 후보
 
 - 트리: `312bea4`
@@ -35,6 +48,5 @@ Skill, dashboard smoke까지 통과했습니다. 이후 공개 이력에 noreply
 
 ## 근거의 경계
 
-위 명령은 이식성 계약의 프로세스 트리 종료·경로 이탈·심볼릭 링크 전용 검사를
-충족하지 않습니다. 따라서 macOS 플랫폼 판정은 보류입니다. Linux 릴리스 검사는
-통과했다고 주장하지 않으며, Windows 설치와 Job Object 동작은 실험적 범위입니다.
+macOS 전용 검사는 위 호스트 범위에서 통과했습니다. Linux 릴리스 검사는 통과했다고
+주장하지 않으며, Windows 설치와 Job Object 동작은 실험적 범위입니다.

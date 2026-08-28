@@ -7,5 +7,5 @@
 - dashboard와 학습 게임은 설명용 UI이지 외부 provider가 활성이라는 증거가 아닙니다.
 - 작은 과거 v1 방식/v2 비교 수치 하나를 공개합니다. 세 조건 공개 benchmark는 결과 없이 protocol만 준비돼 있습니다.
 - 공개 릴리스 근거는 로컬 검사기가 만듭니다. 이 저장소는 GitHub Actions를 사용하지 않습니다.
-- 전체 테스트는 macOS에서 실행했지만 프로세스 트리 종료·경로 이탈·심볼릭 링크 전용 이식성 검사는 아직 수행하지 않았습니다. 따라서 macOS 플랫폼 판정은 보류입니다. Linux 릴리스 검사는 통과했다고 주장하지 않으며, Windows 설치와 Job Object 동작은 실험적 범위입니다.
+- generic adapter 전용 검사는 macOS 26.5.2 x86_64 한 대에서 Python 3.11·3.14로 통과했습니다. 이 결과는 해당 환경의 근거이며 모든 macOS 버전과 CPU를 보장하지 않습니다. Linux 릴리스 검사는 통과했다고 주장하지 않으며, Windows 설치와 Job Object 동작은 실험적 범위입니다.
 - Actions를 쓰지 않으므로 CodeQL, OpenSSF Scorecard, OIDC 빌드 증명은 이번 릴리스 범위에 없습니다. 공개 근거의 경계는 Gitleaks, `pip-audit`, SBOM, 산출물 해시와 재현 가능한 로컬 명령입니다.

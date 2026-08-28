@@ -35,6 +35,10 @@
 - `scripts/verify_public_release.py` now accepts a linked Git worktree as well
   as an ordinary clone. It previously required `.git` to be a directory even
   though Git stores a control file at a linked worktree root.
+- The macOS generic-adapter verdict no longer rests on the full suite alone.
+  A dedicated local fixture now verifies process-tree termination, path and
+  POSIX symlink escape, case collisions, journal publication, replay, and
+  idempotency, and emits one hashed evidence record per boundary.
 - `THIRD_PARTY_NOTICES.md` listed IBM Plex Sans KR fonts that this repository
   does not ship.
 - Several documents overstated what is verified. The README claimed macOS `run`

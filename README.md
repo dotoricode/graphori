@@ -254,11 +254,11 @@ deliberately.
 - `0.9.0-beta.1` is a beta and the name says so. No stable API, and nothing is
   published to a package registry yet.
 - Orca integration exists as an optional adapter and is currently off.
-- The local test suite runs on macOS. That is not the dedicated process-tree,
-  path-escape, and symlink acceptance fixture required by the
-  [portability contract](docs/architecture/PORTABILITY_CONTRACT.md), so the
-  macOS platform verdict remains deferred. No Linux release gate is claimed;
-  Windows installation and Job Object behavior remain experimental.
+- The dedicated macOS generic-adapter fixture passed on macOS 26.5.2 x86_64
+  with Python 3.11 and 3.14. It covers process-tree termination, path and
+  symlink escape, case collisions, journal publication, replay, and
+  idempotency. This is one recorded host, not every Mac. No Linux release gate
+  is claimed; Windows installation and Job Object behavior remain experimental.
 
 ## Documentation
 
