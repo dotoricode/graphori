@@ -134,6 +134,15 @@ class ModelRouterContractTests(unittest.TestCase):
         self.assertIsNone(decision.primary.quality_score)
         self.assertEqual(decision.benchmark_confidence, "partial")
 
+    def test_cross_provider_verification_routes_back_to_codex_after_claude_work(self):
+        decision = self.router.route(TaskFeatures(
+            "verify", "verification", "reviewer", "high", 1, 2, 1,
+            "verification", True, False,
+            requires_cross_provider=True, excluded_provider="anthropic",
+        ))
+        self.assertEqual(decision.primary.provider, "openai")
+        self.assertEqual(decision.primary.adapter, "codex")
+
     def test_frontier_cross_provider_synthesis_routes_to_premium_opus_identity(self):
         decision = self.router.route(TaskFeatures(
             "frontier", "design", "worker", "critical", 3, 7, 3,

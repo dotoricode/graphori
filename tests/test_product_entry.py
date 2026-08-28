@@ -1,7 +1,9 @@
 import asyncio
 import contextlib
 import io
+import json
 import os
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -24,6 +26,7 @@ from graphori_core import (
     SessionHandle,
 )
 from graphori_core.product import ProductPlanCompiler, execute_product, render_plan_preview
+from graphori_core.product import _verifier_command
 from graphori_core import product_cli
 from graphori_core.product_cli import _render_human_status, build_parser
 from graphori_core.presentation import normalized_locale, objective_locale, resolve_locale
@@ -87,6 +90,20 @@ class WritingAdapter(RecordingAdapter):
         return handle
 
 
+class FailingReviewAdapter(RecordingAdapter):
+    async def events(self, dispatch):
+        yield RuntimeEvent(
+            "worker_finished", dispatch.node_id, "worker",
+            {"outcome": "failed", "summary": "Blocking issue found"},
+        )
+
+    async def collect(self, dispatch):
+        return ExecutionResult(
+            "failed", summary="Blocking issue found", runtime_id=dispatch.value,
+            attempt_id=f"attempt:{dispatch.node_id}:1", open_risks=("blocking issue",),
+        )
+
+
 class ProductPlanTests(unittest.TestCase):
     def setUp(self):
         self.compiler = ProductPlanCompiler(availability={
@@ -104,7 +121,7 @@ class ProductPlanTests(unittest.TestCase):
             verification_argv=(sys.executable, "-m", "unittest", "discover", "-s", "tests"),
         )
         plan = bundle.plan
-        self.assertEqual([node.node_id for node in plan.nodes], ["d1", "i1", "r1", "r2", "v1"])
+        self.assertEqual([node.node_id for node in plan.nodes], ["cr1", "d1", "i1", "r1", "r2", "v1"])
         self.assertEqual(next(node for node in plan.nodes if node.node_id == "d1").dependencies,
                          ("r1", "r2"))
         self.assertEqual(next(node for node in plan.nodes if node.node_id == "v1").adapter,
@@ -118,6 +135,130 @@ class ProductPlanTests(unittest.TestCase):
         })
         self.assertTrue(next(node for node in plan.nodes if node.node_id == "i1").model)
         self.assertIn("v1", bundle.process_commands)
+
+    def test_cross_review_uses_the_other_ready_provider_before_deterministic_verification(self):
+        bundle = self.compiler.compile(
+            RunSpec(
+                "Fix authentication permission handling", "codex", "/workspace",
+                constraints=RunConstraints(cross_review="always"),
+            ),
+            run_id="run-cross-review", write_scope=("src/auth.py",),
+        )
+        implementation = next(node for node in bundle.plan.nodes if node.node_id == "i1")
+        review = next(node for node in bundle.plan.nodes if node.node_id == "cr1")
+        verifier = next(node for node in bundle.plan.nodes if node.node_id == "v1")
+        self.assertNotEqual(implementation.provider_family, review.provider_family)
+        self.assertEqual(review.role, "reviewer")
+        self.assertEqual(review.write_scope, ())
+        self.assertEqual(review.dependencies, ("i1",))
+        self.assertEqual(verifier.dependencies, ("cr1", "i1"))
+
+    def test_claude_implementation_is_cross_reviewed_by_codex(self):
+        compiler = ProductPlanCompiler(availability={
+            "gpt-5.6-terra": Availability.AVAILABLE,
+            "claude-sonnet-5": Availability.AVAILABLE,
+        })
+        bundle = compiler.compile(
+            RunSpec(
+                "Fix authentication permission handling", "codex", "/workspace",
+                constraints=RunConstraints(
+                    cross_review="always", implementation_provider="claude",
+                ),
+            ),
+            run_id="run-claude-cross-review", write_scope=("src/auth.py",),
+        )
+        implementation = next(node for node in bundle.plan.nodes if node.node_id == "i1")
+        review = next(node for node in bundle.plan.nodes if node.node_id == "cr1")
+        self.assertEqual((implementation.adapter, review.adapter), ("claude", "codex"))
+
+    def test_auto_cross_review_includes_two_files_broad_scope_and_high_uncertainty(self):
+        cases = (
+            (RunConstraints(), ("src/a.py", "src/b.py")),
+            (RunConstraints(), ("src/",)),
+            (RunConstraints(uncertainty="high"), ("src/a.py",)),
+        )
+        for index, (constraints, scope) in enumerate(cases):
+            with self.subTest(scope=scope, uncertainty=constraints.uncertainty):
+                bundle = self.compiler.compile(
+                    RunSpec("Implement the change", "codex", "/workspace",
+                            constraints=constraints),
+                    run_id=f"run-auto-review-{index}", write_scope=scope,
+                )
+                self.assertIn("cr1", {node.node_id for node in bundle.plan.nodes})
+
+    def test_cross_review_degrades_explicitly_when_only_one_provider_is_ready(self):
+        compiler = ProductPlanCompiler(availability={
+            "gpt-5.6-luna": Availability.AVAILABLE,
+            "claude-sonnet-5": Availability.UNAVAILABLE,
+        })
+        bundle = compiler.compile(
+            RunSpec(
+                "Fix authentication permission handling", "codex", "/workspace",
+                constraints=RunConstraints(cross_review="always"),
+            ),
+            run_id="run-single-provider", write_scope=("src/auth.py",),
+        )
+        self.assertNotIn("cr1", {node.node_id for node in bundle.plan.nodes})
+        self.assertTrue(any("Cross-provider review omitted" in item
+                            for item in bundle.assumptions))
+
+    def test_cross_review_policy_is_available_on_plan_and_run_commands(self):
+        parser = build_parser()
+        for command in ("plan", "run"):
+            args = parser.parse_args([command, "Fix it", "--cross-review", "never"])
+            self.assertEqual(args.cross_review, "never")
+        routed = parser.parse_args([
+            "plan", "Fix it", "--implementation-provider", "claude",
+            "--uncertainty", "high",
+        ])
+        self.assertEqual(routed.implementation_provider, "claude")
+        self.assertEqual(routed.uncertainty, "high")
+
+    def test_verification_criteria_are_explicit_and_part_of_the_plan(self):
+        spec = RunSpec(
+            "Fix it", "codex", "/workspace",
+            acceptance_criteria=("AC-01: focused check", "AC-02: manual inspection"),
+        )
+        bundle = self.compiler.compile(
+            spec, run_id="run-criterion-proof", write_scope=("src/a.py",),
+            verification_criteria=("AC-01",),
+        )
+        verifier = next(node for node in bundle.plan.nodes if node.node_id == "v1")
+        self.assertEqual(verifier.evidence_requirements, ("criterion:AC-01",))
+        command = bundle.process_commands["v1"].argv
+        self.assertIn('["AC-01"]', command)
+
+    def test_unknown_verification_criterion_is_rejected(self):
+        spec = RunSpec(
+            "Fix it", "codex", "/workspace",
+            acceptance_criteria=("AC-01: focused check",),
+        )
+        with self.assertRaisesRegex(ValueError, "unknown verification criteria"):
+            self.compiler.compile(
+                spec, run_id="run-bad-proof", write_scope=("src/a.py",),
+                verification_criteria=("AC-99",),
+            )
+
+    def test_failed_mapped_command_records_failed_criterion(self):
+        with tempfile.TemporaryDirectory() as temp:
+            command = _verifier_command(
+                (sys.executable, "-c", "raise SystemExit(7)"),
+                "verdict.json", ("AC-01",),
+            )
+            result = subprocess.run(command.argv, cwd=temp, check=False)
+            self.assertEqual(result.returncode, 0)
+            verdict = json.loads((Path(temp) / "verdict.json").read_text(encoding="utf-8"))
+            self.assertEqual(verdict["verdict"], "revise")
+            self.assertEqual(
+                verdict["criterion_evidence"]["AC-01"]["status"], "FAILED",
+            )
+
+    def test_verify_criterion_is_repeatable_before_the_command(self):
+        args = build_parser().parse_args([
+            "run", "Fix it", "--criterion", "AC-01: focused check",
+            "--verify-criterion", "AC-01", "--verify-command", "python", "-m", "unittest",
+        ])
+        self.assertEqual(args.verify_criterion, ["AC-01"])
 
     def test_preview_shows_team_model_skill_status_and_graph(self):
         spec = RunSpec("작은 버그를 수정해줘", "codex", "/workspace")
@@ -310,6 +451,7 @@ class ProductPlanTests(unittest.TestCase):
             )
             bundle = self.compiler.compile(
                 spec, run_id="run-product-e2e", write_scope=("result.txt",),
+                verification_criteria=("AC-01",),
                 verification_argv=(
                     sys.executable, "-c",
                     "from pathlib import Path; assert Path('result.txt').read_text() == 'ready\\n'",
@@ -340,12 +482,39 @@ class ProductPlanTests(unittest.TestCase):
             from graphori_core.dashboard import DashboardStore
             read_model, _events = DashboardStore(root).canonical_projection(bundle.plan.run_id)
             self.assertEqual(
-                read_model.verification["requirements_status"], "not_proven",
+                read_model.verification["requirements_status"], "proven",
             )
             self.assertEqual(
                 read_model.verification["acceptance_criteria"][0]["status"],
-                "NOT_PROVEN",
+                "PROVEN",
             )
+
+    def test_blocking_cross_review_prevents_the_final_verifier_from_running(self):
+        from graphori_core import GraphExecutionEngine
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            spec = RunSpec(
+                "Fix authentication permission handling", "codex", temp,
+                constraints=RunConstraints(cross_review="always"),
+            )
+            bundle = self.compiler.compile(
+                spec, run_id="run-review-blocks", write_scope=("result.txt",),
+                verification_argv=(sys.executable, "-c", "raise SystemExit(0)"),
+            )
+            codex = WritingAdapter("codex-cli", root)
+            claude = FailingReviewAdapter("claude-code-cli")
+            generic = RecordingAdapter("generic-process")
+            engine = GraphExecutionEngine(
+                adapter=RoutedExecutionAdapter({
+                    "codex": codex, "claude": claude, "generic-process": generic,
+                }),
+                plan_factory=lambda _spec: bundle.plan,
+            )
+            projection = asyncio.run(execute_product(engine, spec, bundle.plan))
+            self.assertEqual(projection.node_states["cr1"], "failed")
+            self.assertEqual(projection.node_states["v1"], "pending")
+            self.assertEqual(projection.terminal_status, "failed")
+            self.assertEqual(generic.started, [])
 
     def test_contending_product_run_does_not_persist_sidecars_before_lock(self):
         from graphori_core import GraphExecutionEngine

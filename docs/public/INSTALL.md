@@ -94,6 +94,11 @@ repo_root="$(pwd -P)"
 graphori run "add a docstring to the parser" \
   --root "$repo_root" \
   --write-scope src/parser.py \
+  --criterion "AC-01: parser test passes" \
+  --verify-criterion AC-01 \
+  --cross-review auto \
+  --implementation-provider auto \
+  --uncertainty auto \
   --verify-command python -m unittest tests.test_parser
 ```
 
@@ -107,6 +112,20 @@ graphori plan "add a docstring to the parser" --root $root --lang en
 `--write-scope` bounds what the run may touch. `--verify-command` is the check
 that decides the verdict; leave it out and Graphori picks a default for the
 workspace — the unit test suite, then `compileall`, then `git diff --check`.
+
+`--verify-criterion` explicitly maps that command to a declared criterion and
+is repeatable. It must appear before `--verify-command`, which consumes all
+remaining argv. Criteria without an explicit mapping remain `NOT_PROVEN` even
+when the command exits successfully.
+
+`--cross-review auto` adds a read-only review by the provider opposite the
+implementer for sensitive changes, two or more write scopes, directory or glob
+scopes, high-uncertainty work, and synthesis-heavy changes when both Codex and
+Claude Code are installed, compatible, and authenticated. `always` applies the
+policy to every implementation; `never` disables it. Implementation routing is
+automatic unless `--implementation-provider codex|claude` pins it. Use
+`--uncertainty high` to declare known uncertainty. Run `graphori doctor --json`
+to inspect the sanitized readiness state without making a model call.
 
 ## Choosing the output language
 

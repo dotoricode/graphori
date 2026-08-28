@@ -21,6 +21,14 @@ class CodexExecutionAdapter(StructuredCliAdapter):
     def _help_argv(self) -> tuple[str, ...]:
         return (*self.executable, "exec", "--help")
 
+    def _auth_argv(self) -> tuple[str, ...]:
+        return (*self.executable, "login", "status")
+
+    def _auth_ready(
+            self, stdout: bytes, stderr: bytes, exit_code: int | None) -> bool:
+        del stdout, stderr
+        return exit_code == 0
+
     def _command(
             self, envelope: AgentTaskEnvelope, schema_path: Path,
             node: NodeSpec) -> tuple[str, ...]:

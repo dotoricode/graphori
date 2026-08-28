@@ -45,8 +45,9 @@ Graphori가 만든다. 무엇을 같이 돌릴지는 그 그래프가 정한다.
 **노드마다 모델을 고른다.** 기계적인 수정과 설계 판단에 같은 모델을 쓸 이유가
 없으니 같은 모델을 주지 않는다.
 
-**확인하기 전에는 끝났다고 하지 않는다.** 구현 노드마다 검증 노드가 붙고, 실제
-명령을 돌린다. "완료"는 그 명령이 통과했다는 뜻이다.
+**위험한 변경은 반대쪽에서도 본다.** Codex와 Claude Code가 모두 설치·호환·로그인
+상태라면, 위험하거나 범위가 넓은 변경은 구현하지 않은 provider가 읽기 전용으로
+교차 리뷰한다. 마지막 PASS는 여전히 실제 deterministic 명령만 결정한다.
 
 ## 다섯 개 팀
 
@@ -66,9 +67,16 @@ Graphori는 다섯 역할을 두고 계획한다. 노드는 하나의 팀에 속
 "오타 고쳐줘"는 안 붙는다. 알아 둘 만한 이유가 있다 — 필요하면 그렇게 적어서 부를 수
 있다는 뜻이다.
 
-제작과 검증은 항상 별개 노드에 별개 역할이라 자기 일에 자기가 도장을 찍지 못한다.
-다만 그 분리는 계획기가 그래프를 그렇게 짜서 생긴다. 이벤트 계층은 판정이 검증자에게서
-왔는지만 확인하지, 그 검증자가 작업자와 다른 주체인지까지 대조하지는 않는다.
+제작과 최종 검증은 항상 별개 노드에 별개 역할이라 자기 일에 자기가 도장을 찍지 못한다.
+교차 리뷰가 켜지면 그래프는 `구현 -> 다른 provider의 읽기 전용 리뷰 -> deterministic
+검사`가 된다. AI 리뷰는 다음 검사를 막을 수 있지만 최종 PASS를 줄 수는 없다.
+
+기본값은 `--cross-review auto`다. 보안·인증·인가·권한, write scope 2개 이상,
+디렉터리·glob 범위, 불확실성이 높은 작업, 조사/설계 종합 작업에 다른 provider를 붙인다.
+모든 구현에 강제하려면 `always`, 끄려면 `never`를 쓴다. 둘 다 준비되지 않았으면 이유를
+계획에 기록하고 deterministic 검증만 계속한다. 축소됐다는 사실을 숨기지 않는다.
+구현 provider는 기본적으로 자동 배정하며 `--implementation-provider claude` 또는
+`codex`로 고정하면 준비된 반대 provider가 리뷰한다.
 
 작은 수정이면 운영실·제작팀·품질관리팀만 쓰고, 그렇다고 말한다.
 
@@ -186,6 +194,25 @@ codex plugin add graphori@graphori
 Skill만 있으면 된다. `graphori` 명령줄, journal 재생, 이어서 실행이 필요하면 별도
 Python 런타임을 얹을 수 있는데 선택 사항이고 [INSTALL.md](docs/public/INSTALL.md)에
 정리해 뒀다.
+
+모델을 호출하지 않고 로컬 provider 경계만 확인할 수 있다.
+
+```sh
+graphori doctor --json
+graphori plan "Fix authentication permission handling" \
+  --criterion "AC-01: permission regression test passes" \
+  --verify-criterion AC-01 \
+  --cross-review auto \
+  --implementation-provider claude \
+  --uncertainty high
+```
+
+provider 진단은 호환 여부와 인증의 `ready` / `not_ready` 상태만 보여 준다. credential이나
+계정 상세 정보는 출력하지 않는다.
+
+`--verify-criterion AC-01`은 뒤의 검증 명령이 AC-01을 증명한다고 명시한다.
+나머지 인자를 모두 받는 `--verify-command`보다 앞에 둔다. 연결하지 않은 기준은
+`NOT_PROVEN`으로 남으며, 명령 하나가 모든 요구사항을 증명한다고 추정하지 않는다.
 
 ## 무엇을 측정했나
 

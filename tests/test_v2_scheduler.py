@@ -82,6 +82,21 @@ class V2SchedulerContractTests(unittest.TestCase):
         self.assertEqual(tuple(item.node_id for item in batch.dispatches), ("verify",))
         self.assertNotIn("implement", batch.ready)
 
+    def test_awaiting_verification_releases_a_read_only_reviewer(self):
+        scheduler = Scheduler(SchedulerPolicy(max_wip=1))
+        plan = self.plan(
+            node("implement", write=("src/feature.py",)),
+            NodeSpec(
+                "review", "verification", "Review", "review", "worker",
+                role="reviewer", dependencies=("implement",), read_scope=("src/",),
+                verification_policy="deterministic", reviews_unverified_dependencies=True,
+            ),
+        )
+        batch = scheduler.decide(
+            plan, SchedulingState(node_states={"implement": "awaiting_verification"}),
+        )
+        self.assertEqual(tuple(item.node_id for item in batch.dispatches), ("review",))
+
     def test_premium_gate_blocks_only_its_node(self):
         plan = self.plan(
             node("premium", approval=True, read=("premium",)),

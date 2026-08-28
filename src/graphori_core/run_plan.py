@@ -85,6 +85,7 @@ class NodeSpec:
     external_effect: bool = False
     acceptance_criteria: tuple[str, ...] = ()
     evidence_requirements: tuple[str, ...] = ()
+    reviews_unverified_dependencies: bool = False
 
     def __post_init__(self) -> None:
         if not self.node_id.strip() or not self.title.strip() or not self.objective.strip():

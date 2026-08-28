@@ -57,6 +57,22 @@
 
 ### Changed
 
+- Runtime can now add a read-only cross-provider review with
+  `--cross-review auto|always|never`. It checks Codex and Claude Code CLI
+  compatibility plus local authentication without a model call, assigns the
+  provider opposite the implementer, and keeps the deterministic command as
+  the only source of final PASS. A missing provider is an explicit
+  deterministic-only downgrade; a dispatched unknown outcome is never silently
+  rerouted.
+- `--verify-criterion ID` now explicitly maps a deterministic verification
+  command to the acceptance criteria it proves. Mapped criteria become PROVEN
+  or FAILED from that command; unmapped criteria remain NOT_PROVEN. The mapping
+  is stored in the plan's evidence requirements and survives replay.
+- Cross-provider review now supports both Codex-to-Claude and Claude-to-Codex
+  paths through `--implementation-provider`. Auto review also covers two-file,
+  directory, glob, and explicitly high-uncertainty changes. A blocking review
+  terminates the run as failed instead of leaving pending descendants stranded.
+
 - The public benchmark now includes the completed 72-run Direct/v1-style/
   Graphori v2 matrix for Codex and Claude. Raw JSONL, deterministic analysis,
   task fixtures, provider-separated reports, and complete README metrics are

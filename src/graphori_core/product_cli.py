@@ -20,7 +20,7 @@ from .execution_engine import GraphExecutionEngine
 from .dashboard import DashboardStore, create_server
 from .journal import ensure_run_dirs
 from .journal import RunPaths, replay_journal
-from .model_routing import Availability
+from .model_routing import Availability, default_model_catalog
 from .process_supervisor import ProcessLimits
 from .presentation import (doctor_label, effort_label, normalized_locale,
                            resolve_locale, route_label, runtime_label,
@@ -68,9 +68,25 @@ _HELP_TEXT = {
         "en": "Stable acceptance criterion, for example AC-01: tests pass.",
         "ko": "안정적인 완료 기준입니다. 예: AC-01: 테스트 통과",
     },
+    "verify_criterion": {
+        "en": "Acceptance criterion ID proven by the verification command (repeatable).",
+        "ko": "검증 명령이 증명하는 완료 기준 ID입니다. 여러 번 지정할 수 있습니다.",
+    },
     "language": {
         "en": "Help and output language: auto, en, or ko.",
         "ko": "도움말과 출력 언어: auto, en, ko 중 하나입니다.",
+    },
+    "cross_review": {
+        "en": "Cross-provider review policy: auto, always, or never.",
+        "ko": "교차 제공자 리뷰 정책: auto, always, never 중 하나입니다.",
+    },
+    "implementation_provider": {
+        "en": "Implementation provider: auto, codex, or claude.",
+        "ko": "구현 제공자: auto, codex, claude 중 하나입니다.",
+    },
+    "uncertainty": {
+        "en": "Task uncertainty used by auto review: auto, low, medium, or high.",
+        "ko": "자동 리뷰 판단에 사용할 작업 불확실성: auto, low, medium, high 중 하나입니다.",
     },
     "dashboard_run": {
         "en": "Run ID to display (default: latest run).",
@@ -98,6 +114,8 @@ def _bootstrap_objective(argv: list[str]) -> str:
     value_options = {
         "--root", "--host", "--run-id", "--max-parallelism", "--read-scope",
         "--write-scope", "--timeout", "--criterion", "--lang", "--locale",
+        "--cross-review", "--implementation-provider", "--uncertainty",
+        "--verify-criterion",
     }
     flag_options = {"--no-network", "--json", "--help", "-h"}
     objective: list[str] = []
@@ -168,14 +186,13 @@ def _direct_adapters(root: Path, timeout: float):
 
 
 def _availability(codex, claude) -> dict[str, Availability]:
-    result: dict[str, Availability] = {}
     codex_status = Availability.AVAILABLE if codex.probe().available else Availability.UNAVAILABLE
     claude_status = Availability.AVAILABLE if claude.probe().available else Availability.UNAVAILABLE
-    for model in ("gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.6-sol"):
-        result[model] = codex_status
-    for model in ("claude-sonnet-5", "claude-opus-5"):
-        result[model] = claude_status
-    return result
+    adapter_status = {"codex": codex_status, "claude": claude_status}
+    return {
+        model.runtime_model_id: adapter_status[model.adapter]
+        for model in default_model_catalog().provider_catalog.models
+    }
 
 
 def _spec(args: argparse.Namespace, root: Path) -> RunSpec:
@@ -186,6 +203,9 @@ def _spec(args: argparse.Namespace, root: Path) -> RunSpec:
         constraints=RunConstraints(
             max_parallelism=args.max_parallelism,
             allow_network=not args.no_network,
+            cross_review=args.cross_review,
+            implementation_provider=args.implementation_provider,
+            uncertainty=args.uncertainty,
         ),
         runtime_preference=("codex", "claude", "generic_process"),
         acceptance_criteria=criteria,
@@ -209,6 +229,7 @@ def _bundle(args: argparse.Namespace, *, probe: bool = True):
         read_scope=tuple(args.read_scope or (".",)),
         write_scope=tuple(args.write_scope or (".",)),
         verification_argv=verify,
+        verification_criteria=tuple(args.verify_criterion),
     )
     return root, spec, bundle, codex, claude
 
@@ -476,7 +497,11 @@ def cmd_doctor(args: argparse.Namespace) -> int:
             lock_status = doctor_label("lock_unreadable", locale)
     values: dict[str, object] = {
         "mode": "read_only", "providers": {
-            name: {"available": probe.available, "reason": probe.reason}
+            name: {
+                "available": probe.available,
+                "authentication": probe.authentication,
+                "reason": probe.reason,
+            }
             for name, probe in providers.items()
         },
         "schemas": {"RunSpec": 2, "RunPlan": 2, "journal_event": 1,
@@ -750,8 +775,24 @@ def build_parser(*, locale: str = "en") -> argparse.ArgumentParser:
         command.add_argument("--write-scope", action="append", default=[])
         command.add_argument("--timeout", type=float, default=300)
         command.add_argument("--no-network", action="store_true")
+        command.add_argument(
+            "--cross-review", choices=("auto", "always", "never"), default="auto",
+            help=_help_text("cross_review", locale),
+        )
+        command.add_argument(
+            "--implementation-provider", choices=("auto", "codex", "claude"),
+            default="auto", help=_help_text("implementation_provider", locale),
+        )
+        command.add_argument(
+            "--uncertainty", choices=("auto", "low", "medium", "high"),
+            default="auto", help=_help_text("uncertainty", locale),
+        )
         command.add_argument("--criterion", action="append", default=[], metavar="ID:DESCRIPTION",
                              help=_help_text("criterion", locale))
+        command.add_argument(
+            "--verify-criterion", action="append", default=[], metavar="ID",
+            help=_help_text("verify_criterion", locale),
+        )
         command.add_argument("--verify-command", nargs=argparse.REMAINDER)
         command.add_argument("--json", action="store_true")
         _add_locale_argument(command, locale=locale)

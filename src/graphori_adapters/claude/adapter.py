@@ -27,6 +27,20 @@ class ClaudeCodeExecutionAdapter(StructuredCliAdapter):
         "--disable-slash-commands",
     )
 
+    def _auth_argv(self) -> tuple[str, ...]:
+        return (*self.executable, "auth", "status")
+
+    def _auth_ready(
+            self, stdout: bytes, stderr: bytes, exit_code: int | None) -> bool:
+        del stderr
+        if exit_code != 0:
+            return False
+        try:
+            value = json.loads(stdout.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            return False
+        return isinstance(value, dict) and value.get("loggedIn") is True
+
     def _command(
             self, envelope: AgentTaskEnvelope, schema_path: Path,
             node: NodeSpec) -> tuple[str, ...]:
