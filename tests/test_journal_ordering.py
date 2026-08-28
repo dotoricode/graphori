@@ -158,6 +158,25 @@ class JournalOrderingTests(unittest.TestCase):
             ready = submit_event(paths, envelope, local_seq=1)
         self.assertEqual(journal._submission_ordinal(ready), 10**19)
 
+        wide_local_seq = submit_event(paths, envelope, local_seq=10**12)
+        self.assertIsNotNone(journal._submission_ordinal(wide_local_seq))
+
+    def test_negative_local_sequence_fails_before_writing(self):
+        paths = ensure_run_dirs(self.root, "run-order-negative-local-seq")
+        envelope = canonical_event(
+            "heartbeat", event_id="evt_negative_local_seq",
+            run_id="run-order-negative-local-seq", actor_role="worker",
+        )
+        envelope["producer_event_id"] = "producer:worker:-1"
+        envelope["actor"] = {"role": "worker", "role_id": "worker"}
+        for field in ("seq", "recorded_at", "prev_digest", "digest"):
+            envelope.pop(field, None)
+
+        with self.assertRaisesRegex(StateTransitionError, "local_seq"):
+            submit_event(paths, envelope, local_seq=-1)
+        self.assertEqual(list(paths.tmp.iterdir()), [])
+        self.assertEqual(list(paths.ready.iterdir()), [])
+
     def test_legacy_producer_named_v2_is_not_a_submission_ordinal(self):
         paths = ensure_run_dirs(self.root, "run-order-legacy-v2-producer")
         envelope = canonical_event(

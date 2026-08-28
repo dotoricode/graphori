@@ -38,7 +38,7 @@ GENESIS_DIGEST = "sha256:" + "0" * 64
 _SUBMISSION_PROTOCOL = "v2"
 _SUBMISSION_ORDINAL = re.compile(
     rf"^{re.escape(_SUBMISSION_PROTOCOL)}\.(\d+)\."
-    r"[A-Za-z0-9_-]+\.\d{12}\.[0-9a-f]{32}\.json$"
+    r"[A-Za-z0-9_-]+\.\d+\.[0-9a-f]{32}\.json$"
 )
 
 
@@ -311,6 +311,8 @@ def _write_submission_counter(paths: RunPaths, value: int) -> None:
 def submit_event(paths: RunPaths, envelope: Mapping[str, Any], *, local_seq: int) -> Path:
     """Write ``envelope`` to inbox/tmp then atomically rename it into inbox/ready."""
     _validate_producer_envelope(envelope, paths.run_id)
+    if isinstance(local_seq, bool) or not isinstance(local_seq, int) or local_seq < 0:
+        raise StateTransitionError("local_seq must be a non-negative integer")
     producer_id = _sanitize_id(envelope["actor"]["role_id"])
     unique = uuid.uuid4().hex
     tmp_path = safe_join(paths.tmp, f"{producer_id}.{local_seq:012d}.{unique}.tmp")
