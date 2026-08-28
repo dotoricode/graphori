@@ -25,12 +25,12 @@ See [LIMITATIONS.md](LIMITATIONS.md) for the user-facing boundary.
 
 ## Clean-history publication procedure
 
-The original development repository was not made public in place. The exported public repository is live, but its current history audit still reports one non-noreply author identity. Do not claim the full release gate until that is resolved with an explicitly approved history decision.
+The reviewed public tree was replaced on 2026-08-28 with the parentless noreply
+commit `83fe5a5`. Before the force update, that exact commit passed the complete local
+release verifier in an isolated one-commit repository. The old prerelease tag and the
+three ordinary remote work branches were removed. A fresh public clone contains one
+noreply commit and passes the tree/history privacy audit.
 
-1. Export the reviewed tree with `scripts/export_public_tree.py`.
-2. Create a new `main` history with a noreply author identity.
-3. Run `scripts/verify_public_release.py` in that repository.
-4. Use `gh` to preserve the development repository as private, move the clean repository to `dotoricode/graphori`, disable Actions, and change only the clean repository to public.
-5. Use `gh api` to enable vulnerability alerts, automated security fixes, secret scanning, push protection, and private vulnerability reporting where GitHub supports them.
-
-No development branch, tag, pull request, Actions artifact, or old release is copied into the public repository.
+This rewrites ordinary Git refs; it cannot retract copies already fetched by another
+party or promise that hosting caches and merged pull-request metadata no longer retain
+old object identifiers. No secret was found by the tree or history Gitleaks scans.

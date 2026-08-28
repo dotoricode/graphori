@@ -198,8 +198,67 @@ documented in [INSTALL.md](docs/public/INSTALL.md).
 
 ## What was measured
 
-Three experiments settled current defaults. All three said "don't", and the
-defaults follow.
+### Public 72-run comparison
+
+Direct, v1-style, and Graphori v2 were run on four deterministic Python tasks,
+three times per cell, and reported separately for Codex and Claude. Every arm
+used the same starting files, model, effort, visible and hidden tests, and write
+scope within its provider/task cell.
+
+TTUR is wall time from creating the fresh fixture through finishing the hidden
+verifier. It includes provider work and both visible and hidden checks.
+
+**Codex · `gpt-5.6-terra`, medium · 12 runs per arm**
+
+| Metric | Direct | v1-style | Graphori v2 |
+| --- | ---: | ---: | ---: |
+| Successful runs | 12/12 | 12/12 | 12/12 |
+| Hidden tests | 36/36 | 36/36 | 36/36 |
+| Completion claims matched | 12/12 | 12/12 | 12/12 |
+| Scope violations | 0 | 0 | 0 |
+| Rework | 0 | 0 | 0 |
+| AI sessions | 12 | 24 | 12 |
+| Median TTUR | 29.059 s | 54.683 s | 34.823 s |
+| Total input tokens | 967,834 | 1,614,763 | 1,080,869 |
+| Cached input tokens | 800,512 | 1,330,688 | 905,984 |
+| Fresh input tokens | 167,322 | 284,075 | 174,885 |
+| Output tokens | 11,905 | 19,714 | 15,109 |
+| Provider-reported cost | unknown | unknown | unknown |
+
+**Claude · `claude-sonnet-5`, medium · 12 runs per arm**
+
+| Metric | Direct | v1-style | Graphori v2 |
+| --- | ---: | ---: | ---: |
+| Successful runs | 12/12 | 12/12 | 12/12 |
+| Hidden tests | 36/36 | 36/36 | 36/36 |
+| Completion claims matched | 12/12 | 12/12 | 12/12 |
+| Scope violations | 0 | 0 | 0 |
+| Rework | 0 | 0 | 0 |
+| AI sessions | 12 | 24 | 12 |
+| Median TTUR | 22.723 s | 55.287 s | 23.866 s |
+| Total input tokens | 1,413,288 | 2,819,151 | 1,413,366 |
+| Cached input tokens | 1,228,242 | 2,426,808 | 1,228,245 |
+| Fresh input tokens | 185,046 | 392,343 | 185,121 |
+| Output tokens | 14,659 | 33,394 | 14,534 |
+| Provider-reported cost | $1.1322 | $2.3883 | $1.1313 |
+
+Against v1-style, Graphori v2 used 50% fewer AI sessions and reduced median
+TTUR by 36.3% on Codex and 56.8% on Claude. Against Direct, v2 paid for its
+deterministic verification and journal: median TTUR was 19.8% higher on Codex
+and 5.0% higher on Claude. Claude token use and provider-reported cost were
+effectively flat versus Direct; Codex total input was 11.7% higher. This is not
+a claim that orchestration beats Direct on small tasks.
+
+The tasks are small deterministic fixtures, not production repositories. `n=12`
+per provider/arm. [Protocol](benchmarks/three_arm/PROTOCOL.md) ·
+[Report](benchmarks/three_arm/REPORT.md) ·
+[Raw JSONL](benchmarks/three_arm/raw-results.jsonl) ·
+[Calculated result](benchmarks/three_arm/results.json)
+
+### Earlier default-setting experiments
+
+Three earlier experiments settled current defaults. All three said "don't",
+and the defaults follow.
 
 **Does a second AI reviewer catch what the first missed?** Two Python tasks,
 four runs per arm, Codex only. It found nothing and doubled the AI calls. So v2
@@ -228,9 +287,6 @@ python benchmarks/v1_v2/verify_results.py
 ```
 
 [Method](benchmarks/v1_v2/PROTOCOL.en.md) · [Report](benchmarks/v1_v2/REPORT.en.md) · [Raw data](benchmarks/v1_v2/raw-results.json)
-
-The separate 72-run Direct/v1-style/v2 protocol in [`benchmarks/`](benchmarks/)
-has not run and contributes no numbers to this README.
 
 **Should Graphori attach other Agent Skills to a node automatically?** It can
 bind an external Skill to a step. Two skills were used as probes — `ponytail`

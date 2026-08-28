@@ -122,7 +122,7 @@ class LocalReleaseContractTests(unittest.TestCase):
                     shared.index("gh repo clone dotoricode/graphori -- --depth 1"),
                 )
 
-    def test_readmes_publish_the_complete_small_benchmark_boundary(self):
+    def test_readmes_publish_completed_public_and_historical_benchmark_boundaries(self):
         required = (
             "567,584", "333,681", "396,800", "267,776", "170,784",
             "65,905", "4,960", "3,309", "48.5", "32.1", "72",
@@ -133,7 +133,15 @@ class LocalReleaseContractTests(unittest.TestCase):
                 for value in required:
                     self.assertIn(value, text)
                 self.assertIn("not recorded" if name == "README.md" else "기록 안 됨", text)
-                self.assertIn("has not run" if name == "README.md" else "아직 실행하지", text)
+                self.assertIn(
+                    "Public 72-run comparison" if name == "README.md" else "공개 72회 비교",
+                    text,
+                )
+                for value in ("12/12", "36/36", "1,614,763", "2,819,151", "$2.3883"):
+                    self.assertIn(value, text)
+                self.assertNotIn(
+                    "has not run" if name == "README.md" else "아직 실행하지", text,
+                )
 
 
 if __name__ == "__main__":

@@ -25,12 +25,11 @@ python3.11 scripts/verify_public_release.py --output <새로운-산출물-폴더
 
 ## 깨끗한 이력으로 공개하는 순서
 
-기존 개발 저장소는 그대로 공개하지 않았습니다. 내보낸 공개 저장소는 현재 public이지만, 현재 이력 감사에는 noreply가 아닌 작성자 식별값 1개가 남아 있습니다. 명시적으로 승인된 이력 처리 결정 전에는 전체 릴리스 검사를 통과했다고 주장하지 않습니다.
+2026-08-28에 검토한 공개 tree를 부모가 없고 noreply 작성자인 commit `83fe5a5`로
+교체했습니다. 강제 갱신 전에 그 commit만 있는 격리 저장소에서 전체 로컬 릴리스
+검사를 통과했습니다. 과거 prerelease tag와 일반 원격 작업 branch 3개를 제거했습니다.
+새 public clone은 noreply commit 1개만 가지며 tree/history 개인정보 감사를 통과합니다.
 
-1. `scripts/export_public_tree.py`로 검토한 트리만 내보냅니다.
-2. noreply 작성자로 새로운 `main` 이력을 만듭니다.
-3. 새 저장소에서 `scripts/verify_public_release.py`를 실행합니다.
-4. `gh`로 개발 저장소는 private 보관소로 남기고, 깨끗한 저장소만 `dotoricode/graphori`로 옮긴 뒤 Actions를 비활성화하고 public으로 변경합니다.
-5. GitHub가 지원하는 범위에서 vulnerability alert, automated security fix, secret scanning, push protection, private vulnerability reporting을 `gh api`로 활성화합니다.
-
-개발 저장소의 branch, tag, pull request, Actions artifact, 과거 release는 공개 저장소로 옮기지 않습니다.
+이는 일반 Git ref를 재작성한 결과입니다. 이미 다른 사람이 내려받은 복사본을 회수하거나
+hosting cache와 병합된 PR metadata에서 과거 object identifier가 완전히 사라졌다고
+보장할 수는 없습니다. Tree와 이력 Gitleaks 검사에서는 secret을 찾지 못했습니다.

@@ -4,12 +4,18 @@
   "type": "object",
   "required": ["schema_version", "run_id", "arm", "provider", "repetition", "task_id", "started_at", "finished_at", "command", "outcome", "usage", "quality", "evidence"],
   "properties": {
-    "schema_version": {"const": 1},
+    "schema_version": {"enum": [1, 2]},
     "run_id": {"type": "string", "minLength": 1},
     "arm": {"enum": ["direct", "v1-style", "graphori-v2"]},
     "provider": {"enum": ["codex", "claude"]},
     "repetition": {"type": "integer", "minimum": 1},
     "task_id": {"type": "string", "minLength": 1},
+    "task_category": {"type": "string", "minLength": 1},
+    "execution_index": {"type": "integer", "minimum": 1},
+    "source_commit": {"type": "string", "minLength": 7},
+    "model": {"type": "string", "minLength": 1},
+    "effort": {"type": "string", "minLength": 1},
+    "provider_cli_version": {"type": "string", "minLength": 1},
     "started_at": {"type": "string", "format": "date-time"},
     "finished_at": {"type": "string", "format": "date-time"},
     "command": {"type": "array", "items": {"type": "string"}, "minItems": 1},
@@ -30,6 +36,12 @@
       "scope_violations": {"type": ["integer", "null"], "minimum": 0}
     }, "additionalProperties": false},
     "evidence": {"type": "object", "required": ["exit_code"], "properties": {"exit_code": {"type": ["integer", "null"]}, "stdout_sha256": {"type": "string"}, "stderr_sha256": {"type": "string"}}},
+    "claim_matches_hidden": {"type": ["boolean", "null"]},
+    "completion_claim": {"type": ["boolean", "null"]},
+    "changed_paths": {"type": "array", "items": {"type": "string"}},
+    "scope_violation_paths": {"type": "array", "items": {"type": "string"}},
+    "infrastructure_error": {"type": "string"},
+    "error_detail": {"type": "string"},
     "notes": {"type": "string"}
   },
   "additionalProperties": false

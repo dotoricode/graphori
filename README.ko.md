@@ -184,7 +184,65 @@ Python 런타임을 얹을 수 있는데 선택 사항이고 [INSTALL.md](docs/p
 
 ## 무엇을 측정했나
 
-세 실험이 지금 기본값을 정했다. 셋 다 "하지 마라"였고, 기본값이 그 결과를 따른다.
+### 공개 72회 비교
+
+Direct, v1 방식, Graphori v2를 작은 deterministic Python 과제 4종에서 각 조합당
+3회 실행했다. Codex와 Claude 결과는 섞지 않았다. 같은 provider·과제 안에서는 시작
+파일, model, effort, 공개·숨은 검사와 write scope가 모두 같았다.
+
+TTUR은 새 fixture를 만든 시점부터 provider 작업, 공개 검사와 숨은 검사를 모두 마칠
+때까지의 wall time이다.
+
+**Codex · `gpt-5.6-terra`, medium · 조건별 12회**
+
+| 항목 | Direct | v1 방식 | Graphori v2 |
+| --- | ---: | ---: | ---: |
+| 성공한 실행 | 12/12 | 12/12 | 12/12 |
+| 숨은 검사 | 36/36 | 36/36 | 36/36 |
+| 완료 보고와 실제 결과 일치 | 12/12 | 12/12 | 12/12 |
+| 허용 범위 밖 파일 변경 | 0 | 0 | 0 |
+| 재작업 | 0 | 0 | 0 |
+| AI 세션 | 12 | 24 | 12 |
+| TTUR 중앙값 | 29.059초 | 54.683초 | 34.823초 |
+| 전체 입력 토큰 | 967,834 | 1,614,763 | 1,080,869 |
+| 캐시된 입력 토큰 | 800,512 | 1,330,688 | 905,984 |
+| 신규 입력 토큰 | 167,322 | 284,075 | 174,885 |
+| 출력 토큰 | 11,905 | 19,714 | 15,109 |
+| Provider가 보고한 비용 | 알 수 없음 | 알 수 없음 | 알 수 없음 |
+
+**Claude · `claude-sonnet-5`, medium · 조건별 12회**
+
+| 항목 | Direct | v1 방식 | Graphori v2 |
+| --- | ---: | ---: | ---: |
+| 성공한 실행 | 12/12 | 12/12 | 12/12 |
+| 숨은 검사 | 36/36 | 36/36 | 36/36 |
+| 완료 보고와 실제 결과 일치 | 12/12 | 12/12 | 12/12 |
+| 허용 범위 밖 파일 변경 | 0 | 0 | 0 |
+| 재작업 | 0 | 0 | 0 |
+| AI 세션 | 12 | 24 | 12 |
+| TTUR 중앙값 | 22.723초 | 55.287초 | 23.866초 |
+| 전체 입력 토큰 | 1,413,288 | 2,819,151 | 1,413,366 |
+| 캐시된 입력 토큰 | 1,228,242 | 2,426,808 | 1,228,245 |
+| 신규 입력 토큰 | 185,046 | 392,343 | 185,121 |
+| 출력 토큰 | 14,659 | 33,394 | 14,534 |
+| Provider가 보고한 비용 | $1.1322 | $2.3883 | $1.1313 |
+
+v1 방식과 비교하면 Graphori v2는 AI 세션을 50% 줄였고 TTUR 중앙값은 Codex에서
+36.3%, Claude에서 56.8% 줄었다. Direct와 비교하면 deterministic 검증과 journal의
+대가가 보인다. v2 TTUR은 Codex에서 19.8%, Claude에서 5.0% 더 길었다. Claude의
+토큰과 provider 보고 비용은 Direct와 사실상 같았고, Codex 전체 입력은 11.7% 많았다.
+즉 작은 작업에서 orchestration이 Direct보다 빠르다는 결과가 아니다.
+
+실제 production 저장소가 아니라, 같은 입력을 정해진 Python 검사로 판정하는 작은
+fixture다. provider·조건별 `n=12`다. [방법](benchmarks/three_arm/PROTOCOL.ko.md) ·
+[보고서](benchmarks/three_arm/REPORT.ko.md) ·
+[원자료 JSONL](benchmarks/three_arm/raw-results.jsonl) ·
+[계산 결과](benchmarks/three_arm/results.json)
+
+### 이전 기본값 결정 실험
+
+그보다 앞선 세 실험이 지금 기본값을 정했다. 셋 다 "하지 마라"였고, 기본값이 그
+결과를 따른다.
 
 **두 번째 AI 리뷰어가 첫 번째가 놓친 걸 잡아내나?** Python 작업 2종, 각 조건 4회,
 Codex만. 아무것도 못 찾았고 AI 호출만 두 배였다. 그래서 v2는 기본으로 쓰지 않는다.
@@ -212,9 +270,6 @@ python benchmarks/v1_v2/verify_results.py
 ```
 
 [방법](benchmarks/v1_v2/PROTOCOL.md) · [보고서](benchmarks/v1_v2/REPORT.md) · [원자료](benchmarks/v1_v2/raw-results.json)
-
-[`benchmarks/`](benchmarks/)의 Direct/v1 방식/v2 72회 비교 protocol은 아직 실행하지
-않았으며, 위 README 수치에는 포함되지 않는다.
 
 **다른 Agent Skill을 노드에 자동으로 붙여야 하나?** Graphori는 외부 Skill을 단계에
 바인딩할 수 있다. 시험 대상으로 `ponytail`과 `tdd`를 썼는데, 둘 다 Graphori의
