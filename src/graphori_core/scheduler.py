@@ -123,7 +123,8 @@ class Scheduler:
                 blocked.append(node.node_id)
             elif not all(
                 item in _SUCCESS
-                or (node.kind == "verifier" and item == _AWAITING_VERIFICATION)
+                or ((node.kind == "verifier" or node.role == "reviewer")
+                    and item == _AWAITING_VERIFICATION)
                 for item in dependency_states
             ):
                 waiting.append(node.node_id)

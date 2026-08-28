@@ -38,6 +38,7 @@ import time
 
 provider = os.environ.get("FAKE_PROVIDER", "codex")
 mode = os.environ.get("FAKE_MODE", "success")
+authenticated = os.environ.get("FAKE_LOGIN_STATE", "ready") == "ready"
 args = sys.argv[1:]
 if "--version" in args:
     print(f"{provider}-fixture 1.2.3")
@@ -48,6 +49,12 @@ if "--help" in args or (provider == "codex" and args == ["exec", "--help"]):
     else:
         print("-p --output-format --json-schema --no-session-persistence --permission-mode "
               "--allowedTools --disallowedTools --disable-slash-commands --model")
+    raise SystemExit(0)
+if provider == "codex" and args == ["login", "status"]:
+    print("Logged in" if authenticated else "Not logged in", file=sys.stderr)
+    raise SystemExit(0 if authenticated else 1)
+if provider == "claude" and args == ["auth", "status"]:
+    print(json.dumps({"loggedIn": authenticated, "email": "must-not-escape@example.com"}))
     raise SystemExit(0)
 if mode == "sleep":
     time.sleep(30)
@@ -109,11 +116,13 @@ class ProviderAdapterCompatibilityMixin:
             read_scope=(".",), write_scope=(), provider=self.provider,
         )
 
-    def adapter(self, *, mode="success", report=None, limits=None, write_path=""):
+    def adapter(self, *, mode="success", report=None, limits=None, write_path="",
+                authenticated=True):
         env = {
             "FAKE_PROVIDER": self.provider,
             "FAKE_MODE": mode,
             "FAKE_REPORT": json.dumps(report or REPORT),
+            "FAKE_LOGIN_STATE": "ready" if authenticated else "missing",
         }
         if write_path:
             env["FAKE_WRITE_PATH"] = write_path
@@ -124,6 +133,7 @@ class ProviderAdapterCompatibilityMixin:
             process_env_allowlist=frozenset({
                 "PATH", "HOME", "LANG", "LC_ALL", "TMPDIR", "TEMP", "TMP",
                 "FAKE_PROVIDER", "FAKE_MODE", "FAKE_REPORT", "FAKE_WRITE_PATH",
+                "FAKE_LOGIN_STATE",
             }),
             limits=limits or ProcessLimits(timeout_seconds=5, grace_seconds=0.2),
         )
@@ -151,6 +161,7 @@ class ProviderAdapterCompatibilityMixin:
         adapter = self.adapter()
         capabilities = adapter.probe()
         self.assertTrue(capabilities.available)
+        self.assertEqual(capabilities.authentication, "ready")
         self.assertTrue(capabilities.supports_structured_result)
         self.assertFalse(capabilities.supports_reconcile)
         self.assertFalse(capabilities.supports_persistent_session)
@@ -167,6 +178,13 @@ class ProviderAdapterCompatibilityMixin:
         self.assertIn("cleanup_ms", result.runtime_metadata)
         self.assertGreaterEqual(result.total_attempt_ms, result.execution_ms)
         self.assertEqual(adapter.active_handles, 0)
+
+    def test_probe_fails_closed_when_provider_is_not_authenticated(self):
+        capabilities = self.adapter(authenticated=False).probe()
+        self.assertFalse(capabilities.available)
+        self.assertEqual(capabilities.authentication, "not_ready")
+        self.assertEqual(capabilities.reason, "provider authentication is unavailable")
+        self.assertNotIn("must-not-escape", capabilities.reason)
 
     def test_requested_effort_is_forwarded_to_the_provider_cli(self):
         adapter = self.adapter()

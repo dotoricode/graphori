@@ -47,9 +47,10 @@ the plan you see before anything runs.
 **It picks a model per node.** A mechanical edit and a design decision do not
 need the same model, so they do not get the same one.
 
-**It verifies before calling anything done.** Every implementation node gets a
-verification node that runs an actual command. "Complete" means that command
-passed.
+**It checks risky changes from the other side.** When both Codex and Claude Code
+are installed, compatible, and signed in, risky or broad changes get a read-only
+review from the provider that did not implement them. An actual deterministic
+command still decides the final PASS.
 
 ## The five teams
 
@@ -69,10 +70,16 @@ planner judging your task. Asking to "research the rate limit options and then
 implement them" gets you a research phase; "fix the typo" does not. That is
 worth knowing, because it means you can ask for a phase and get it.
 
-Implementation and verification are always separate nodes with separate roles,
-so nothing signs off on its own work. That separation comes from the planner
-building the graph that way — the event layer checks that a verdict comes from
-a verifier, not that the verifier is a different agent than the worker.
+Implementation and final verification are always separate nodes with separate
+roles, so nothing signs off on its own work. With cross-review enabled, the graph
+is `implementation -> other provider's read-only review -> deterministic check`.
+The AI review can block the check, but it cannot issue the final PASS.
+
+`--cross-review auto` is the default. It adds the other provider for security,
+authentication, authorization, permission, broad-scope, and research/design
+synthesis work. Use `always` to require it for any implementation or `never` to
+disable it. If both providers are not ready, Graphori records the reason and
+continues with deterministic verification; it never hides the downgrade.
 
 A typical small fix uses Planning, Implementation, and Verification, and says
 so:
@@ -201,6 +208,16 @@ New session, then `$graphori:graphori <your task>`.
 The Skill is all you need. A separate Python runtime is available if you want a
 `graphori` command line, journal replay, and resume; it is optional and
 documented in [INSTALL.md](docs/public/INSTALL.md).
+
+Check the local provider boundary without making a model call:
+
+```sh
+graphori doctor --json
+graphori plan "Fix authentication permission handling" --cross-review auto
+```
+
+Provider diagnostics expose only compatibility and `ready` / `not_ready`
+authentication state. They do not print credentials or account details.
 
 ## What was measured
 

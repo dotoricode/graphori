@@ -57,6 +57,14 @@
 
 ### Changed
 
+- Runtime can now add a read-only cross-provider review with
+  `--cross-review auto|always|never`. It checks Codex and Claude Code CLI
+  compatibility plus local authentication without a model call, assigns the
+  provider opposite the implementer, and keeps the deterministic command as
+  the only source of final PASS. A missing provider is an explicit
+  deterministic-only downgrade; a dispatched unknown outcome is never silently
+  rerouted.
+
 - The public benchmark now includes the completed 72-run Direct/v1-style/
   Graphori v2 matrix for Codex and Claude. Raw JSONL, deterministic analysis,
   task fixtures, provider-separated reports, and complete README metrics are

@@ -206,11 +206,21 @@ class StructuredCliAdapter:
     def _help_argv(self) -> tuple[str, ...]:
         return (*self.executable, "--help")
 
-    def _probe_result(self, available: bool, reason: str = "") -> AdapterCapabilities:
+    def _auth_argv(self) -> tuple[str, ...]:
+        raise NotImplementedError
+
+    def _auth_ready(
+            self, stdout: bytes, stderr: bytes, exit_code: int | None) -> bool:
+        raise NotImplementedError
+
+    def _probe_result(
+            self, available: bool, reason: str = "", *,
+            authentication: str = "unknown") -> AdapterCapabilities:
         return AdapterCapabilities(
             adapter_id=self.adapter_id,
             available=available,
             reason=reason,
+            authentication=authentication,
             max_concurrency=self.max_concurrency,
             supports_sessions=True,
             supports_cancel=True,
@@ -245,6 +255,11 @@ class StructuredCliAdapter:
                 env=self.process_env, env_allowlist=self.process_env_allowlist,
                 limits=probe_limits,
             )
+            auth_result = self.supervisor.run(
+                self._auth_argv(), workspace_root=self.workspace_root,
+                env=self.process_env, env_allowlist=self.process_env_allowlist,
+                limits=probe_limits,
+            )
         except Exception:
             self._probe = self._probe_result(False, "provider CLI is unavailable")
             return self._probe
@@ -256,8 +271,14 @@ class StructuredCliAdapter:
                 False, "required CLI capability is unavailable"
                 + (f": {', '.join(missing)}" if missing else ""),
             )
+        elif not self._auth_ready(
+                auth_result.stdout, auth_result.stderr, auth_result.exit_code):
+            self._probe = self._probe_result(
+                False, "provider authentication is unavailable",
+                authentication="not_ready",
+            )
         else:
-            self._probe = self._probe_result(True)
+            self._probe = self._probe_result(True, authentication="ready")
         return self._probe
 
     async def prepare_run(self, plan: RunPlan) -> RuntimeRunHandle:

@@ -1,6 +1,8 @@
 # Limitations
 
 - Direct providers require their own installed, authenticated CLIs; Graphori does not supply models or accounts.
+- Provider readiness checks CLI compatibility and local authentication without a paid model call. A provider can still fail after dispatch because of quota, service, network, or policy changes; Graphori records that outcome and does not silently reroute an unknown attempt.
+- Cross-provider review is an AI review report, not a verification verdict. A blocking report stops the graph, while only the later deterministic command can record PASS. If both providers are not ready, the plan records a deterministic-only downgrade.
 - The generic verifier only reports the command it was given. Passing tests are evidence about that command, not a general correctness claim.
 - Locale changes presentation only. Canonical identifiers remain English and a digest does not encode translated labels.
 - Journal replay is local and assumes the stored files are available and readable. It intentionally refuses unsafe resume cases.

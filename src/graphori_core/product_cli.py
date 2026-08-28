@@ -72,6 +72,10 @@ _HELP_TEXT = {
         "en": "Help and output language: auto, en, or ko.",
         "ko": "도움말과 출력 언어: auto, en, ko 중 하나입니다.",
     },
+    "cross_review": {
+        "en": "Cross-provider review policy: auto, always, or never.",
+        "ko": "교차 제공자 리뷰 정책: auto, always, never 중 하나입니다.",
+    },
     "dashboard_run": {
         "en": "Run ID to display (default: latest run).",
         "ko": "표시할 작업 ID (기본: 가장 최근 작업)",
@@ -98,6 +102,7 @@ def _bootstrap_objective(argv: list[str]) -> str:
     value_options = {
         "--root", "--host", "--run-id", "--max-parallelism", "--read-scope",
         "--write-scope", "--timeout", "--criterion", "--lang", "--locale",
+        "--cross-review",
     }
     flag_options = {"--no-network", "--json", "--help", "-h"}
     objective: list[str] = []
@@ -186,6 +191,7 @@ def _spec(args: argparse.Namespace, root: Path) -> RunSpec:
         constraints=RunConstraints(
             max_parallelism=args.max_parallelism,
             allow_network=not args.no_network,
+            cross_review=args.cross_review,
         ),
         runtime_preference=("codex", "claude", "generic_process"),
         acceptance_criteria=criteria,
@@ -476,7 +482,11 @@ def cmd_doctor(args: argparse.Namespace) -> int:
             lock_status = doctor_label("lock_unreadable", locale)
     values: dict[str, object] = {
         "mode": "read_only", "providers": {
-            name: {"available": probe.available, "reason": probe.reason}
+            name: {
+                "available": probe.available,
+                "authentication": probe.authentication,
+                "reason": probe.reason,
+            }
             for name, probe in providers.items()
         },
         "schemas": {"RunSpec": 2, "RunPlan": 2, "journal_event": 1,
@@ -750,6 +760,10 @@ def build_parser(*, locale: str = "en") -> argparse.ArgumentParser:
         command.add_argument("--write-scope", action="append", default=[])
         command.add_argument("--timeout", type=float, default=300)
         command.add_argument("--no-network", action="store_true")
+        command.add_argument(
+            "--cross-review", choices=("auto", "always", "never"), default="auto",
+            help=_help_text("cross_review", locale),
+        )
         command.add_argument("--criterion", action="append", default=[], metavar="ID:DESCRIPTION",
                              help=_help_text("criterion", locale))
         command.add_argument("--verify-command", nargs=argparse.REMAINDER)

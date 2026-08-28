@@ -28,6 +28,7 @@ class AdapterCapabilities:
     supports_sessions: bool = True
     supports_cancel: bool = True
     reason: str = ""
+    authentication: str = "unknown"
     max_concurrency: int | None = None
     supports_reconcile: bool = False
     supports_heartbeat: bool = False
@@ -43,6 +44,8 @@ class AdapterCapabilities:
     supports_delivery_ack: bool = False
 
     def __post_init__(self) -> None:
+        if self.authentication not in {"ready", "not_ready", "unknown", "not_applicable"}:
+            raise ValueError("authentication must be ready, not_ready, unknown, or not_applicable")
         if self.max_parallelism < 1:
             raise ValueError("max_parallelism must be at least 1")
         if self.max_concurrency is None:

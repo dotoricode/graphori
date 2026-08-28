@@ -57,8 +57,11 @@ class RunConstraints:
     max_parallelism: int = 3
     allow_external_effects: bool = False
     allow_network: bool = True
+    cross_review: str = "auto"
 
     def __post_init__(self) -> None:
+        if self.cross_review not in {"auto", "always", "never"}:
+            raise ValueError("cross_review must be auto, always, or never")
         if self.max_parallelism < 1:
             raise ValueError("max_parallelism must be at least 1")
         if self.time_budget_ms is not None and self.time_budget_ms < 0:

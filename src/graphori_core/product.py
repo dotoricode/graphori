@@ -104,7 +104,32 @@ class ProductPlanCompiler:
     """Compile a small product graph; the current host remains Planning."""
 
     def __init__(self, *, availability: Mapping[str, Availability] | None = None) -> None:
-        self.router = ModelRouter(default_model_catalog(availability or {}))
+        known = dict(availability or {})
+        self.router = ModelRouter(default_model_catalog(known))
+        ready: set[str] = set()
+        if any(known.get(model) is Availability.AVAILABLE
+               for model in ("gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.6-sol")):
+            ready.add("openai")
+        if any(known.get(model) is Availability.AVAILABLE
+               for model in ("claude-sonnet-5", "claude-opus-5")):
+            ready.add("anthropic")
+        self.ready_provider_families = frozenset(ready)
+
+    @staticmethod
+    def _cross_review_warranted(
+            spec: RunSpec, profile: str, write_scope: tuple[str, ...]) -> bool:
+        policy = spec.constraints.cross_review
+        if policy == "never":
+            return False
+        if policy == "always":
+            return True
+        sensitive = _contains(spec.objective, (
+            "security", "authentication", "authorization", "permission", "secret",
+            "보안", "인증", "인가", "권한", "비밀",
+        ))
+        broad_scope = "." in write_scope or len(set(write_scope)) >= 3
+        synthesis = profile in {"research-and-implementation", "design-and-implementation"}
+        return sensitive or broad_scope or synthesis
 
     @staticmethod
     def _teams(nodes: tuple[NodeSpec, ...]) -> tuple[TeamSpec, ...]:
@@ -175,6 +200,39 @@ class ProductPlanCompiler:
             ),
         )
         routed = self.router.route_plan(unrouted)
+        assumptions = [
+            "Planning is the current coordinator; no Planner sub-agent is created.",
+            "External Skills remain unbound by default.",
+        ]
+        review_enabled = False
+        if profile != "research" and self._cross_review_warranted(spec, profile, write_scope):
+            if self.ready_provider_families == {"openai", "anthropic"}:
+                implementation = next(node for node in routed.nodes if node.node_id == "i1")
+                review = NodeSpec(
+                    "cr1", "verification", f"Cross-review: {display_title}",
+                    (
+                        "Review the implementation for correctness, security, scope, and "
+                        "acceptance-criteria gaps. Do not modify files. Report status=succeeded "
+                        "only when no blocking issue remains; otherwise report status=failed and "
+                        "describe each blocking issue in limitations."
+                    ),
+                    "worker", role="reviewer", dependencies=("i1",),
+                    read_scope=tuple(sorted(set((*read_scope, *write_scope)))), write_scope=(),
+                    task_kind="verification", verification_policy="deterministic",
+                    estimated_startup_ms=5_000, estimated_execution_ms=45_000,
+                    permission_profile="read_only", requires_cross_provider=True,
+                    excluded_provider=implementation.provider_family,
+                    evidence_requirements=("cross-provider-review-report",),
+                )
+                unrouted = replace(unrouted, nodes=tuple((*unrouted.nodes, review)))
+                routed = self.router.route_plan(unrouted)
+                review_enabled = True
+            else:
+                ready_names = ", ".join(sorted(self.ready_provider_families)) or "none"
+                assumptions.append(
+                    "Cross-provider review omitted: both Codex and Claude Code must be "
+                    f"installed, compatible, and authenticated (ready providers: {ready_names})."
+                )
         commands: dict[str, ProductCommand] = {}
         if profile != "research":
             verdict_file = f".graphori/verdicts/{run_id}-v1.json"
@@ -183,7 +241,8 @@ class ProductPlanCompiler:
             verifier = NodeSpec(
                 "v1", "verification", f"Verify: {display_title}",
                 "Run the deterministic acceptance command and record an independent verdict.",
-                "verifier", role="verifier", dependencies=("i1",),
+                "verifier", role="verifier",
+                dependencies=(("i1", "cr1") if review_enabled else ("i1",)),
                 read_scope=tuple(sorted(set((*read_scope, *write_scope)))),
                 write_scope=(verdict_file,), adapter="generic-process",
                 provider="generic-process", task_kind="deterministic",
@@ -197,11 +256,12 @@ class ProductPlanCompiler:
             routed, teams=self._teams(routed.nodes),
             nodes=tuple(replace(node, acceptance_criteria=spec.acceptance_criteria)
                         for node in routed.nodes),
-            critical_path=tuple((*routed.critical_path, *(("v1",) if profile != "research" else ()))),
-            assumptions=(
-                "Planning is the current coordinator; no Planner sub-agent is created.",
-                "External Skills remain unbound by default.",
-            ),
+            critical_path=tuple((
+                *routed.critical_path,
+                *(("cr1",) if review_enabled else ()),
+                *(("v1",) if profile != "research" else ()),
+            )),
+            assumptions=tuple(assumptions),
         )
         return ProductPlanBundle(routed, profile, commands, routed.assumptions)
 
