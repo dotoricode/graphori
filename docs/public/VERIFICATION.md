@@ -5,7 +5,7 @@ support claim.
 
 ## 2026-08-28 · public-release follow-up candidate
 
-- Tree: `7ef9ade`
+- Tree: `312bea4`
 - Host: macOS 26.5.2, x86_64
 - Python 3.14.6: `python -m unittest discover -s tests` — 413 tests passed,
   6 skipped.

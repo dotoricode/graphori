@@ -4,7 +4,7 @@
 
 ## 2026-08-28 · 공개 릴리스 후속 후보
 
-- 트리: `7ef9ade`
+- 트리: `312bea4`
 - 환경: macOS 26.5.2, x86_64
 - Python 3.14.6: `python -m unittest discover -s tests` — 413개 통과,
   6개 건너뜀.
