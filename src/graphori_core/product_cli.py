@@ -117,7 +117,11 @@ def _bootstrap_objective(argv: list[str]) -> str:
             continue
         objective.append(token)
     text = " ".join(objective)
-    if len(objective) == 1 and any(marker in text for marker in ("/", "\\", "(", ")")):
+    code_or_path_markers = ("/", "\\", "_", ".", "(", ")", "::")
+    if objective and all(
+        any(marker in token for marker in code_or_path_markers)
+        for token in objective
+    ):
         return ""
     return text
 

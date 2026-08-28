@@ -265,7 +265,15 @@ class ProductPlanTests(unittest.TestCase):
         ):
             self.assertIn("Graphori 작업을 계획", render(["--help"]))
             self.assertIn("환경과 journal", render(["doctor", "--help"]))
-            self.assertIn("실행 전에 계획", render(["plan", "src/worker.py", "--help"]))
+            for objective in (
+                ["src/worker.py"],
+                ["README.md"],
+                ["src/worker.py", "tests/test_worker.py"],
+                ["fix_bug"],
+                ["MyClass.method"],
+            ):
+                with self.subTest(objective=objective):
+                    self.assertIn("실행 전에 계획", render(["plan", *objective, "--help"]))
 
     def test_preview_is_published_before_safe_read_only_nodes_dispatch(self):
         with tempfile.TemporaryDirectory() as temp:
