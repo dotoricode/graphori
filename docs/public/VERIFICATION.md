@@ -3,6 +3,16 @@
 This page records commands that actually ran. It is evidence, not a platform-wide
 support claim.
 
+## 2026-08-28 · PR #4 full release gate
+
+- Tree: `1ae6840`; macOS 26.5.2 x86_64; Python 3.11.15.
+- Complete local release verifier status: PASS; 421 tests passed, 5 skipped.
+- Document indexes: 141 Markdown files; Skill and dashboard smoke: PASS.
+- Tree/history privacy audit and Gitleaks over three commits: PASS, no leak found.
+- Wheel, sdist, Twine, isolated Runtime and Codex/Claude Skill installs,
+  `pip-audit`, CycloneDX SBOM, macOS portability evidence, and SHA-256: PASS.
+- GitHub Actions used: false. Published: false.
+
 ## 2026-08-28 · clean-history full release gate
 
 - Tree: parentless commit `83fe5a5`.

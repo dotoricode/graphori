@@ -637,10 +637,12 @@ async def main_async(args: argparse.Namespace) -> int:
     arms = selected(args.arm or ARMS, ARMS, "arm")
     workload_by_id = {item.task_id: item for item in WORKLOADS}
     tasks = selected(args.task or tuple(workload_by_id), tuple(workload_by_id), "task")
+    repetitions = ((args.repetition,) if args.repetition is not None
+                   else tuple(range(1, args.repetitions + 1)))
     order = [
         (provider, arm, workload_by_id[task], repetition)
         for provider in providers for task in tasks for arm in arms
-        for repetition in range(1, args.repetitions + 1)
+        for repetition in repetitions
     ]
     random.Random(args.seed).shuffle(order)
     existing = load_existing(args.output)
@@ -675,6 +677,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--arm", action="append", choices=ARMS)
     parser.add_argument("--task", action="append", choices=tuple(item.task_id for item in WORKLOADS))
     parser.add_argument("--repetitions", type=int, default=3)
+    parser.add_argument("--repetition", type=int,
+                        help="run one exact repetition instead of the full 1..N range")
     parser.add_argument("--timeout", type=int, default=300)
     parser.add_argument("--seed", type=int, default=SEED)
     parser.add_argument("--fail-fast", action=argparse.BooleanOptionalAction, default=True)
@@ -685,6 +689,8 @@ def main() -> int:
     args = build_parser().parse_args()
     if args.repetitions < 1:
         raise SystemExit("repetitions must be positive")
+    if args.repetition is not None and args.repetition < 1:
+        raise SystemExit("repetition must be positive")
     return asyncio.run(main_async(args))
 
 

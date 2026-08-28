@@ -2,6 +2,16 @@
 
 실제로 실행한 명령만 기록합니다. 특정 플랫폼 전체를 지원한다는 주장은 아닙니다.
 
+## 2026-08-28 · PR #4 전체 릴리스 검사
+
+- 트리: `1ae6840`, macOS 26.5.2 x86_64, Python 3.11.15.
+- 전체 로컬 릴리스 검사 PASS, 테스트 421개 통과, 5개 건너뜀.
+- Markdown 141개 index, Skill 검사와 dashboard smoke PASS.
+- Commit 3개의 tree/history 개인정보 감사와 Gitleaks PASS, 유출 없음.
+- Wheel, sdist, Twine, 격리 Runtime·Codex/Claude Skill 설치, `pip-audit`,
+  CycloneDX SBOM, macOS 이식성 근거와 SHA-256 PASS.
+- GitHub Actions 사용: false. 배포: false.
+
 ## 2026-08-28 · clean-history 전체 릴리스 검사
 
 - 트리: 부모 없는 commit `83fe5a5`.

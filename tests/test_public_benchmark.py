@@ -37,6 +37,10 @@ class PublicBenchmarkTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "matrix mismatch"):
             ANALYZER["summarize"]([], 3)
 
+    def test_runner_accepts_exact_repetition_replay_option(self):
+        args = RUNNER["build_parser"]().parse_args(["--repetition", "3"])
+        self.assertEqual(args.repetition, 3)
+
     def test_raw_schema_accepts_v1_and_v2(self):
         schema = json.loads((ROOT / "benchmarks/raw-result.schema.json").read_text())
         self.assertEqual(schema["properties"]["schema_version"]["enum"], [1, 2])
