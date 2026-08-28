@@ -79,7 +79,7 @@ class JournalOrderingTests(unittest.TestCase):
         for name in names:
             self.assertIsNotNone(
                 journal._submission_ordinal(Path(name)),
-                f"{name} carries no submission stamp",
+                f"{name} carries no submission ordinal",
             )
         # Sorting the names must reproduce submission order: producer worker-00
         # submitted fourth, so it cannot sort first merely by being worker-00.
@@ -143,6 +143,21 @@ class JournalOrderingTests(unittest.TestCase):
             submit_event(paths, envelope, local_seq=1)
         self.assertEqual(list(paths.ready.iterdir()), [])
 
+    def test_submission_ordinal_can_grow_beyond_nineteen_digits(self):
+        paths = ensure_run_dirs(self.root, "run-order-wide-counter")
+        envelope = canonical_event(
+            "heartbeat", event_id="evt_wide_counter",
+            run_id="run-order-wide-counter", actor_role="worker",
+        )
+        envelope["producer_event_id"] = "producer:worker:1"
+        envelope["actor"] = {"role": "worker", "role_id": "worker"}
+        for field in ("seq", "recorded_at", "prev_digest", "digest"):
+            envelope.pop(field, None)
+
+        with mock.patch.object(journal.time, "time_ns", return_value=10**19):
+            ready = submit_event(paths, envelope, local_seq=1)
+        self.assertEqual(journal._submission_ordinal(ready), 10**19)
+
     def test_a_file_left_by_an_older_version_is_still_consumed(self):
         paths = ensure_run_dirs(self.root, "run-order-legacy")
         envelope = canonical_event(
@@ -155,9 +170,13 @@ class JournalOrderingTests(unittest.TestCase):
             envelope.pop(field, None)
         submitted = submit_event(paths, envelope, local_seq=1)
         # Strip the stamp to reproduce a name written before this change.
-        legacy = submitted.rename(
-            submitted.with_name(submitted.name.split(".", 1)[1]),
-        )
+        # Numeric producer IDs were valid in the legacy filename protocol. The
+        # explicit v2 marker must prevent this 19-digit ID from being parsed as
+        # a new submission ordinal.
+        legacy_tail = submitted.name.split(".", 3)[3]
+        legacy = submitted.rename(submitted.with_name(
+            f"1234567890123456789.{legacy_tail}",
+        ))
         self.assertIsNone(journal._submission_ordinal(legacy))
         os.utime(legacy, ns=(1_000, 1_000))
         paths.submission_counter_file.unlink()

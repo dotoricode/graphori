@@ -30,15 +30,19 @@ from .reducer import EVENT_TYPES, StateTransitionError, validate_event_envelope
 
 GENESIS_DIGEST = "sha256:" + "0" * 64
 
-# Width of the durable submission ordinal that opens a ready filename. The
-# counter starts near nanoseconds since the epoch for compatibility with legacy
-# mtime ordering, then advances logically under a per-run interprocess lock.
-_SUBMISSION_ORDINAL_DIGITS = 19
-_SUBMISSION_ORDINAL = re.compile(r"^(\d{%d})\." % _SUBMISSION_ORDINAL_DIGITS)
+# A protocol marker keeps numeric legacy producer IDs from being mistaken for
+# submission ordinals. The counter starts near nanoseconds since the epoch for
+# compatibility with legacy mtime ordering, then advances logically under a
+# per-run interprocess lock. Parsing digits rather than a fixed width also keeps
+# the protocol valid after the counter grows beyond nineteen digits.
+_SUBMISSION_PROTOCOL = "v2"
+_SUBMISSION_ORDINAL = re.compile(
+    rf"^{re.escape(_SUBMISSION_PROTOCOL)}\.(\d+)\."
+)
 
 
 def _submission_ordinal(path: Path) -> int | None:
-    """Durable submission ordinal from the name, or ``None`` for legacy files."""
+    """Persistent submission ordinal from the name, or ``None`` for legacy files."""
     match = _SUBMISSION_ORDINAL.match(path.name)
     return int(match.group(1)) if match else None
 
@@ -319,7 +323,7 @@ def submit_event(paths: RunPaths, envelope: Mapping[str, Any], *, local_seq: int
     lock_fd = _acquire_submission_lock(paths)
     try:
         # Wall time only seeds a new counter. Once a run has published anything,
-        # the durable counter is authoritative even if the clock repeats or
+        # the persistent counter is authoritative even if the clock repeats or
         # moves backwards. Scanning ready makes upgrades from stamped or legacy
         # files monotonic as well.
         ordinal = max(
@@ -328,7 +332,7 @@ def submit_event(paths: RunPaths, envelope: Mapping[str, Any], *, local_seq: int
             _ready_order_floor(paths) + 1,
         )
         _write_submission_counter(paths, ordinal)
-        name = (f"{ordinal:0{_SUBMISSION_ORDINAL_DIGITS}d}.{producer_id}"
+        name = (f"{_SUBMISSION_PROTOCOL}.{ordinal}.{producer_id}"
                 f".{local_seq:012d}.{unique}.json")
         ready_path = safe_join(paths.ready, name)
         os.replace(str(tmp_path), str(ready_path))
@@ -592,7 +596,7 @@ class JournalWriter:
     def consume_ready(self) -> dict[str, int]:
         """Process every file currently in inbox/ready in deterministic order.
 
-        Ordering is by (durable submission ordinal, filename), both read from
+        Ordering is by (persistent submission ordinal, filename), both read from
         the ready set. :func:`submit_event` assigns the ordinal under a per-run
         interprocess lock after the tmp file is durable and holds that lock
         through the ready rename, so the order follows ready publication
@@ -606,7 +610,7 @@ class JournalWriter:
         and it made ordering depend on wall-clock: filesystem timestamp
         granularity decides which submissions collide, that varies per run, and
         two runs over an identically submitted set could disagree.  A file left
-        in ready by an older version has no stamp, so it falls back to
+        in ready by an older version has no protocol marker, so it falls back to
         ``st_mtime_ns``. A new counter starts above every legacy mtime already
         in ready, so an upgraded run never publishes a new file before an older
         pending one.

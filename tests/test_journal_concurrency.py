@@ -1,13 +1,16 @@
 import sys
 import subprocess
 import tempfile
+import threading
 import unittest
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).parents[1] / "src"))
 
 from graphori_core import canonical_event, ensure_run_dirs, submit_event, JournalWriter  # noqa: E402
+from graphori_core import journal  # noqa: E402
 
 
 _PROCESS_PRODUCER = r'''
@@ -75,7 +78,7 @@ class JournalConcurrencyTests(unittest.TestCase):
             self.assertEqual(event["prev_digest"], prev)
             prev = event["digest"]
 
-    def test_processes_with_the_same_wall_time_receive_distinct_durable_ordinals(self):
+    def test_processes_with_the_same_wall_time_receive_distinct_persistent_ordinals(self):
         src = str(Path(__file__).parents[1] / "src")
         children = [
             subprocess.Popen(
@@ -91,9 +94,52 @@ class JournalConcurrencyTests(unittest.TestCase):
             self.assertEqual(child.returncode, 0, stderr)
             names.append(stdout.strip())
 
-        ordinals = [int(name.split(".", 1)[0]) for name in names]
+        ordinals = [journal._submission_ordinal(Path(name)) for name in names]
+        self.assertNotIn(None, ordinals)
         self.assertEqual(len(set(ordinals)), 8)
         self.assertEqual(sorted(ordinals), list(range(100, 108)))
+
+    def test_writer_snapshot_waits_until_locked_ready_publication_finishes(self):
+        paths = ensure_run_dirs(self.root, "run-publication-snapshot")
+        writer = JournalWriter(paths)
+        self.addCleanup(writer.close)
+        envelope = canonical_event(
+            "heartbeat", event_id="evt_locked_publication",
+            run_id="run-publication-snapshot", actor_role="worker",
+        )
+        envelope["producer_event_id"] = "producer:worker:1"
+        envelope["actor"] = {"role": "worker", "role_id": "worker"}
+        for field in ("seq", "recorded_at", "prev_digest", "digest"):
+            envelope.pop(field, None)
+
+        counter_entered = threading.Event()
+        allow_publication = threading.Event()
+        snapshot_finished = threading.Event()
+        original_write = journal._write_submission_counter
+
+        def paused_write(target_paths, value):
+            original_write(target_paths, value)
+            counter_entered.set()
+            self.assertTrue(allow_publication.wait(timeout=5))
+
+        with mock.patch.object(journal, "_write_submission_counter", paused_write):
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                producer = pool.submit(submit_event, paths, envelope, local_seq=1)
+                self.assertTrue(counter_entered.wait(timeout=5))
+
+                def consume():
+                    counts = writer.consume_ready()
+                    snapshot_finished.set()
+                    return counts
+
+                consumer = pool.submit(consume)
+                self.assertFalse(snapshot_finished.wait(timeout=0.1))
+                allow_publication.set()
+                producer.result(timeout=5)
+                counts = consumer.result(timeout=5)
+
+        self.assertEqual(counts["accepted"], 1)
+        self.assertEqual(len(paths.journal_file.read_text(encoding="utf-8").splitlines()), 1)
 
 
 if __name__ == "__main__":
