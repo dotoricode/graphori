@@ -13,6 +13,16 @@
 - The verifier node title is no longer Korean. It is part of the canonical plan
   digest, and the portability contract requires language to stay out of plan,
   journal, and projection digests.
+- Ready-file consumption is reproducible again. Ordering keyed on modification
+  time, so filesystem timestamp granularity decided which submissions collided
+  and that varied per run. Each run now assigns a persistent logical ordinal under
+  a short interprocess lock after the tmp file is flushed, persists the counter,
+  and holds the lock through the ready rename. The writer takes the same lock
+  while capturing its ready snapshot, so clock rollback, equal timestamps, and
+  concurrent producers cannot publish a later ordinal first. Files left by an
+  older version have no ordinal and fall back to `st_mtime_ns`; the new counter
+  starts above every legacy file already waiting. A `v2.` filename marker keeps
+  numeric legacy producer IDs distinct from new ordinals.
 - On Windows, a lock failure that was not contention was reported as "another
   Graphori is running". Only `EACCES` and `EDEADLOCK` now mean contention;
   every other errno reports its own cause. A missing lock backend raises the
