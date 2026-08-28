@@ -30,10 +30,12 @@ def digest(path: Path) -> str:
 def is_git_repository(root: Path) -> bool:
     """Accept both ordinary clones and linked Git worktrees."""
     result = subprocess.run(
-        ["git", "rev-parse", "--is-inside-work-tree"],
+        ["git", "rev-parse", "--show-toplevel"],
         cwd=root, text=True, capture_output=True,
     )
-    return result.returncode == 0 and result.stdout.strip() == "true"
+    if result.returncode != 0:
+        return False
+    return Path(result.stdout.strip()).resolve() == root.resolve()
 
 
 def verify(root: Path, output: Path | None) -> dict[str, object]:

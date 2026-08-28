@@ -78,6 +78,9 @@ class LocalReleaseContractTests(unittest.TestCase):
 
             self.assertTrue((linked / ".git").is_file())
             self.assertTrue(is_git_repository(linked))
+            nested = linked / "nested"
+            nested.mkdir()
+            self.assertFalse(is_git_repository(nested))
 
     def test_readmes_split_codex_and_claude_skill_installation(self):
         """Each language documents both agents across its install document set.

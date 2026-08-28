@@ -6,6 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 import sys
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).parents[1] / "src"))
 
@@ -257,6 +258,14 @@ class ProductPlanTests(unittest.TestCase):
         self.assertIn("도움말과 출력 언어", korean)
         self.assertIn("Preview the plan", render(["plan", "Fix this bug", "--help"]))
         self.assertIn("실행 전에 계획", render(["plan", "이 버그를 고쳐줘", "--help"]))
+
+        with mock.patch.dict(
+            os.environ,
+            {"LC_ALL": "ko_KR.UTF-8", "LC_MESSAGES": "", "LANG": "ko_KR.UTF-8"},
+        ):
+            self.assertIn("Graphori 작업을 계획", render(["--help"]))
+            self.assertIn("환경과 journal", render(["doctor", "--help"]))
+            self.assertIn("실행 전에 계획", render(["plan", "src/worker.py", "--help"]))
 
     def test_preview_is_published_before_safe_read_only_nodes_dispatch(self):
         with tempfile.TemporaryDirectory() as temp:

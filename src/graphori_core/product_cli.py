@@ -87,20 +87,58 @@ def _help_text(key: str, locale: str) -> str:
     return _HELP_TEXT[key][normalized_locale(locale)]
 
 
+def _bootstrap_objective(argv: list[str]) -> str:
+    """Extract only plan/run positional text without executing the full parser."""
+    command_index = next(
+        (index for index, token in enumerate(argv) if token in {"plan", "run"}),
+        None,
+    )
+    if command_index is None:
+        return ""
+    value_options = {
+        "--root", "--host", "--run-id", "--max-parallelism", "--read-scope",
+        "--write-scope", "--timeout", "--criterion", "--lang", "--locale",
+    }
+    flag_options = {"--no-network", "--json", "--help", "-h"}
+    objective: list[str] = []
+    skip_value = False
+    for token in argv[command_index + 1:]:
+        if skip_value:
+            skip_value = False
+            continue
+        if token == "--verify-command":
+            break
+        if token in value_options:
+            skip_value = True
+            continue
+        if token in flag_options or token.startswith(tuple(f"{name}=" for name in value_options)):
+            continue
+        if token.startswith("-"):
+            continue
+        objective.append(token)
+    text = " ".join(objective)
+    if len(objective) == 1 and any(marker in text for marker in ("/", "\\", "(", ")")):
+        return ""
+    return text
+
+
 def _bootstrap_help_locale(argv: list[str]) -> str:
     """Resolve help language before argparse handles an early ``--help``."""
     preference = "auto"
     root = Path.cwd()
-    for index, token in enumerate(argv):
-        if token in {"--lang", "--locale"} and index + 1 < len(argv):
-            preference = argv[index + 1]
+    bootstrap_argv = argv[:argv.index("--verify-command")] if "--verify-command" in argv else argv
+    for index, token in enumerate(bootstrap_argv):
+        if token in {"--lang", "--locale"} and index + 1 < len(bootstrap_argv):
+            preference = bootstrap_argv[index + 1]
         elif token.startswith("--lang=") or token.startswith("--locale="):
             preference = token.split("=", 1)[1]
-        elif token == "--root" and index + 1 < len(argv):
-            root = Path(argv[index + 1])
+        elif token == "--root" and index + 1 < len(bootstrap_argv):
+            root = Path(bootstrap_argv[index + 1])
         elif token.startswith("--root="):
             root = Path(token.split("=", 1)[1])
-    return resolve_locale(preference, root=root, objective=" ".join(argv))
+    return resolve_locale(
+        preference, root=root, objective=_bootstrap_objective(bootstrap_argv),
+    )
 
 
 def _add_locale_argument(parser: argparse.ArgumentParser, *, locale: str,
