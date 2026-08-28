@@ -4,6 +4,7 @@
 
 ## 2026-08-28 · macOS 이식성 전용 검사
 
+- 트리: `af1cafd`
 - 명령: `python scripts/verify_macos_portability.py`
 - 환경: macOS 26.5.2, x86_64
 - Python: 3.11.15, 3.14.6
@@ -11,6 +12,7 @@
   JSONL tmp→ready 공개, replay, idempotency.
 - 출력: fixture마다 `platform`, `fixture`, `verdict`, `evidence_id`, `command`,
   `host`, 자체 포함된 테스트 근거와 SHA-256 hash를 기록합니다.
+- fixture 추가 뒤 Python 3.14.6 전체 검사: 415개 통과, 5개 건너뜀.
 
 이 결과는 기록된 호스트와 generic adapter fixture 범위의 macOS 판정만 바꿉니다.
 Linux나 Windows 릴리스 지원 근거는 아닙니다.

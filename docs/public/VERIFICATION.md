@@ -5,6 +5,7 @@ support claim.
 
 ## 2026-08-28 · macOS portability fixture
 
+- Tree: `af1cafd`
 - Command: `python scripts/verify_macos_portability.py`
 - Host: macOS 26.5.2, x86_64
 - Python: 3.11.15 and 3.14.6
@@ -13,6 +14,7 @@ support claim.
 - Output: one contract-shaped record per fixture with `platform`, `fixture`,
   `verdict`, `evidence_id`, `command`, `host`, self-contained test evidence,
   and its SHA-256 hash.
+- Python 3.14.6 full suite after adding the fixture: 415 passed, 5 skipped.
 
 This changes the macOS generic-adapter verdict only for the recorded host and
 fixture scope. It does not establish Linux or Windows release support.
