@@ -1,0 +1,159 @@
+{
+  "matrix": {
+    "arms": 3,
+    "providers": 2,
+    "repetitions": 3,
+    "runs": 72,
+    "tasks": 4
+  },
+  "providers": {
+    "claude": {
+      "comparisons": {
+        "v2_vs_direct_percent": {
+          "ai_sessions": 0.0,
+          "cached_input_tokens": 0.0,
+          "cost_usd": -0.084,
+          "fresh_input_tokens": 0.041,
+          "median_ttur_seconds": 5.03,
+          "output_tokens": -0.853,
+          "total_input_tokens": 0.006
+        },
+        "v2_vs_v1_style_percent": {
+          "ai_sessions": -50.0,
+          "cached_input_tokens": -49.388,
+          "cost_usd": -52.632,
+          "fresh_input_tokens": -52.817,
+          "median_ttur_seconds": -56.833,
+          "output_tokens": -56.477,
+          "total_input_tokens": -49.866
+        }
+      },
+      "direct": {
+        "ai_sessions": 12,
+        "cached_input_tokens": 1228242,
+        "claim_matches_hidden": 12,
+        "cost_usd": 1.1322304,
+        "fresh_input_tokens": 185046,
+        "hidden_tests_passed": 36,
+        "hidden_tests_total": 36,
+        "median_ttur_seconds": 22.723,
+        "output_tokens": 14659,
+        "rework_count": 0,
+        "runs": 12,
+        "scope_violations": 0,
+        "successful_runs": 12,
+        "total_input_tokens": 1413288,
+        "unknown_outcomes": 0
+      },
+      "graphori-v2": {
+        "ai_sessions": 12,
+        "cached_input_tokens": 1228245,
+        "claim_matches_hidden": 12,
+        "cost_usd": 1.131281,
+        "fresh_input_tokens": 185121,
+        "hidden_tests_passed": 36,
+        "hidden_tests_total": 36,
+        "median_ttur_seconds": 23.866,
+        "output_tokens": 14534,
+        "rework_count": 0,
+        "runs": 12,
+        "scope_violations": 0,
+        "successful_runs": 12,
+        "total_input_tokens": 1413366,
+        "unknown_outcomes": 0
+      },
+      "v1-style": {
+        "ai_sessions": 24,
+        "cached_input_tokens": 2426808,
+        "claim_matches_hidden": 12,
+        "cost_usd": 2.3883016,
+        "fresh_input_tokens": 392343,
+        "hidden_tests_passed": 36,
+        "hidden_tests_total": 36,
+        "median_ttur_seconds": 55.287,
+        "output_tokens": 33394,
+        "rework_count": 0,
+        "runs": 12,
+        "scope_violations": 0,
+        "successful_runs": 12,
+        "total_input_tokens": 2819151,
+        "unknown_outcomes": 0
+      }
+    },
+    "codex": {
+      "comparisons": {
+        "v2_vs_direct_percent": {
+          "ai_sessions": 0.0,
+          "cached_input_tokens": 13.176,
+          "cost_usd": null,
+          "fresh_input_tokens": 4.52,
+          "median_ttur_seconds": 19.836,
+          "output_tokens": 26.913,
+          "total_input_tokens": 11.679
+        },
+        "v2_vs_v1_style_percent": {
+          "ai_sessions": -50.0,
+          "cached_input_tokens": -31.916,
+          "cost_usd": null,
+          "fresh_input_tokens": -38.437,
+          "median_ttur_seconds": -36.318,
+          "output_tokens": -23.359,
+          "total_input_tokens": -33.063
+        }
+      },
+      "direct": {
+        "ai_sessions": 12,
+        "cached_input_tokens": 800512,
+        "claim_matches_hidden": 12,
+        "cost_usd": null,
+        "fresh_input_tokens": 167322,
+        "hidden_tests_passed": 36,
+        "hidden_tests_total": 36,
+        "median_ttur_seconds": 29.059,
+        "output_tokens": 11905,
+        "rework_count": 0,
+        "runs": 12,
+        "scope_violations": 0,
+        "successful_runs": 12,
+        "total_input_tokens": 967834,
+        "unknown_outcomes": 0
+      },
+      "graphori-v2": {
+        "ai_sessions": 12,
+        "cached_input_tokens": 905984,
+        "claim_matches_hidden": 12,
+        "cost_usd": null,
+        "fresh_input_tokens": 174885,
+        "hidden_tests_passed": 36,
+        "hidden_tests_total": 36,
+        "median_ttur_seconds": 34.823,
+        "output_tokens": 15109,
+        "rework_count": 0,
+        "runs": 12,
+        "scope_violations": 0,
+        "successful_runs": 12,
+        "total_input_tokens": 1080869,
+        "unknown_outcomes": 0
+      },
+      "v1-style": {
+        "ai_sessions": 24,
+        "cached_input_tokens": 1330688,
+        "claim_matches_hidden": 12,
+        "cost_usd": null,
+        "fresh_input_tokens": 284075,
+        "hidden_tests_passed": 36,
+        "hidden_tests_total": 36,
+        "median_ttur_seconds": 54.683,
+        "output_tokens": 19714,
+        "rework_count": 0,
+        "runs": 12,
+        "scope_violations": 0,
+        "successful_runs": 12,
+        "total_input_tokens": 1614763,
+        "unknown_outcomes": 0
+      }
+    }
+  },
+  "schema_version": 1,
+  "source_commit": "02fb61d6b130e8c94bd0c90d8f6ad0f5fbcd49b6"
+}

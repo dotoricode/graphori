@@ -41,6 +41,25 @@ class PublicBenchmarkTests(unittest.TestCase):
         schema = json.loads((ROOT / "benchmarks/raw-result.schema.json").read_text())
         self.assertEqual(schema["properties"]["schema_version"]["enum"], [1, 2])
 
+    def test_published_readmes_contain_every_calculated_metric(self):
+        result_path = ROOT / "benchmarks/three_arm/results.json"
+        if not result_path.exists():
+            self.skipTest("generated result is not present")
+        result = json.loads(result_path.read_text())
+        english = (ROOT / "README.md").read_text()
+        korean = (ROOT / "README.ko.md").read_text()
+        for provider in ("codex", "claude"):
+            for arm in ("direct", "v1-style", "graphori-v2"):
+                cell = result["providers"][provider][arm]
+                for key in ("total_input_tokens", "cached_input_tokens",
+                            "fresh_input_tokens", "output_tokens"):
+                    value = f"{cell[key]:,}"
+                    self.assertIn(value, english)
+                    self.assertIn(value, korean)
+                ttur = f"{cell['median_ttur_seconds']:.3f}"
+                self.assertIn(ttur, english)
+                self.assertIn(ttur, korean)
+
 
 if __name__ == "__main__":
     unittest.main()

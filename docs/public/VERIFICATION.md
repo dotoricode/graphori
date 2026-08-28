@@ -3,6 +3,36 @@
 This page records commands that actually ran. It is evidence, not a platform-wide
 support claim.
 
+## 2026-08-28 · clean-history full release gate
+
+- Tree: parentless commit `83fe5a5`.
+- Host: macOS 26.5.2, x86_64; Python 3.11.15.
+- `python3.11 scripts/verify_public_release.py --output
+  build/release-artifacts-clean-history` exited successfully.
+- 416 tests passed and 5 opt-in/platform tests were skipped.
+- Document indexes, Skill validation, dashboard HTTP smoke, current-tree and
+  one-commit history privacy audit all passed.
+- Gitleaks scanned the tree and the single commit without finding a leak.
+- Wheel and sdist build, Twine metadata, isolated Runtime install, isolated
+  Codex/Claude Skill install, `pip-audit`, CycloneDX SBOM, and SHA-256 generation
+  passed.
+- The seven-record macOS portability fixture passed and was included beside the
+  build artifacts.
+- No GitHub Actions, package publication, or artifact upload occurred.
+
+After this pass, public `main` was force-updated to the exact commit, the old
+prerelease/tag and ordinary work branches were removed, and a fresh public clone
+passed the tree/history audit.
+
+## 2026-08-28 · public 72-run comparison
+
+- Source: `02fb61d`; Codex CLI 0.150.1 and Claude Code 2.1.245.
+- Matrix: 2 providers × 3 arms × 4 tasks × 3 repetitions = 72 runs.
+- 72/72 runs and 216/216 hidden tests passed; 72/72 completion claims matched.
+- Scope violations, rework, and infrastructure-unknown records: 0.
+- Raw JSONL, deterministic analysis, and provider-separated results are in
+  [`benchmarks/three_arm/`](../../benchmarks/three_arm/).
+
 ## 2026-08-28 · macOS portability fixture
 
 - Tree: `b7edaea`
@@ -37,8 +67,9 @@ fixture scope. It does not establish Linux or Windows release support.
   rows recalculated to 8 hidden passes and 0 scope violations.
 - Gitleaks found no leaks in the current tree or 17 reachable commits.
 
-The history privacy audit still blocks the full release verifier for the reason
-recorded below. No package or release was published.
+At that point the history privacy audit still blocked the full release verifier.
+The later clean-history record above supersedes that blocker. No package or release
+was published by this earlier run.
 
 ## 2026-08-28 · ready-ordering merge
 

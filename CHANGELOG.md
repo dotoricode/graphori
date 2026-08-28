@@ -46,12 +46,22 @@
   support the portability contract holds at `deferred/unknown`, presented an
   environment-dependent skip count as fixed, said a run without
   `--verify-command` has nothing to judge by when the runtime picks a default,
-  and called `0.1.0` the first public source version even though the
-  `v0.9.0-beta.1` tag sits on this repository's own first commit. The install
+  and called `0.1.0` the first public source version even though this public
+  beta line already declared `v0.9.0-beta.1`. The install
   guide said nothing executes at install time, but the installer runs
   `validate_skill.py` against the copied Skill.
 
 ### Changed
+
+- The public benchmark now includes the completed 72-run Direct/v1-style/
+  Graphori v2 matrix for Codex and Claude. Raw JSONL, deterministic analysis,
+  task fixtures, provider-separated reports, and complete README metrics are
+  published. All 72 runs passed; Graphori v2 matched measured quality with half
+  the AI sessions of v1-style, while Direct remained fastest on the small tasks.
+- Public `main` now starts from one parentless noreply source snapshot after the
+  approved history rewrite. That exact snapshot passed the complete local
+  release verifier before publication; the earlier prerelease tag and ordinary
+  work branches were removed.
 
 - Runtime output follows the language you work in. Journal, resume, provider,
   doctor, and dashboard messages carry a condition key with an English default
@@ -62,10 +72,10 @@
   rather than write output. Argparse now resolves explicit, configured,
   objective, or process language before constructing help, so top-level and
   subcommand help are available in both English and Korean.
-- The declared version is now `0.9.0-beta.1`, matching the tag on the first
-  public commit. `pyproject.toml` spells it `0.9.0b1` because PEP 440
-  normalizes it that way; the two are the same version. Calling a beta `0.1.0`
-  understated how much of this line already existed.
+- The declared version is `0.9.0-beta.1`; `pyproject.toml` spells it `0.9.0b1`
+  because PEP 440 normalizes it that way. Calling this beta `0.1.0` understated
+  how much of the line already existed. The early public prerelease tag was
+  retired during the approved clean-history rewrite; no package was published.
 - Internal build reports, reviews, research checkpoints, and preserved Doctori
   evidence moved under `docs/archive/`. Maintainer-context documents moved from
   the repository root into `docs/`. Every relative link was repointed.

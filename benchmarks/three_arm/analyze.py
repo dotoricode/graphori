@@ -87,6 +87,26 @@ def summarize(records: list[dict[str, Any]], repetitions: int) -> dict[str, Any]
                 "claim_matches_hidden": sum(row.get("claim_matches_hidden") is True for row in rows),
                 "unknown_outcomes": sum(row["outcome"] == "unknown" for row in rows),
             }
+        def change(base: str, key: str):
+            before = arms[base][key]
+            after = arms["graphori-v2"][key]
+            if not isinstance(before, (int, float)) or not isinstance(after, (int, float)):
+                return None
+            return round((after - before) / before * 100, 3)
+        arms["comparisons"] = {
+            "v2_vs_direct_percent": {
+                key: change("direct", key) for key in (
+                    "ai_sessions", "median_ttur_seconds", "total_input_tokens",
+                    "cached_input_tokens", "fresh_input_tokens", "output_tokens", "cost_usd",
+                )
+            },
+            "v2_vs_v1_style_percent": {
+                key: change("v1-style", key) for key in (
+                    "ai_sessions", "median_ttur_seconds", "total_input_tokens",
+                    "cached_input_tokens", "fresh_input_tokens", "output_tokens", "cost_usd",
+                )
+            },
+        }
         providers[provider] = arms
     return {
         "schema_version": 1,

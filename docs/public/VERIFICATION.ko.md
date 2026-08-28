@@ -2,6 +2,33 @@
 
 실제로 실행한 명령만 기록합니다. 특정 플랫폼 전체를 지원한다는 주장은 아닙니다.
 
+## 2026-08-28 · clean-history 전체 릴리스 검사
+
+- 트리: 부모 없는 commit `83fe5a5`.
+- 환경: macOS 26.5.2, x86_64, Python 3.11.15.
+- `python3.11 scripts/verify_public_release.py --output
+  build/release-artifacts-clean-history` 성공.
+- 테스트 416개 통과, opt-in/platform 검사 5개 건너뜀.
+- 문서 index, Skill 검사, dashboard HTTP smoke, 현재 tree와 단일 commit 이력
+  개인정보 감사 통과.
+- Gitleaks가 tree와 단일 commit에서 유출을 찾지 못함.
+- wheel·sdist 생성, Twine metadata, 격리 Runtime 설치, Codex·Claude Skill 격리
+  설치, `pip-audit`, CycloneDX SBOM, SHA-256 생성 통과.
+- macOS 이식성 record 7개 통과 및 build artifact 옆에 포함.
+- GitHub Actions, package 배포, artifact upload는 하지 않음.
+
+이 검사 뒤 public `main`을 같은 commit으로 강제 갱신하고 과거 prerelease/tag와 일반
+작업 branch를 제거했습니다. 새 public clone에서 tree/history 감사를 다시 통과했습니다.
+
+## 2026-08-28 · 공개 72회 비교
+
+- Source: `02fb61d`, Codex CLI 0.150.1, Claude Code 2.1.245.
+- 실행표: provider 2 × 조건 3 × 과제 4 × 반복 3 = 72회.
+- 실행 72/72와 숨은 검사 216/216 통과, 완료 보고 72/72 일치.
+- Scope 위반, 재작업, infrastructure unknown: 0.
+- 원자료 JSONL, deterministic 분석과 provider별 결과는
+  [`benchmarks/three_arm/`](../../benchmarks/three_arm/)에 있습니다.
+
 ## 2026-08-28 · macOS 이식성 전용 검사
 
 - 트리: `b7edaea`
@@ -34,8 +61,9 @@ Linux나 Windows 릴리스 지원 근거는 아닙니다.
   8건 통과, 범위 위반 0건으로 다시 계산됐습니다.
 - Gitleaks는 현재 트리와 도달 가능한 커밋 17개에서 유출을 찾지 못했습니다.
 
-아래에 적은 이력 개인정보 감사 문제 때문에 전체 릴리스 검사는 여전히 중단됩니다.
-패키지나 release는 배포하지 않았습니다.
+당시에는 아래 이력 개인정보 문제 때문에 전체 릴리스 검사가 중단됐습니다. 위의
+clean-history 기록이 그 blocker를 해소했습니다. 이 이전 실행에서 package나 release를
+배포하지 않았습니다.
 
 ## 2026-08-28 · ready 순서 병합
 
