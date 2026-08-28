@@ -38,6 +38,7 @@ GENESIS_DIGEST = "sha256:" + "0" * 64
 _SUBMISSION_PROTOCOL = "v2"
 _SUBMISSION_ORDINAL = re.compile(
     rf"^{re.escape(_SUBMISSION_PROTOCOL)}\.(\d+)\."
+    r"[A-Za-z0-9_-]+\.\d{12}\.[0-9a-f]{32}\.json$"
 )
 
 

@@ -158,6 +158,25 @@ class JournalOrderingTests(unittest.TestCase):
             ready = submit_event(paths, envelope, local_seq=1)
         self.assertEqual(journal._submission_ordinal(ready), 10**19)
 
+    def test_legacy_producer_named_v2_is_not_a_submission_ordinal(self):
+        paths = ensure_run_dirs(self.root, "run-order-legacy-v2-producer")
+        envelope = canonical_event(
+            "heartbeat", event_id="evt_legacy_v2_producer",
+            run_id="run-order-legacy-v2-producer", actor_role="worker",
+        )
+        envelope["producer_event_id"] = "producer:v2:1"
+        envelope["actor"] = {"role": "worker", "role_id": "v2"}
+        for field in ("seq", "recorded_at", "prev_digest", "digest"):
+            envelope.pop(field, None)
+        submitted = submit_event(paths, envelope, local_seq=1)
+        legacy_tail = submitted.name.split(".", 3)[3]
+        legacy = submitted.rename(submitted.with_name(f"v2.{legacy_tail}"))
+
+        self.assertIsNone(journal._submission_ordinal(legacy))
+        writer = JournalWriter(paths)
+        self.addCleanup(writer.close)
+        self.assertEqual(writer.consume_ready()["accepted"], 1)
+
     def test_a_file_left_by_an_older_version_is_still_consumed(self):
         paths = ensure_run_dirs(self.root, "run-order-legacy")
         envelope = canonical_event(
