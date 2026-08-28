@@ -10,8 +10,12 @@
 - Python: 3.11.15, 3.14.6
 - PASS: 프로세스 트리 종료, 경로 이탈, POSIX 심볼릭 링크 이탈, 대소문자 충돌,
   JSONL tmp→ready 공개, replay, idempotency.
+- PASS: 실제 generic adapter 성공, 자식 프로세스 취소, fan-in, 명시적 verdict replay
+  lifecycle.
 - 출력: fixture마다 `platform`, `fixture`, `verdict`, `evidence_id`, `command`,
   `host`, 자체 포함된 테스트 근거와 SHA-256 hash를 기록합니다.
+- 로컬 릴리스 검사기는 이 record를 wheel, sdist, SBOM, `SHA256SUMS` 옆의
+  `macos-portability.json`으로 보존합니다.
 - fixture 추가 뒤 Python 3.14.6 전체 검사: 415개 통과, 5개 건너뜀.
 
 이 결과는 기록된 호스트와 generic adapter fixture 범위의 macOS 판정만 바꿉니다.

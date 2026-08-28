@@ -40,11 +40,20 @@ FIXTURES = {
         "test_journal_replay",
         "test_journal_idempotency",
     ),
+    "generic_adapter_lifecycle": (
+        "test_generic_process_adapter.GenericProcessAdapterContractTests."
+        "test_explicit_argv_process_returns_structured_success",
+        "test_generic_process_adapter.GenericProcessAdapterContractTests."
+        "test_cancel_terminates_descendant_tree",
+        "test_generic_process_adapter.GenericProcessEngineIntegrationTests."
+        "test_real_workers_fan_in_and_explicit_verdict_replay",
+    ),
 }
 
 
 def run_fixture(name: str, tests: tuple[str, ...]) -> dict[str, str]:
     command = [sys.executable, "-m", "unittest", *tests]
+    recorded_command = ["python", "-m", "unittest", *tests]
     environment = dict(os.environ)
     roots = [str(ROOT / "tests"), str(ROOT / "src")]
     if environment.get("PYTHONPATH"):
@@ -56,16 +65,23 @@ def run_fixture(name: str, tests: tuple[str, ...]) -> dict[str, str]:
     evidence_text = (result.stdout + "\n" + result.stderr).strip()
     evidence = evidence_text.encode("utf-8")
     passed = result.returncode == 0 and "skipped=" not in evidence_text
-    return {
+    python = f"{platform.python_implementation()} {platform.python_version()}"
+    evidence_digest = hashlib.sha256(evidence).hexdigest()
+    record = {
         "platform": "macos",
         "fixture": name,
         "verdict": "pass" if passed else "fail",
-        "evidence_id": f"macos:{name}",
-        "command": " ".join(command),
+        "evidence_id": f"macos:{name}:{python.replace(' ', '-').lower()}:{evidence_digest[:12]}",
+        "command": " ".join(recorded_command),
         "host": platform.platform(),
-        "hash": "sha256:" + hashlib.sha256(evidence).hexdigest(),
+        "python": python,
         "evidence": evidence_text,
     }
+    canonical = json.dumps(
+        record, ensure_ascii=False, separators=(",", ":"), sort_keys=True,
+    ).encode("utf-8")
+    record["hash"] = "sha256:" + hashlib.sha256(canonical).hexdigest()
+    return record
 
 
 def verify() -> list[dict[str, str]]:

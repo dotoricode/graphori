@@ -257,8 +257,9 @@ deliberately.
 - The dedicated macOS generic-adapter fixture passed on macOS 26.5.2 x86_64
   with Python 3.11 and 3.14. It covers process-tree termination, path and
   symlink escape, case collisions, journal publication, replay, and
-  idempotency. This is one recorded host, not every Mac. No Linux release gate
-  is claimed; Windows installation and Job Object behavior remain experimental.
+  idempotency, plus a real generic-adapter lifecycle. This is one recorded host,
+  not every Mac. No Linux release gate is claimed; Windows installation and Job
+  Object behavior remain experimental.
 
 ## Documentation
 

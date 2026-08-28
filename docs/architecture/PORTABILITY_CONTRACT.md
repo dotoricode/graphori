@@ -100,7 +100,8 @@ evidence에 기록하며, 실패하면 `adapter_unavailable`이지 core 상태 c
   JSONL tmp→ready, replay/idempotency.
 - macOS generic: `scripts/verify_macos_portability.py`가 process tree 종료, path
   escape, POSIX symlink, case collision, JSONL tmp→ready, replay/idempotency를
-  실행한다. macOS 26.5.2 x86_64에서 Python 3.11·3.14로 `pass`했다.
+  실행하고 실제 generic adapter lifecycle을 통과시킨다. macOS 26.5.2 x86_64에서
+  Python 3.11·3.14로 `pass`했다.
 - Orca: Orca adapter가 없거나 꺼진 상태에서 core CLI replay가 성공한 뒤, Orca를
   연결해 동일 event projection을 비교한다.
 - provider usage: provider가 보고하지 않는 fixture에서는 `usage.status=unknown`이

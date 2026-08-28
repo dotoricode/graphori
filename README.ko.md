@@ -239,9 +239,9 @@ python benchmarks/v1_v2/verify_results.py
 - Orca 연동은 선택 adapter로 있고 지금은 꺼져 있다.
 - macOS generic adapter 전용 검사는 macOS 26.5.2 x86_64와 Python 3.11·3.14에서
   통과했다. 프로세스 트리 종료, 경로·심볼릭 링크 이탈, 대소문자 충돌, journal 공개,
-  replay, idempotency를 확인했다. 이는 기록된 Mac 한 대의 결과이지 모든 Mac을
-  보장하지 않는다. Linux 릴리스 검사는 통과했다고 주장하지 않으며, Windows 설치와
-  Job Object 동작은 실험적 범위다.
+  replay, idempotency와 실제 generic adapter lifecycle을 확인했다. 이는 기록된 Mac
+  한 대의 결과이지 모든 Mac을 보장하지 않는다. Linux 릴리스 검사는 통과했다고
+  주장하지 않으며, Windows 설치와 Job Object 동작은 실험적 범위다.
 
 ## 문서
 

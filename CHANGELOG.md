@@ -38,7 +38,8 @@
 - The macOS generic-adapter verdict no longer rests on the full suite alone.
   A dedicated local fixture now verifies process-tree termination, path and
   POSIX symlink escape, case collisions, journal publication, replay, and
-  idempotency, and emits one hashed evidence record per boundary.
+  idempotency plus a real generic-adapter lifecycle. It emits one whole-record
+  hash per boundary and preserves the JSON beside local release artifacts.
 - `THIRD_PARTY_NOTICES.md` listed IBM Plex Sans KR fonts that this repository
   does not ship.
 - Several documents overstated what is verified. The README claimed macOS `run`

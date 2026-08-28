@@ -56,8 +56,6 @@ def verify(root: Path, output: Path | None) -> dict[str, object]:
         [sys.executable, "scripts/dashboard_smoke.py"],
         [sys.executable, "scripts/public_release_audit.py"],
     )
-    if sys.platform == "darwin":
-        checks += ([sys.executable, "scripts/verify_macos_portability.py"],)
     for command in checks:
         run(command, cwd=root)
     run([gitleaks, "git", "--redact", "--no-banner"], cwd=root)
@@ -75,6 +73,11 @@ def verify(root: Path, output: Path | None) -> dict[str, object]:
 
         artifacts = temporary / "dist"
         run([build_python, "-m", "build", "--outdir", artifacts], cwd=root)
+        if sys.platform == "darwin":
+            run([
+                sys.executable, "scripts/verify_macos_portability.py", "--output",
+                artifacts / "macos-portability.json",
+            ], cwd=root)
         distributions = sorted((*artifacts.glob("*.whl"), *artifacts.glob("*.tar.gz")))
         if len(distributions) != 2:
             raise ValueError("expected exactly one wheel and one source distribution")

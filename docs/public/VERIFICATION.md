@@ -11,9 +11,13 @@ support claim.
 - Python: 3.11.15 and 3.14.6
 - PASS: process-tree termination, path escape, POSIX symlink escape, case
   collision, JSONL tmp→ready publication, replay, and idempotency.
+- PASS: real generic-adapter success, descendant cancellation, fan-in, and
+  explicit-verdict replay lifecycle.
 - Output: one contract-shaped record per fixture with `platform`, `fixture`,
   `verdict`, `evidence_id`, `command`, `host`, self-contained test evidence,
   and its SHA-256 hash.
+- The local release verifier preserves these records as
+  `macos-portability.json` beside the wheel, sdist, SBOM, and `SHA256SUMS`.
 - Python 3.14.6 full suite after adding the fixture: 415 passed, 5 skipped.
 
 This changes the macOS generic-adapter verdict only for the recorded host and

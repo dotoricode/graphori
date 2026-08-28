@@ -285,6 +285,7 @@ class ExternalMarkerInvarianceTests(unittest.TestCase):
 
     def test_marker_outside_workspace_is_unchanged_after_rejected_escape_and_timeout_kill(self):
         before = self._digest()
+        listing_before = sorted(path.name for path in Path(self.outside.name).iterdir())
 
         with self.assertRaises(PathSecurityError):
             self.supervisor.run([PY, "-c", "pass"], workspace_root=self.root, cwd=str(self.outside.name))
@@ -297,6 +298,11 @@ class ExternalMarkerInvarianceTests(unittest.TestCase):
 
         after = self._digest()
         self.assertEqual(before, after, "marker file outside the workspace root was modified")
+        self.assertEqual(
+            listing_before,
+            sorted(path.name for path in Path(self.outside.name).iterdir()),
+            "the directory outside the workspace root changed",
+        )
 
 
 if __name__ == "__main__":
