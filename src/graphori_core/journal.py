@@ -22,12 +22,25 @@ import hashlib
 import json
 import os
 import re
+import time
 import uuid
 
 from .paths import resolve_run_root, safe_join
 from .reducer import EVENT_TYPES, StateTransitionError, validate_event_envelope
 
 GENESIS_DIGEST = "sha256:" + "0" * 64
+
+# Width of the submission stamp that opens a ready filename. Nineteen digits
+# hold nanoseconds since the epoch past the year 2200, and the fixed width
+# keeps lexical order equal to numeric order.
+_SUBMITTED_AT_DIGITS = 19
+_SUBMITTED_AT = re.compile(r"^(\d{%d})\." % _SUBMITTED_AT_DIGITS)
+
+
+def _submitted_at(path: Path) -> int | None:
+    """Submission time in nanoseconds, read from the name, or None if legacy."""
+    match = _SUBMITTED_AT.match(path.name)
+    return int(match.group(1)) if match else None
 
 
 # Windows reports a range already held by another process as EACCES; the
@@ -218,7 +231,11 @@ def submit_event(paths: RunPaths, envelope: Mapping[str, Any], *, local_seq: int
     """Write ``envelope`` to inbox/tmp then atomically rename it into inbox/ready."""
     _validate_producer_envelope(envelope, paths.run_id)
     producer_id = _sanitize_id(envelope["actor"]["role_id"])
-    name = f"{producer_id}.{local_seq:012d}.{uuid.uuid4().hex}.json"
+    # The leading stamp is the submission ordinal the consumer sorts on. It is
+    # nanoseconds since the epoch so that it stays comparable with st_mtime_ns
+    # for any file left behind by an older version.
+    name = (f"{time.time_ns():0{_SUBMITTED_AT_DIGITS}d}.{producer_id}"
+            f".{local_seq:012d}.{uuid.uuid4().hex}.json")
     tmp_path = safe_join(paths.tmp, name)
     ready_path = safe_join(paths.ready, name)
     data = _canonical_bytes(dict(envelope))
@@ -483,32 +500,34 @@ class JournalWriter:
     def consume_ready(self) -> dict[str, int]:
         """Process every file currently in inbox/ready in deterministic order.
 
-        Ordering is by (mtime_ns, filename): the tmp->ready rename preserves
-        the tmp file's creation time, so this reflects real submission
-        arrival order across producers, which the reducer needs -- a run
-        cannot be recorded as succeeded before the worker it waited on is
-        recorded as passed.  The filename is only a tiebreak for entries that
-        land in the same tick.
+        Ordering is by (submission time, filename), both read from the name
+        itself.  :func:`submit_event` stamps the submission time into the ready
+        filename, so the order follows the order producers actually submitted
+        -- which the reducer needs, since a run cannot be recorded as succeeded
+        before the worker it waited on is recorded as passed -- while remaining
+        a function of the ready set and nothing else.  Re-running consumption
+        over an unchanged set therefore assigns the same seq every time, which
+        is what replay depends on.
 
-        Known limitation: filesystem timestamp granularity decides which
-        entries share a tick, and that varies between runs. Two runs over an
-        identically submitted ready set can therefore differ in the order of
-        events that collide, which is why
-        ``test_ready_ordering_is_a_deterministic_function_of_filenames`` fails
-        intermittently. Ordering by filename alone would be reproducible but
-        breaks causal order across producers, so the fix is a submission
-        ordinal in the ready name rather than a different sort key.
+        Modification time is not used for a file that carries a stamp.  It was,
+        and it made ordering depend on wall-clock: filesystem timestamp
+        granularity decides which submissions collide, that varies per run, and
+        two runs over an identically submitted set could disagree.  A file left
+        in ready by an older version has no stamp, so it falls back to
+        ``st_mtime_ns``; both are nanoseconds since the epoch and sort together.
         """
         self._require_ownership()
         counts = {"accepted": 0, "duplicate": 0, "conflict": 0, "quarantined": 0}
         entries = []
         for name in os.listdir(self.paths.ready):
             path = self.paths.ready / name
-            try:
-                mtime_ns = path.stat().st_mtime_ns
-            except OSError:
-                continue
-            entries.append((mtime_ns, name, path))
+            submitted_at = _submitted_at(path)
+            if submitted_at is None:
+                try:
+                    submitted_at = path.stat().st_mtime_ns
+                except OSError:
+                    continue
+            entries.append((submitted_at, name, path))
         entries.sort(key=lambda item: (item[0], item[1]))
         for _, _, ready_path in entries:
             counts[self.consume_one(ready_path)] += 1

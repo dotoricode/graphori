@@ -13,6 +13,14 @@
 - The verifier node title is no longer Korean. It is part of the canonical plan
   digest, and the portability contract requires language to stay out of plan,
   journal, and projection digests.
+- Ready-file consumption is reproducible again. Ordering keyed on modification
+  time, so filesystem timestamp granularity decided which submissions collided
+  and that varied per run: the same ready set could produce two different `seq`
+  assignments, and `test_ready_ordering_is_a_deterministic_function_of_filenames`
+  failed roughly half the time. `submit_event` now stamps the submission time
+  into the ready filename and the writer sorts on that, which keeps submission
+  order without reading the clock at consumption. Files left by an older
+  version have no stamp and fall back to `st_mtime_ns`.
 - On Windows, a lock failure that was not contention was reported as "another
   Graphori is running". Only `EACCES` and `EDEADLOCK` now mean contention;
   every other errno reports its own cause. A missing lock backend raises the
