@@ -30,16 +30,16 @@ from .reducer import EVENT_TYPES, StateTransitionError, validate_event_envelope
 
 GENESIS_DIGEST = "sha256:" + "0" * 64
 
-# Width of the submission stamp that opens a ready filename. Nineteen digits
-# hold nanoseconds since the epoch past the year 2200, and the fixed width
-# keeps lexical order equal to numeric order.
-_SUBMITTED_AT_DIGITS = 19
-_SUBMITTED_AT = re.compile(r"^(\d{%d})\." % _SUBMITTED_AT_DIGITS)
+# Width of the durable submission ordinal that opens a ready filename. The
+# counter starts near nanoseconds since the epoch for compatibility with legacy
+# mtime ordering, then advances logically under a per-run interprocess lock.
+_SUBMISSION_ORDINAL_DIGITS = 19
+_SUBMISSION_ORDINAL = re.compile(r"^(\d{%d})\." % _SUBMISSION_ORDINAL_DIGITS)
 
 
-def _submitted_at(path: Path) -> int | None:
-    """Submission time in nanoseconds, read from the name, or None if legacy."""
-    match = _SUBMITTED_AT.match(path.name)
+def _submission_ordinal(path: Path) -> int | None:
+    """Durable submission ordinal from the name, or ``None`` for legacy files."""
+    match = _SUBMISSION_ORDINAL.match(path.name)
     return int(match.group(1)) if match else None
 
 
@@ -86,6 +86,16 @@ def _lock_exclusive_nonblocking(fd: int) -> None:
         if exc.errno in _NT_CONTENTION_ERRNOS:
             raise BlockingIOError(str(exc)) from exc
         raise
+
+
+def _lock_exclusive_blocking(fd: int) -> None:
+    """Take the short-lived submission lock, waiting for the current holder."""
+    backend = _lock_backend()
+    if os.name == "posix":
+        backend.flock(fd, backend.LOCK_EX)
+        return
+    os.lseek(fd, 0, os.SEEK_SET)
+    backend.locking(fd, backend.LK_LOCK, 1)
 
 
 def _unlock(fd: int) -> None:
@@ -203,6 +213,14 @@ class RunPaths:
         return self.journal_dir / ".writer.lock"
 
     @property
+    def submission_lock_file(self) -> Path:
+        return self.ready.parent / ".submission.lock"
+
+    @property
+    def submission_counter_file(self) -> Path:
+        return self.ready.parent / ".submission.counter"
+
+    @property
     def evidence_dir(self) -> Path:
         return safe_join(self.root, ".graphori", "runs", self.run_id, "evidence")
 
@@ -227,25 +245,99 @@ def _sanitize_id(value: str) -> str:
     return re.sub(r"[^A-Za-z0-9_-]", "_", str(value)) or "producer"
 
 
+def _acquire_submission_lock(paths: RunPaths) -> int:
+    """Acquire the per-run lock that orders ready publication and snapshots."""
+    fd = os.open(str(paths.submission_lock_file), os.O_RDWR | os.O_CREAT, 0o600)
+    try:
+        # Windows byte-range locking needs a byte to lock. Concurrent writers
+        # may write the same sentinel, which is harmless because it never
+        # carries protocol data.
+        if os.fstat(fd).st_size == 0:
+            os.write(fd, b"\0")
+            os.fsync(fd)
+        os.lseek(fd, 0, os.SEEK_SET)
+        _lock_exclusive_blocking(fd)
+        return fd
+    except BaseException:
+        os.close(fd)
+        raise
+
+
+def _ready_order_floor(paths: RunPaths) -> int:
+    """Largest ordering value already published, including legacy files."""
+    floor = 0
+    for name in os.listdir(paths.ready):
+        path = paths.ready / name
+        ordinal = _submission_ordinal(path)
+        if ordinal is None:
+            try:
+                ordinal = path.stat().st_mtime_ns
+            except OSError:
+                continue
+        floor = max(floor, ordinal)
+    return floor
+
+
+def _read_submission_counter(paths: RunPaths) -> int:
+    try:
+        raw = paths.submission_counter_file.read_text(encoding="ascii").strip()
+    except FileNotFoundError:
+        return 0
+    try:
+        value = int(raw)
+    except ValueError as exc:
+        raise StateTransitionError("submission counter is corrupt") from exc
+    if value < 0:
+        raise StateTransitionError("submission counter cannot be negative")
+    return value
+
+
+def _write_submission_counter(paths: RunPaths, value: int) -> None:
+    tmp = paths.submission_counter_file.with_name(
+        paths.submission_counter_file.name + f".{uuid.uuid4().hex}.tmp"
+    )
+    with open(tmp, "wb") as handle:
+        handle.write(f"{value}\n".encode("ascii"))
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.replace(str(tmp), str(paths.submission_counter_file))
+
+
 def submit_event(paths: RunPaths, envelope: Mapping[str, Any], *, local_seq: int) -> Path:
     """Write ``envelope`` to inbox/tmp then atomically rename it into inbox/ready."""
     _validate_producer_envelope(envelope, paths.run_id)
     producer_id = _sanitize_id(envelope["actor"]["role_id"])
-    # The leading stamp is the submission ordinal the consumer sorts on. It is
-    # nanoseconds since the epoch so that it stays comparable with st_mtime_ns
-    # for any file left behind by an older version.
-    name = (f"{time.time_ns():0{_SUBMITTED_AT_DIGITS}d}.{producer_id}"
-            f".{local_seq:012d}.{uuid.uuid4().hex}.json")
-    tmp_path = safe_join(paths.tmp, name)
-    ready_path = safe_join(paths.ready, name)
+    unique = uuid.uuid4().hex
+    tmp_path = safe_join(paths.tmp, f"{producer_id}.{local_seq:012d}.{unique}.tmp")
     data = _canonical_bytes(dict(envelope))
     fd = os.open(str(tmp_path), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
     with os.fdopen(fd, "wb") as handle:
         handle.write(data)
         handle.flush()
         os.fsync(handle.fileno())
-    os.replace(str(tmp_path), str(ready_path))
-    return ready_path
+
+    lock_fd = _acquire_submission_lock(paths)
+    try:
+        # Wall time only seeds a new counter. Once a run has published anything,
+        # the durable counter is authoritative even if the clock repeats or
+        # moves backwards. Scanning ready makes upgrades from stamped or legacy
+        # files monotonic as well.
+        ordinal = max(
+            time.time_ns(),
+            _read_submission_counter(paths) + 1,
+            _ready_order_floor(paths) + 1,
+        )
+        _write_submission_counter(paths, ordinal)
+        name = (f"{ordinal:0{_SUBMISSION_ORDINAL_DIGITS}d}.{producer_id}"
+                f".{local_seq:012d}.{unique}.json")
+        ready_path = safe_join(paths.ready, name)
+        os.replace(str(tmp_path), str(ready_path))
+        return ready_path
+    finally:
+        try:
+            _unlock(lock_fd)
+        finally:
+            os.close(lock_fd)
 
 
 def _unique_path(path: Path) -> Path:
@@ -500,34 +592,45 @@ class JournalWriter:
     def consume_ready(self) -> dict[str, int]:
         """Process every file currently in inbox/ready in deterministic order.
 
-        Ordering is by (submission time, filename), both read from the name
-        itself.  :func:`submit_event` stamps the submission time into the ready
-        filename, so the order follows the order producers actually submitted
+        Ordering is by (durable submission ordinal, filename), both read from
+        the ready set. :func:`submit_event` assigns the ordinal under a per-run
+        interprocess lock after the tmp file is durable and holds that lock
+        through the ready rename, so the order follows ready publication
         -- which the reducer needs, since a run cannot be recorded as succeeded
         before the worker it waited on is recorded as passed -- while remaining
         a function of the ready set and nothing else.  Re-running consumption
         over an unchanged set therefore assigns the same seq every time, which
         is what replay depends on.
 
-        Modification time is not used for a file that carries a stamp.  It was,
+        Modification time is not used for a file that carries an ordinal. It was,
         and it made ordering depend on wall-clock: filesystem timestamp
         granularity decides which submissions collide, that varies per run, and
         two runs over an identically submitted set could disagree.  A file left
         in ready by an older version has no stamp, so it falls back to
-        ``st_mtime_ns``; both are nanoseconds since the epoch and sort together.
+        ``st_mtime_ns``. A new counter starts above every legacy mtime already
+        in ready, so an upgraded run never publishes a new file before an older
+        pending one.
         """
         self._require_ownership()
         counts = {"accepted": 0, "duplicate": 0, "conflict": 0, "quarantined": 0}
         entries = []
-        for name in os.listdir(self.paths.ready):
-            path = self.paths.ready / name
-            submitted_at = _submitted_at(path)
-            if submitted_at is None:
-                try:
-                    submitted_at = path.stat().st_mtime_ns
-                except OSError:
-                    continue
-            entries.append((submitted_at, name, path))
+        lock_fd = _acquire_submission_lock(self.paths)
+        try:
+            names = os.listdir(self.paths.ready)
+            for name in names:
+                path = self.paths.ready / name
+                ordinal = _submission_ordinal(path)
+                if ordinal is None:
+                    try:
+                        ordinal = path.stat().st_mtime_ns
+                    except OSError:
+                        continue
+                entries.append((ordinal, name, path))
+        finally:
+            try:
+                _unlock(lock_fd)
+            finally:
+                os.close(lock_fd)
         entries.sort(key=lambda item: (item[0], item[1]))
         for _, _, ready_path in entries:
             counts[self.consume_one(ready_path)] += 1

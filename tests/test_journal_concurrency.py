@@ -1,4 +1,5 @@
 import sys
+import subprocess
 import tempfile
 import unittest
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -7,6 +8,26 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parents[1] / "src"))
 
 from graphori_core import canonical_event, ensure_run_dirs, submit_event, JournalWriter  # noqa: E402
+
+
+_PROCESS_PRODUCER = r'''
+import sys
+from pathlib import Path
+sys.path.insert(0, sys.argv[1])
+from graphori_core import canonical_event, ensure_run_dirs, submit_event
+from graphori_core import journal
+journal.time.time_ns = lambda: 100
+root, run_id, index = Path(sys.argv[2]), sys.argv[3], int(sys.argv[4])
+paths = ensure_run_dirs(root, run_id)
+event = canonical_event(
+    "heartbeat", event_id=f"evt_{index}", run_id=run_id, actor_role="worker",
+)
+event["producer_event_id"] = f"producer:worker-{index}:1"
+event["actor"] = {"role": "worker", "role_id": f"worker-{index}"}
+for field in ("seq", "recorded_at", "prev_digest", "digest"):
+    event.pop(field, None)
+print(submit_event(paths, event, local_seq=1).name, flush=True)
+'''
 
 
 class JournalConcurrencyTests(unittest.TestCase):
@@ -53,6 +74,26 @@ class JournalConcurrencyTests(unittest.TestCase):
         for event in events:
             self.assertEqual(event["prev_digest"], prev)
             prev = event["digest"]
+
+    def test_processes_with_the_same_wall_time_receive_distinct_durable_ordinals(self):
+        src = str(Path(__file__).parents[1] / "src")
+        children = [
+            subprocess.Popen(
+                [sys.executable, "-c", _PROCESS_PRODUCER, src, str(self.root),
+                 "run-process-concurrency", str(index)],
+                text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            )
+            for index in range(8)
+        ]
+        names = []
+        for child in children:
+            stdout, stderr = child.communicate(timeout=20)
+            self.assertEqual(child.returncode, 0, stderr)
+            names.append(stdout.strip())
+
+        ordinals = [int(name.split(".", 1)[0]) for name in names]
+        self.assertEqual(len(set(ordinals)), 8)
+        self.assertEqual(sorted(ordinals), list(range(100, 108)))
 
 
 if __name__ == "__main__":

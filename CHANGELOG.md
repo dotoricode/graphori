@@ -15,12 +15,13 @@
   journal, and projection digests.
 - Ready-file consumption is reproducible again. Ordering keyed on modification
   time, so filesystem timestamp granularity decided which submissions collided
-  and that varied per run: the same ready set could produce two different `seq`
-  assignments, and `test_ready_ordering_is_a_deterministic_function_of_filenames`
-  failed roughly half the time. `submit_event` now stamps the submission time
-  into the ready filename and the writer sorts on that, which keeps submission
-  order without reading the clock at consumption. Files left by an older
-  version have no stamp and fall back to `st_mtime_ns`.
+  and that varied per run. Each run now assigns a durable logical ordinal under
+  a short interprocess lock after the tmp file is flushed, persists the counter,
+  and holds the lock through the ready rename. The writer takes the same lock
+  while capturing its ready snapshot, so clock rollback, equal timestamps, and
+  concurrent producers cannot publish a later ordinal first. Files left by an
+  older version have no ordinal and fall back to `st_mtime_ns`; the new counter
+  starts above every legacy file already waiting.
 - On Windows, a lock failure that was not contention was reported as "another
   Graphori is running". Only `EACCES` and `EDEADLOCK` now mean contention;
   every other errno reports its own cause. A missing lock backend raises the
