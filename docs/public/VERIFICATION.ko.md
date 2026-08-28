@@ -4,7 +4,7 @@
 
 ## 2026-08-28 · macOS 이식성 전용 검사
 
-- 트리: `af1cafd`
+- 트리: `0b065cd`
 - 명령: `python scripts/verify_macos_portability.py`
 - 환경: macOS 26.5.2, x86_64
 - Python: 3.11.15, 3.14.6

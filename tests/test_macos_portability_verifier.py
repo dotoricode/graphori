@@ -4,7 +4,12 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stderr, redirect_stdout
+from io import StringIO
 from pathlib import Path
+from unittest import mock
+
+from scripts import verify_macos_portability
 
 
 ROOT = Path(__file__).parents[1]
@@ -49,3 +54,27 @@ class MacOSPortabilityVerifierTests(unittest.TestCase):
             self.assertEqual(
                 record["hash"], "sha256:" + hashlib.sha256(canonical).hexdigest(),
             )
+
+    def test_failed_fixture_is_written_before_the_command_returns_nonzero(self):
+        failed_record = {
+            "platform": "macos", "fixture": "process_tree", "verdict": "fail",
+            "evidence_id": "macos:process_tree:test", "command": "python -m unittest test",
+            "host": "test-host", "python": "CPython 3.14.0", "evidence": "failure",
+            "hash": "sha256:test",
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary) / "failed.json"
+            with (
+                mock.patch.object(
+                    verify_macos_portability, "run_fixture",
+                    return_value=failed_record,
+                ),
+                redirect_stdout(StringIO()),
+                redirect_stderr(StringIO()),
+            ):
+                result = verify_macos_portability.main(["--output", str(output)])
+            records = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(result, 1)
+        self.assertEqual(len(records), len(verify_macos_portability.FIXTURES))
+        self.assertEqual({record["verdict"] for record in records}, {"fail"})

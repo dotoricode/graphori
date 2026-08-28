@@ -87,11 +87,7 @@ def run_fixture(name: str, tests: tuple[str, ...]) -> dict[str, str]:
 def verify() -> list[dict[str, str]]:
     if sys.platform != "darwin":
         raise RuntimeError("the macOS portability fixture requires a macOS host")
-    records = [run_fixture(name, tests) for name, tests in FIXTURES.items()]
-    failed = [record["fixture"] for record in records if record["verdict"] != "pass"]
-    if failed:
-        raise RuntimeError("portability fixture failed: " + ", ".join(failed))
-    return records
+    return [run_fixture(name, tests) for name, tests in FIXTURES.items()]
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -108,6 +104,16 @@ def main(argv: list[str] | None = None) -> int:
             output.parent.mkdir(parents=True, exist_ok=True)
             output.write_text(text, encoding="utf-8")
         print(text, end="")
+        failed = [
+            record["fixture"] for record in records
+            if record["verdict"] != "pass"
+        ]
+        if failed:
+            print(
+                "MACOS PORTABILITY VERIFICATION: FAILED: " + ", ".join(failed),
+                file=sys.stderr,
+            )
+            return 1
         return 0
     except (OSError, RuntimeError, ValueError) as exc:
         print(f"MACOS PORTABILITY VERIFICATION: FAILED: {exc}", file=sys.stderr)

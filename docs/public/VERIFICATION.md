@@ -5,7 +5,7 @@ support claim.
 
 ## 2026-08-28 · macOS portability fixture
 
-- Tree: `af1cafd`
+- Tree: `0b065cd`
 - Command: `python scripts/verify_macos_portability.py`
 - Host: macOS 26.5.2, x86_64
 - Python: 3.11.15 and 3.14.6
