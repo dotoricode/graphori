@@ -27,9 +27,18 @@ def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def is_git_repository(root: Path) -> bool:
+    """Accept both ordinary clones and linked Git worktrees."""
+    result = subprocess.run(
+        ["git", "rev-parse", "--is-inside-work-tree"],
+        cwd=root, text=True, capture_output=True,
+    )
+    return result.returncode == 0 and result.stdout.strip() == "true"
+
+
 def verify(root: Path, output: Path | None) -> dict[str, object]:
     root = root.resolve()
-    if not (root / ".git").is_dir():
+    if not is_git_repository(root):
         raise ValueError("the full release verifier requires a Git repository")
     gitleaks = shutil.which("gitleaks")
     if not gitleaks:

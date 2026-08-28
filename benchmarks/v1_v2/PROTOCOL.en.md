@@ -17,8 +17,9 @@ for four observations per arm. Hidden checks were revealed only after each run.
 ## Limits
 
 - Four observations per arm cannot represent every coding task.
-- v1-style reconstructed the rules from commit `93c5fcf`; it did not replay preserved
-  historical runs.
+- v1-style reconstructed the rules from private development revision `93c5fcf`; it did
+  not replay preserved historical runs. That revision is not reachable from this clean
+  public history.
 - The v2 source was an uncommitted candidate identified by the digest retained in the
   raw data.
 - The benchmark used Codex only. It does not compare providers.

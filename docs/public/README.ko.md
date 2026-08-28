@@ -10,5 +10,6 @@ Graphori의 입장은 좁고 분명합니다. **에이전트는 꼭 필요한 �
 - [쇼케이스](SHOWCASE.ko.md)
 - [포지셔닝](POSITIONING.ko.md)
 - [공개 전환 조건](RELEASE_GATE.ko.md)
+- [검증 기록](VERIFICATION.ko.md)
 - [English release gate](RELEASE_GATE.md)
 - [English guide](README.md)

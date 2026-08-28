@@ -202,25 +202,35 @@ Three experiments settled current defaults. All three said "don't", and the
 defaults follow.
 
 **Does a second AI reviewer catch what the first missed?** Two Python tasks,
-four runs per arm, Codex only. It found nothing, and cost twice as much. So v2
-does not run one.
+four runs per arm, Codex only. It found nothing and doubled the AI calls. So v2
+does not run one by default.
 
 | Metric | With second reviewer | Without | Change |
 | --- | ---: | ---: | ---: |
 | Hidden checks passed | 4/4 | 4/4 | same |
+| Completion claim matched result | 4/4 | 4/4 | same |
+| Scope violations | 0 | 0 | same |
 | Issues the reviewer found | 0 | n/a | — |
 | AI calls | 8 | 4 | −50% |
 | Median completion | 48.5 s | 32.1 s | −34% |
+| Total input tokens | 567,584 | 333,681 | −41% |
+| Cached input tokens | 396,800 | 267,776 | −33% |
 | Fresh input tokens | 170,784 | 65,905 | −61% |
+| Output tokens | 4,960 | 3,309 | −33% |
+| Provider cost | not recorded | not recorded | unknown |
 
-Small sample, reconstructed from commit `93c5fcf` rather than replayed. It does
-not predict your codebase. Recompute it from the retained artifacts:
+Small sample. The v1-style arm was reconstructed from the documented private
+development design rather than replayed from historical runs. It does not
+predict your codebase. Recompute it from the retained artifacts:
 
 ```sh
 python benchmarks/v1_v2/verify_results.py
 ```
 
 [Method](benchmarks/v1_v2/PROTOCOL.en.md) · [Report](benchmarks/v1_v2/REPORT.en.md) · [Raw data](benchmarks/v1_v2/raw-results.json)
+
+The separate 72-run Direct/v1-style/v2 protocol in [`benchmarks/`](benchmarks/)
+has not run and contributes no numbers to this README.
 
 **Should Graphori attach other Agent Skills to a node automatically?** It can
 bind an external Skill to a step. Two skills were used as probes — `ponytail`
@@ -244,10 +254,11 @@ deliberately.
 - `0.9.0-beta.1` is a beta and the name says so. No stable API, and nothing is
   published to a package registry yet.
 - Orca integration exists as an optional adapter and is currently off.
-- Windows and Linux are exercised, and the maintainer develops on macOS. What
-  macOS does not have is a recorded fixture run, so the
-  [portability contract](docs/architecture/PORTABILITY_CONTRACT.md) still lists
-  it as unverified — daily use is not the same evidence as a platform suite.
+- The local test suite runs on macOS. That is not the dedicated process-tree,
+  path-escape, and symlink acceptance fixture required by the
+  [portability contract](docs/architecture/PORTABILITY_CONTRACT.md), so the
+  macOS platform verdict remains deferred. No Linux release gate is claimed;
+  Windows installation and Job Object behavior remain experimental.
 
 ## Documentation
 
