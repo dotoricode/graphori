@@ -1,6 +1,10 @@
 import json
+import subprocess
+import tempfile
 import unittest
 from pathlib import Path
+
+from scripts.verify_public_release import is_git_repository
 
 
 ROOT = Path(__file__).parents[1]
@@ -54,6 +58,30 @@ class LocalReleaseContractTests(unittest.TestCase):
         ):
             self.assertIn(token, text)
 
+    def test_release_verifier_accepts_a_linked_git_worktree(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "source"
+            linked = root / "linked"
+            source.mkdir()
+            subprocess.run(["git", "init", "-q"], cwd=source, check=True)
+            subprocess.run(
+                ["git", "-c", "user.name=Release Test",
+                 "-c", "user.email=release-test@users.noreply.github.com",
+                 "commit", "--allow-empty", "-qm", "test"],
+                cwd=source, check=True,
+            )
+            subprocess.run(
+                ["git", "worktree", "add", "-q", str(linked)],
+                cwd=source, check=True,
+            )
+
+            self.assertTrue((linked / ".git").is_file())
+            self.assertTrue(is_git_repository(linked))
+            nested = linked / "nested"
+            nested.mkdir()
+            self.assertFalse(is_git_repository(nested))
+
     def test_readmes_split_codex_and_claude_skill_installation(self):
         """Each language documents both agents across its install document set.
 
@@ -92,6 +120,19 @@ class LocalReleaseContractTests(unittest.TestCase):
                     shared.index("npx skills add dotoricode/graphori --list"),
                     shared.index("gh repo clone dotoricode/graphori -- --depth 1"),
                 )
+
+    def test_readmes_publish_the_complete_small_benchmark_boundary(self):
+        required = (
+            "567,584", "333,681", "396,800", "267,776", "170,784",
+            "65,905", "4,960", "3,309", "48.5", "32.1", "72",
+        )
+        for name in ("README.md", "README.ko.md"):
+            text = (ROOT / name).read_text(encoding="utf-8")
+            with self.subTest(readme=name):
+                for value in required:
+                    self.assertIn(value, text)
+                self.assertIn("not recorded" if name == "README.md" else "기록 안 됨", text)
+                self.assertIn("has not run" if name == "README.md" else "아직 실행하지", text)
 
 
 if __name__ == "__main__":

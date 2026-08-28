@@ -31,6 +31,128 @@ from .projection import resolve_projection_metadata
 from .skills import SkillRegistryError, _package_digest
 
 
+_HELP_TEXT = {
+    "description": {
+        "en": "Plan, run, inspect, and replay Graphori work.",
+        "ko": "Graphori 작업을 계획·실행·점검·재생합니다.",
+    },
+    "plan": {
+        "en": "Preview the plan and approval points before execution.",
+        "ko": "실행 전에 계획과 승인 지점을 미리 봅니다.",
+    },
+    "run": {
+        "en": "Start a replayable Graphori run.",
+        "ko": "기록을 재생할 수 있는 Graphori 실행을 시작합니다.",
+    },
+    "status": {
+        "en": "Read the current state of a recorded run.",
+        "ko": "기록된 실행의 현재 상태를 읽습니다.",
+    },
+    "replay": {
+        "en": "Replay a journal without changing it.",
+        "ko": "journal을 변경하지 않고 다시 재생합니다.",
+    },
+    "resume": {
+        "en": "Safely resume an interrupted run.",
+        "ko": "중단된 실행을 안전하게 재개합니다.",
+    },
+    "doctor": {
+        "en": "Inspect the environment and journal without changing them.",
+        "ko": "환경과 journal을 변경하지 않고 점검합니다.",
+    },
+    "dashboard": {
+        "en": "Open the local run dashboard.",
+        "ko": "로컬 실행 상태 대시보드를 엽니다.",
+    },
+    "criterion": {
+        "en": "Stable acceptance criterion, for example AC-01: tests pass.",
+        "ko": "안정적인 완료 기준입니다. 예: AC-01: 테스트 통과",
+    },
+    "language": {
+        "en": "Help and output language: auto, en, or ko.",
+        "ko": "도움말과 출력 언어: auto, en, ko 중 하나입니다.",
+    },
+    "dashboard_run": {
+        "en": "Run ID to display (default: latest run).",
+        "ko": "표시할 작업 ID (기본: 가장 최근 작업)",
+    },
+    "no_open": {
+        "en": "Do not open a browser automatically.",
+        "ko": "브라우저를 자동으로 열지 않습니다.",
+    },
+}
+
+
+def _help_text(key: str, locale: str) -> str:
+    return _HELP_TEXT[key][normalized_locale(locale)]
+
+
+def _bootstrap_objective(argv: list[str]) -> str:
+    """Extract only plan/run positional text without executing the full parser."""
+    command_index = next(
+        (index for index, token in enumerate(argv) if token in {"plan", "run"}),
+        None,
+    )
+    if command_index is None:
+        return ""
+    value_options = {
+        "--root", "--host", "--run-id", "--max-parallelism", "--read-scope",
+        "--write-scope", "--timeout", "--criterion", "--lang", "--locale",
+    }
+    flag_options = {"--no-network", "--json", "--help", "-h"}
+    objective: list[str] = []
+    skip_value = False
+    for token in argv[command_index + 1:]:
+        if skip_value:
+            skip_value = False
+            continue
+        if token == "--verify-command":
+            break
+        if token in value_options:
+            skip_value = True
+            continue
+        if token in flag_options or token.startswith(tuple(f"{name}=" for name in value_options)):
+            continue
+        if token.startswith("-"):
+            continue
+        objective.append(token)
+    text = " ".join(objective)
+    code_or_path_markers = ("/", "\\", "_", ".", "(", ")", "::")
+    if objective and all(
+        any(marker in token for marker in code_or_path_markers)
+        for token in objective
+    ):
+        return ""
+    return text
+
+
+def _bootstrap_help_locale(argv: list[str]) -> str:
+    """Resolve help language before argparse handles an early ``--help``."""
+    preference = "auto"
+    root = Path.cwd()
+    bootstrap_argv = argv[:argv.index("--verify-command")] if "--verify-command" in argv else argv
+    for index, token in enumerate(bootstrap_argv):
+        if token in {"--lang", "--locale"} and index + 1 < len(bootstrap_argv):
+            preference = bootstrap_argv[index + 1]
+        elif token.startswith("--lang=") or token.startswith("--locale="):
+            preference = token.split("=", 1)[1]
+        elif token == "--root" and index + 1 < len(bootstrap_argv):
+            root = Path(bootstrap_argv[index + 1])
+        elif token.startswith("--root="):
+            root = Path(token.split("=", 1)[1])
+    return resolve_locale(
+        preference, root=root, objective=_bootstrap_objective(bootstrap_argv),
+    )
+
+
+def _add_locale_argument(parser: argparse.ArgumentParser, *, locale: str,
+                         default: object = argparse.SUPPRESS) -> None:
+    parser.add_argument(
+        "--lang", "--locale", dest="locale", choices=("auto", "ko", "en"),
+        default=default, help=_help_text("language", locale),
+    )
+
+
 def _objective(parts: list[str]) -> str:
     value = " ".join(parts).strip()
     if not value:
@@ -605,16 +727,19 @@ def cmd_dashboard(args: argparse.Namespace) -> int:
     return 0
 
 
-def build_parser() -> argparse.ArgumentParser:
+def build_parser(*, locale: str = "en") -> argparse.ArgumentParser:
+    locale = normalized_locale(locale)
     parser = argparse.ArgumentParser(
         prog="graphori",
-        description="Graphori 작업 계획·실행·기록 점검 도구",
+        description=_help_text("description", locale),
     )
+    _add_locale_argument(parser, locale=locale, default="auto")
     sub = parser.add_subparsers(dest="command", required=True)
-    for name, function, help_text in (
-            ("plan", cmd_plan, "실행 전에 계획과 승인 지점을 미리 봅니다."),
-            ("run", cmd_run, "기록 가능한 Graphori 실행을 시작합니다."),
+    for name, function in (
+            ("plan", cmd_plan),
+            ("run", cmd_run),
     ):
+        help_text = _help_text(name, locale)
         command = sub.add_parser(name, help=help_text, description=help_text)
         command.add_argument("objective", nargs="+")
         command.add_argument("--root", type=Path, default=Path.cwd())
@@ -626,51 +751,46 @@ def build_parser() -> argparse.ArgumentParser:
         command.add_argument("--timeout", type=float, default=300)
         command.add_argument("--no-network", action="store_true")
         command.add_argument("--criterion", action="append", default=[], metavar="ID:DESCRIPTION",
-                             help="stable acceptance criterion, e.g. AC-01: tests pass")
+                             help=_help_text("criterion", locale))
         command.add_argument("--verify-command", nargs=argparse.REMAINDER)
         command.add_argument("--json", action="store_true")
-        command.add_argument("--lang", "--locale", dest="locale",
-                             choices=("auto", "ko", "en"), default="auto",
-                             help="output language: auto, en, or ko")
+        _add_locale_argument(command, locale=locale)
         command.set_defaults(func=function)
-    for name, function, help_text in (
-            ("status", cmd_status, "기록된 실행의 현재 상태를 읽습니다."),
-            ("replay", cmd_replay, "journal을 읽기 전용으로 다시 재생합니다."),
+    for name, function in (
+            ("status", cmd_status),
+            ("replay", cmd_replay),
     ):
+        help_text = _help_text(name, locale)
         command = sub.add_parser(name, help=help_text, description=help_text)
         command.add_argument("--root", type=Path, default=Path.cwd())
         command.add_argument("--run-id", required=True)
         command.add_argument("--json", action="store_true")
-        command.add_argument("--lang", "--locale", dest="locale",
-                             choices=("auto", "ko", "en"), default="auto",
-                             help="output language: auto, en, or ko")
+        _add_locale_argument(command, locale=locale)
         command.set_defaults(func=function)
-    command = sub.add_parser("resume", help="중단된 실행을 안전하게 재개합니다.")
+    help_text = _help_text("resume", locale)
+    command = sub.add_parser("resume", help=help_text, description=help_text)
     command.add_argument("--root", type=Path, default=Path.cwd())
     command.add_argument("--run-id", required=True)
     command.add_argument("--timeout", type=float, default=300)
     command.add_argument("--json", action="store_true")
-    command.add_argument("--lang", "--locale", dest="locale",
-                         choices=("auto", "ko", "en"), default="auto",
-                         help="output language: auto, en, or ko")
+    _add_locale_argument(command, locale=locale)
     command.set_defaults(func=cmd_resume)
-    command = sub.add_parser("doctor", help="환경과 journal을 읽기 전용으로 점검합니다.")
+    help_text = _help_text("doctor", locale)
+    command = sub.add_parser("doctor", help=help_text, description=help_text)
     command.add_argument("--root", type=Path, default=Path.cwd())
     command.add_argument("--run-id")
     command.add_argument("--timeout", type=float, default=5)
     command.add_argument("--json", action="store_true")
-    command.add_argument("--lang", "--locale", dest="locale",
-                         choices=("auto", "ko", "en"), default="auto",
-                         help="output language: auto, en, or ko")
+    _add_locale_argument(command, locale=locale)
     command.set_defaults(func=cmd_doctor)
-    command = sub.add_parser("dashboard", help="실행 상태 대시보드를 엽니다.")
+    help_text = _help_text("dashboard", locale)
+    command = sub.add_parser("dashboard", help=help_text, description=help_text)
     command.add_argument("--root", type=Path, default=Path.cwd())
-    command.add_argument("--run-id", help="표시할 작업 ID (기본: 가장 최근 작업)")
+    command.add_argument("--run-id", help=_help_text("dashboard_run", locale))
     command.add_argument("--port", type=int, default=8765)
-    command.add_argument("--no-open", action="store_true", help="브라우저를 자동으로 열지 않습니다.")
-    command.add_argument("--lang", "--locale", dest="locale",
-                         choices=("auto", "ko", "en"), default="auto",
-                         help="output language: auto, en, or ko")
+    command.add_argument("--no-open", action="store_true",
+                         help=_help_text("no_open", locale))
+    _add_locale_argument(command, locale=locale)
     command.set_defaults(func=cmd_dashboard)
     return parser
 
@@ -678,7 +798,8 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = None
     try:
-        args = build_parser().parse_args(argv)
+        raw_argv = list(sys.argv[1:] if argv is None else argv)
+        args = build_parser(locale=_bootstrap_help_locale(raw_argv)).parse_args(raw_argv)
         # Resolve only at the presentation boundary. Plans, journals, and
         # their digests never receive this value.
         if hasattr(args, "locale"):

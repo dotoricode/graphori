@@ -11,6 +11,7 @@ Graphori's position is deliberately narrow: **Fewer agents. Every result verifie
 - [Showcase](SHOWCASE.md): demo and Dori asset requirements; no imagined screenshots.
 - [Positioning](POSITIONING.md): the category comparison behind the slogan.
 - [Release gate](RELEASE_GATE.md): current blockers before changing visibility.
+- [Verification record](VERIFICATION.md): commands actually run and their evidence boundary.
 - [한국어 공개 조건](RELEASE_GATE.ko.md)
 - [한국어 안내](README.ko.md)
-- Korean companions: [TRUST.ko.md](TRUST.ko.md), [LIMITATIONS.ko.md](LIMITATIONS.ko.md), [HISTORY.ko.md](HISTORY.ko.md), [SHOWCASE.ko.md](SHOWCASE.ko.md), and [POSITIONING.ko.md](POSITIONING.ko.md).
+- Korean companions: [TRUST.ko.md](TRUST.ko.md), [LIMITATIONS.ko.md](LIMITATIONS.ko.md), [HISTORY.ko.md](HISTORY.ko.md), [SHOWCASE.ko.md](SHOWCASE.ko.md), [POSITIONING.ko.md](POSITIONING.ko.md), and [VERIFICATION.ko.md](VERIFICATION.ko.md).

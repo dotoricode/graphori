@@ -4,7 +4,7 @@ Graphori uses a **local verification + `gh` publication** process. GitHub Action
 
 ## Required local command
 
-Run this from a clean-history candidate repository:
+Run this from a clean-history candidate clone or linked worktree:
 
 ```bash
 python3.11 scripts/verify_public_release.py --output <new-artifact-directory>
@@ -16,7 +16,7 @@ The verifier does not publish a package, create a GitHub repository, change visi
 
 ## Evidence boundary
 
-- The release is verified locally on macOS with Python 3.11. Python 3.12 is checked separately.
+- Recorded local commands have run on macOS with Python 3.11 and 3.14. See [VERIFICATION.md](VERIFICATION.md). This does not satisfy the dedicated portability fixture.
 - Windows installation and Windows Job Object behavior are experimental and are not release claims.
 - CodeQL, OpenSSF Scorecard, and OIDC provenance are not claimed because this no-Actions release does not run them.
 - Gitleaks, `pip-audit`, SBOM, artifact hashes, clean-history inspection, and local test output are the release evidence.
@@ -25,7 +25,7 @@ See [LIMITATIONS.md](LIMITATIONS.md) for the user-facing boundary.
 
 ## Clean-history publication procedure
 
-The existing development repository cannot be made public in place. Its old history contains non-noreply author emails and personal-path or organization-shaped identifiers.
+The original development repository was not made public in place. The exported public repository is live, but its current history audit still reports one non-noreply author identity. Do not claim the full release gate until that is resolved with an explicitly approved history decision.
 
 1. Export the reviewed tree with `scripts/export_public_tree.py`.
 2. Create a new `main` history with a noreply author identity.

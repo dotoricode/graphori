@@ -32,6 +32,9 @@
   the working directory, so it no longer fails on ignored build output. It also
   checks untracked documents Git would not ignore, which is how a new document
   used to escape the index check until after it was committed.
+- `scripts/verify_public_release.py` now accepts a linked Git worktree as well
+  as an ordinary clone. It previously required `.git` to be a directory even
+  though Git stores a control file at a linked worktree root.
 - `THIRD_PARTY_NOTICES.md` listed IBM Plex Sans KR fonts that this repository
   does not ship.
 - Several documents overstated what is verified. The README claimed macOS `run`
@@ -51,8 +54,9 @@
   reaches the writer or the journal. `graphori status` used to print a readable
   report in Korean and raw JSON in English; both languages now get the report.
   Keyword lists that match Korean input are unchanged — they read the objective
-  rather than write output. Argparse help text is still Korean only, because it
-  is built before a locale is resolved.
+  rather than write output. Argparse now resolves explicit, configured,
+  objective, or process language before constructing help, so top-level and
+  subcommand help are available in both English and Korean.
 - The declared version is now `0.9.0-beta.1`, matching the tag on the first
   public commit. `pyproject.toml` spells it `0.9.0b1` because PEP 440
   normalizes it that way; the two are the same version. Calling a beta `0.1.0`

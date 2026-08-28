@@ -1,9 +1,12 @@
 import asyncio
+import contextlib
+import io
 import os
 import tempfile
 import unittest
 from pathlib import Path
 import sys
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).parents[1] / "src"))
 
@@ -21,6 +24,7 @@ from graphori_core import (
     SessionHandle,
 )
 from graphori_core.product import ProductPlanCompiler, execute_product, render_plan_preview
+from graphori_core import product_cli
 from graphori_core.product_cli import _render_human_status, build_parser
 from graphori_core.presentation import normalized_locale, objective_locale, resolve_locale
 from graphori_core.run_spec import extract_acceptance_criteria
@@ -236,6 +240,40 @@ class ProductPlanTests(unittest.TestCase):
         parser = build_parser()
         self.assertEqual(parser.parse_args(["plan", "Fix it", "--lang", "en"]).locale, "en")
         self.assertEqual(parser.parse_args(["plan", "Fix it", "--locale", "ko"]).locale, "ko")
+        self.assertEqual(parser.parse_args(["--lang", "ko", "plan", "Fix it"]).locale, "ko")
+
+    def test_help_follows_explicit_and_objective_language(self):
+        def render(argv):
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output), self.assertRaises(SystemExit) as raised:
+                product_cli.main(argv)
+            self.assertEqual(raised.exception.code, 0)
+            return output.getvalue()
+
+        english = render(["--lang", "en", "--help"])
+        korean = render(["--lang", "ko", "--help"])
+        self.assertIn("Plan, run, inspect, and replay", english)
+        self.assertNotIn("작업을 계획", english)
+        self.assertIn("Graphori 작업을 계획", korean)
+        self.assertIn("도움말과 출력 언어", korean)
+        self.assertIn("Preview the plan", render(["plan", "Fix this bug", "--help"]))
+        self.assertIn("실행 전에 계획", render(["plan", "이 버그를 고쳐줘", "--help"]))
+
+        with mock.patch.dict(
+            os.environ,
+            {"LC_ALL": "ko_KR.UTF-8", "LC_MESSAGES": "", "LANG": "ko_KR.UTF-8"},
+        ):
+            self.assertIn("Graphori 작업을 계획", render(["--help"]))
+            self.assertIn("환경과 journal", render(["doctor", "--help"]))
+            for objective in (
+                ["src/worker.py"],
+                ["README.md"],
+                ["src/worker.py", "tests/test_worker.py"],
+                ["fix_bug"],
+                ["MyClass.method"],
+            ):
+                with self.subTest(objective=objective):
+                    self.assertIn("실행 전에 계획", render(["plan", *objective, "--help"]))
 
     def test_preview_is_published_before_safe_read_only_nodes_dispatch(self):
         with tempfile.TemporaryDirectory() as temp:
