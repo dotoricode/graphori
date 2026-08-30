@@ -110,6 +110,36 @@ when the graph genuinely has more independent work.
 
 This is the part you would otherwise be doing in your head every time.
 
+## Graphori Sprout
+
+**Run one path. Test it. Expand only if it passes.**
+
+Sprout changes what moves a graph forward. A finished node is not enough: its
+artifact must close the named proof obligations for the next transition.
+
+```text
+pilot --proof--> EXPAND --proof--> FAN_IN --proof--> reversible COMMIT
+```
+
+The node that closes a proof does not have to contain an LLM. It can be a process,
+test, schema checker, control node, agent, or human. `ProofFrontier` activates the
+lowest-latency bounded node cover for the open obligations. For repeated work, the
+performance gate can keep the existing v2 route unless the pilot's declared estimates
+predict a sufficient gain. It is an opt-in planning API; the default CLI compiler does
+not synthesize Sprout plans. Failed proofs get bounded repair, unknown proofs escalate instead of
+being guessed, and every decision is canonical and replayable.
+
+Plans marked `proof_policy="sprout-1"` enforce proof-gated fan-in and reversible
+external commit in the production scheduler and journal path. Irreversible Sprout
+commit is rejected until a dedicated human-approval contract is implemented.
+
+This is the resource-efficiency lesson we take from DeepSeek: do not imitate brute-force
+scale when a better structure can activate less computation and use reliable feedback.
+Graphori does not train or modify a model.
+
+[How Sprout works](docs/architecture/SPROUT.md) ·
+[Policy benchmark](benchmarks/sprout/REPORT.md)
+
 ## How it picks a model
 
 Each node is classified by what it demands, and each class has a minimum
@@ -233,6 +263,27 @@ arguments. Unmapped criteria stay `NOT_PROVEN`; Graphori never assumes one
 passing command proves every requirement.
 
 ## What was measured
+
+### Sprout routing-model benchmark
+
+This 1,000-cell deterministic model compares five routing policies across four distinct
+workflows, target counts 1/2/4/8/16, and ten paired repetitions. It models declared node
+estimates on three WIP lanes; it does not measure provider wall time, tokens, or quality.
+
+| Targets | v1 target review | Graphori v2 | Unconditional pilot | Adaptive Sprout | Static oracle |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 234.0 ms | **123.5 ms** | 240.0 ms | **123.5 ms** | 125.0 ms |
+| 2 | 316.5 ms | 206.0 ms | 290.0 ms | 206.0 ms | **178.0 ms** |
+| 4 | 612.0 ms | 395.0 ms | 453.0 ms | 377.5 ms | **341.0 ms** |
+| 8 | 1,103.0 ms | 776.0 ms | 779.5 ms | 703.5 ms | **666.5 ms** |
+| 16 | 2,192.0 ms | 1,539.0 ms | 1,431.0 ms | 1,382.5 ms | **1,319.0 ms** |
+
+The first audited design was slower than v2 through eight targets. The final performance
+gate therefore keeps v2 until a pilot's own estimates predict a gain. Adaptive Sprout
+matched v2 at 1–2 targets and reduced modeled median latency by 4.4%, 9.3%, and 10.2%
+at 4, 8, and 16. At 16 it also used 39.4% fewer activated nodes, while all arms covered
+3,520/3,520 declared obligations with zero invalid fan-in declarations. These are model
+results, not independent real-world speed claims. [Method and full results](benchmarks/sprout/REPORT.md)
 
 ### Public 72-run comparison
 

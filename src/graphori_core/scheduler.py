@@ -34,6 +34,7 @@ class SchedulingState:
     node_states: Mapping[str, str] = field(default_factory=dict)
     approved_nodes: frozenset[str] = frozenset()
     queue_age_ms: Mapping[str, int] = field(default_factory=dict)
+    proof_states: Mapping[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -63,6 +64,22 @@ def _scope_conflict(left: NodeSpec, right: NodeSpec) -> bool:
     if any(_overlap(a, b) for a in left.write_scope for b in right.read_scope):
         return True
     return any(_overlap(a, b) for a in left.read_scope for b in right.write_scope)
+
+
+def projected_proof_states(plan: RunPlan, node_states: Mapping[str, str]) -> dict[str, str]:
+    """Project proof state from its sole producer without inventing PASS evidence."""
+    result: dict[str, str] = {}
+    for node in plan.nodes:
+        state = node_states.get(node.node_id, "pending")
+        if state == "passed":
+            proof_state = "passed"
+        elif state in _FAILURE:
+            proof_state = "failed"
+        else:
+            proof_state = "open"
+        for proof in node.closes_proofs:
+            result[proof] = proof_state
+    return result
 
 
 class Scheduler:
@@ -119,8 +136,14 @@ class Scheduler:
                 continue
             dependency_states = [state.node_states.get(dep, "pending")
                                  for dep in node.dependencies]
+            proof_states = [state.proof_states.get(proof, "open")
+                            for proof in node.requires_proofs]
             if any(item in _FAILURE for item in dependency_states):
                 blocked.append(node.node_id)
+            elif any(item in {"failed", "unknown"} for item in proof_states):
+                blocked.append(node.node_id)
+            elif not all(item == "passed" for item in proof_states):
+                waiting.append(node.node_id)
             elif not all(
                 item in _SUCCESS
                 or ((node.kind == "verifier" or node.reviews_unverified_dependencies)

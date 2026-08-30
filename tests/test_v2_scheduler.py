@@ -10,12 +10,14 @@ from graphori_core import (  # noqa: E402
 
 
 def node(node_id, *, deps=(), read=(), write=(), execution=90_000,
-         startup=0, approval=False, team="implementation", kind="worker"):
+         startup=0, approval=False, team="implementation", kind="worker",
+         requires_proofs=(), closes_proofs=()):
     return NodeSpec(
         node_id=node_id, team_id=team, title=node_id, objective=node_id,
         kind=kind, dependencies=deps, read_scope=read, write_scope=write,
         estimated_execution_ms=execution, estimated_startup_ms=startup,
-        approval_required=approval,
+        approval_required=approval, requires_proofs=requires_proofs,
+        closes_proofs=closes_proofs,
     )
 
 
@@ -111,6 +113,36 @@ class V2SchedulerContractTests(unittest.TestCase):
         state = SchedulingState(queue_age_ms={"b": 10_000, "a": 0})
         self.assertEqual(self.scheduler.decide(plan, state),
                          self.scheduler.decide(plan, state))
+
+    def test_proof_gated_node_waits_until_required_proof_passes(self):
+        plan = self.plan(
+            node("pilot", closes_proofs=("pilot-qualified",)),
+            node("branch", requires_proofs=("pilot-qualified",)),
+        )
+        waiting = self.scheduler.decide(
+            plan, SchedulingState(node_states={"pilot": "passed"}),
+        )
+        self.assertIn("branch", waiting.waiting)
+        ready = self.scheduler.decide(
+            plan,
+            SchedulingState(
+                node_states={"pilot": "passed"},
+                proof_states={"pilot-qualified": "passed"},
+            ),
+        )
+        self.assertEqual(tuple(item.node_id for item in ready.dispatches), ("branch",))
+
+    def test_failed_or_unknown_proof_blocks_automatic_dispatch(self):
+        plan = self.plan(
+            node("synthesis", closes_proofs=("synthesis",)),
+            node("commit", requires_proofs=("synthesis",)),
+        )
+        for state in ("failed", "unknown"):
+            with self.subTest(state=state):
+                batch = self.scheduler.decide(
+                    plan, SchedulingState(proof_states={"synthesis": state}),
+                )
+                self.assertIn("commit", batch.blocked)
 
 
 if __name__ == "__main__":

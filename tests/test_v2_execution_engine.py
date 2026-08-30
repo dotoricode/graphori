@@ -279,6 +279,61 @@ class V2ExecutionEngineContractTests(unittest.TestCase):
         self.assertEqual(adapter.max_active, 2)
         self.assertEqual(adapter.started, ["a", "b", "verify"])
 
+    def test_sprout_proofs_gate_pilot_fanout_fanin_and_commit(self):
+        adapter = ConcurrentFakeAdapter()
+        plan = RunPlan(
+            run_id="run-sprout-e2e", plan_version=1, status="committed",
+            proof_policy="sprout-1",
+            nodes=(
+                NodeSpec(
+                    "pilot", "implementation", "Pilot", "prove one path", "worker",
+                    verification_policy="deterministic", closes_proofs=("pilot",),
+                    estimated_execution_ms=20_000,
+                ),
+                NodeSpec(
+                    "branch-a", "implementation", "Branch A", "run A", "worker",
+                    verification_policy="deterministic", requires_proofs=("pilot",),
+                    closes_proofs=("branch-a",), estimated_execution_ms=90_000,
+                ),
+                NodeSpec(
+                    "branch-b", "implementation", "Branch B", "run B", "worker",
+                    verification_policy="deterministic", requires_proofs=("pilot",),
+                    closes_proofs=("branch-b",), estimated_execution_ms=80_000,
+                ),
+                NodeSpec(
+                    "verify", "verification", "Fan-in", "verify branches", "verifier",
+                    dependencies=("branch-a", "branch-b"),
+                    requires_proofs=("branch-a", "branch-b"),
+                    closes_proofs=("synthesis",), estimated_execution_ms=30_000,
+                ),
+                NodeSpec(
+                    "commit", "implementation", "Commit", "commit result", "worker",
+                    verification_policy="deterministic",
+                    dependencies=("verify",), requires_proofs=("synthesis",),
+                    estimated_execution_ms=10_000, external_effect=True,
+                    reversibility="reversible",
+                ),
+            ),
+        )
+        engine = GraphExecutionEngine(
+            adapter=adapter, plan_factory=lambda _spec: plan,
+            scheduler=Scheduler(SchedulerPolicy(max_wip=2)),
+        )
+
+        async def scenario():
+            handle = await engine.start(spec(self.workspace))
+            await engine.advance(handle.run_id)
+            self.assertEqual(adapter.started, ["pilot"])
+            await engine.advance(handle.run_id)
+            self.assertEqual(adapter.started, ["pilot", "branch-a", "branch-b"])
+            await engine.advance(handle.run_id)
+            self.assertEqual(adapter.started[-1], "verify")
+            await engine.advance(handle.run_id)
+            self.assertEqual(adapter.started[-1], "commit")
+            self.assertEqual(engine.snapshot(handle.run_id).terminal_status, "succeeded")
+
+        asyncio.run(scenario())
+
     def test_worker_finished_does_not_equal_independent_verification(self):
         adapter = ConcurrentFakeAdapter()
         plan = RunPlan(
@@ -726,9 +781,10 @@ class V2ExecutionEngineContractTests(unittest.TestCase):
             run_id="run-rework", plan_version=1, status="committed",
             nodes=(
                 NodeSpec("work", "implementation", "Work", "build", "worker",
-                         verification_policy="independent"),
+                         verification_policy="independent", closes_proofs=("work",)),
                 NodeSpec("verify", "verification", "Verify", "review", "verifier",
-                         dependencies=("work",), verification_policy="independent"),
+                         dependencies=("work",), closes_proofs=("review",),
+                         verification_policy="independent"),
             ),
         )
 

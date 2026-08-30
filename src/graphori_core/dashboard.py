@@ -20,7 +20,10 @@ from .projection import (
     CanonicalRunProjection, build_canonical_projection, effective_plan, fresh_reducer,
     replay_node_role_ids, replay_task_id, resolve_projection_metadata,
 )
-from .scheduler import Scheduler, SchedulerPolicy, SchedulingBatch, SchedulingState
+from .scheduler import (
+    Scheduler, SchedulerPolicy, SchedulingBatch, SchedulingState,
+    projected_proof_states,
+)
 
 
 def _now() -> float:
@@ -114,6 +117,7 @@ class DashboardStore:
             scheduling = scheduler.decide(plan, SchedulingState(
                 node_states=node_states,
                 approved_nodes=frozenset(reducer.approved_nodes),
+                proof_states=projected_proof_states(plan, node_states),
             ))
         else:
             scheduling = SchedulingBatch()
