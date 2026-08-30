@@ -15,6 +15,7 @@ from .skills import SkillBinding
 TEAM_IDS = frozenset({"planning", "research", "design", "implementation", "verification"})
 TEAM_STATES = frozenset({"standby", "active", "omitted", "blocked", "complete"})
 PLAN_STATES = frozenset({"provisional", "committed", "superseded"})
+PROOF_POLICIES = frozenset({"", "sprout-1"})
 
 
 @dataclass(frozen=True)
@@ -86,6 +87,8 @@ class NodeSpec:
     acceptance_criteria: tuple[str, ...] = ()
     evidence_requirements: tuple[str, ...] = ()
     reviews_unverified_dependencies: bool = False
+    requires_proofs: tuple[str, ...] = ()
+    closes_proofs: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.node_id.strip() or not self.title.strip() or not self.objective.strip():
@@ -98,7 +101,8 @@ class NodeSpec:
                 raise ValueError(f"{name} cannot be negative")
         for name in ("dependencies", "read_scope", "write_scope", "skills",
                      "routing_reason_codes", "adapter_requirements",
-                     "acceptance_criteria", "evidence_requirements"):
+                     "acceptance_criteria", "evidence_requirements",
+                     "requires_proofs", "closes_proofs"):
             object.__setattr__(self, name, tuple(sorted(set(getattr(self, name)))))
         criterion_ids = [criterion_id(item) for item in self.acceptance_criteria]
         if len(criterion_ids) != len(set(criterion_ids)):
@@ -111,6 +115,8 @@ class NodeSpec:
             raise ValueError("skill binding IDs must be unique")
         if len(self.skill_bindings) > 2:
             raise ValueError("a Node may bind at most 2 resolved skills")
+        if set(self.requires_proofs).intersection(self.closes_proofs):
+            raise ValueError("a node cannot require a proof that it closes")
 
     def to_dict(self) -> dict[str, Any]:
         result: dict[str, Any] = {}
@@ -128,7 +134,8 @@ class NodeSpec:
         data = dict(value)
         for name in ("dependencies", "read_scope", "write_scope", "skills",
                      "routing_reason_codes", "adapter_requirements",
-                     "acceptance_criteria", "evidence_requirements"):
+                     "acceptance_criteria", "evidence_requirements",
+                     "requires_proofs", "closes_proofs"):
             data[name] = tuple(data.get(name, ()))
         data["skill_bindings"] = tuple(
             SkillBinding.from_dict(item) for item in data.get("skill_bindings", ())
@@ -160,6 +167,7 @@ class RunPlan:
     run_id: str
     plan_version: int
     status: str
+    proof_policy: str = ""
     teams: tuple[TeamSpec, ...] = ()
     nodes: tuple[NodeSpec, ...] = ()
     edges: tuple[PlanEdge, ...] = ()
@@ -180,6 +188,8 @@ class RunPlan:
             raise ValueError("run_id must be non-empty and plan_version must be positive")
         if self.status not in PLAN_STATES:
             raise ValueError(f"unknown plan status: {self.status}")
+        if self.proof_policy not in PROOF_POLICIES:
+            raise ValueError(f"unknown proof policy: {self.proof_policy}")
         object.__setattr__(self, "teams", tuple(sorted(self.teams, key=lambda item: item.team_id)))
         object.__setattr__(self, "nodes", tuple(sorted(self.nodes, key=lambda item: item.node_id)))
         object.__setattr__(self, "routing_decisions", tuple(sorted(
@@ -191,10 +201,52 @@ class RunPlan:
         if len(node_ids) != len(set(node_ids)):
             raise ValueError("node_id values must be unique")
         known = set(node_ids)
+        proof_producers: dict[str, str] = {}
         for node in self.nodes:
             missing = set(node.dependencies) - known
             if missing:
                 raise ValueError(f"node {node.node_id} has unknown dependencies: {sorted(missing)}")
+            for proof in node.closes_proofs:
+                if proof in proof_producers:
+                    raise ValueError(
+                        f"proof {proof} has multiple producers: "
+                        f"{proof_producers[proof]}, {node.node_id}"
+                    )
+                proof_producers[proof] = node.node_id
+        for node in self.nodes:
+            missing_proofs = set(node.requires_proofs) - set(proof_producers)
+            if missing_proofs:
+                raise ValueError(
+                    f"node {node.node_id} requires unknown proofs: "
+                    f"{sorted(missing_proofs)}"
+                )
+        if self.proof_policy:
+            by_id = {node.node_id: node for node in self.nodes}
+            for node in self.nodes:
+                if len(node.dependencies) > 1:
+                    proof_sets = [set(by_id[dependency].closes_proofs)
+                                  for dependency in node.dependencies]
+                    dependency_proofs = set().union(*proof_sets)
+                    if (any(not proofs for proofs in proof_sets)
+                            or not dependency_proofs <= set(node.requires_proofs)):
+                        raise ValueError(
+                            f"Sprout fan-in {node.node_id} must require every "
+                            "dependency proof"
+                        )
+                if node.external_effect:
+                    dependency_proofs = {
+                        proof for dependency in node.dependencies
+                        for proof in by_id[dependency].closes_proofs
+                    }
+                    if (not dependency_proofs
+                            or not dependency_proofs <= set(node.requires_proofs)):
+                        raise ValueError(
+                            f"Sprout commit {node.node_id} requires its dependency proofs"
+                        )
+                    if node.reversibility != "reversible":
+                        raise ValueError(
+                            f"Sprout commit {node.node_id} must be explicitly reversible"
+                        )
         remaining = {node.node_id: set(node.dependencies) for node in self.nodes}
         resolved: set[str] = set()
         while remaining:
@@ -217,6 +269,7 @@ class RunPlan:
             "run_id": self.run_id,
             "plan_version": self.plan_version,
             "status": self.status,
+            **({"proof_policy": self.proof_policy} if self.proof_policy else {}),
             "benchmark_snapshot_id": self.benchmark_snapshot_id,
             "routing_decisions": [item.to_dict() for item in self.routing_decisions],
             "teams": [team.to_dict() for team in self.teams],

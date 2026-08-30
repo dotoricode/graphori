@@ -115,6 +115,73 @@ class V2PlanningContractTests(unittest.TestCase):
                 ),
             )
 
+    def test_plan_rejects_unknown_required_proof(self):
+        with self.assertRaisesRegex(ValueError, "unknown proofs"):
+            RunPlan(
+                "run-proof", 1, "committed",
+                nodes=(NodeSpec(
+                    "consumer", "implementation", "Consumer", "consume", "worker",
+                    requires_proofs=("missing",),
+                ),),
+            )
+
+    def test_sprout_plan_enforces_fan_in_and_commit_contracts(self):
+        branches = (
+            NodeSpec("a", "implementation", "A", "A", "worker",
+                     closes_proofs=("a",)),
+            NodeSpec("b", "implementation", "B", "B", "worker",
+                     closes_proofs=("b",)),
+        )
+        with self.assertRaisesRegex(ValueError, "fan-in"):
+            RunPlan(
+                "run-fan-in", 1, "committed", proof_policy="sprout-1",
+                nodes=(*branches, NodeSpec(
+                    "join", "verification", "Join", "Join", "verifier",
+                    dependencies=("a", "b"), closes_proofs=("joined",),
+                )),
+            )
+        with self.assertRaisesRegex(ValueError, "explicitly reversible"):
+            RunPlan(
+                "run-commit", 1, "committed", proof_policy="sprout-1",
+                nodes=(NodeSpec(
+                    "proof", "verification", "Proof", "Proof", "verifier",
+                    closes_proofs=("ready",),
+                ), NodeSpec(
+                    "commit", "implementation", "Commit", "Commit", "worker",
+                    dependencies=("proof",), requires_proofs=("ready",),
+                    external_effect=True, reversibility="irreversible",
+                )),
+            )
+
+    def test_sprout_rejects_proofless_fan_in_and_unrelated_commit_proof(self):
+        proofless = NodeSpec("a", "implementation", "A", "A", "worker")
+        qualified = NodeSpec("b", "implementation", "B", "B", "worker",
+                             closes_proofs=("b",))
+        with self.assertRaisesRegex(ValueError, "fan-in"):
+            RunPlan(
+                "run-proofless", 1, "committed", proof_policy="sprout-1",
+                nodes=(proofless, qualified, NodeSpec(
+                    "join", "verification", "Join", "Join", "verifier",
+                    dependencies=("a", "b"), requires_proofs=("b",),
+                    closes_proofs=("joined",),
+                )),
+            )
+        with self.assertRaisesRegex(ValueError, "dependency proofs"):
+            RunPlan(
+                "run-unrelated", 1, "committed", proof_policy="sprout-1",
+                nodes=(NodeSpec(
+                    "source", "verification", "Source", "Source", "verifier",
+                    closes_proofs=("source",),
+                ), NodeSpec(
+                    "other", "verification", "Other", "Other", "verifier",
+                    closes_proofs=("other",),
+                ), NodeSpec(
+                    "commit", "implementation", "Commit", "Commit", "worker",
+                    dependencies=("source",), requires_proofs=("other",),
+                    external_effect=True, reversibility="reversible",
+                )),
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

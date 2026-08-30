@@ -57,6 +57,16 @@
 
 ### Changed
 
+- Graphori Sprout introduces proof-carrying artifacts and a replayable Proof
+  Frontier. Declared proof obligations, rather than node completion alone, now
+  gate sparse dispatch; qualified pilots can create immutable plan revisions,
+  proof-qualified branches gate fan-in, reversible commit requires synthesis proof,
+  and irreversible Sprout commit is rejected until its human gate is implemented.
+- A reproducible 1,000-cell routing-model benchmark compares v1 target review,
+  Graphori v2, unconditional pilot, adaptive Sprout, and a static oracle. The
+  performance gate keeps v2 until declared estimates predict a pilot gain; modeled
+  latency is not presented as provider wall time.
+
 - Runtime can now add a read-only cross-provider review with
   `--cross-review auto|always|never`. It checks Codex and Claude Code CLI
   compatibility plus local authentication without a model call, assigns the

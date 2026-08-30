@@ -30,7 +30,10 @@ from .projection import (
 from .model_routing import ApprovalClass, PremiumApprovalEnvelope, RouteTarget
 from .run_plan import NodeSpec, RunPlan
 from .run_spec import RunSpec
-from .scheduler import Scheduler, SchedulerPolicy, SchedulingBatch, SchedulingState
+from .scheduler import (
+    Scheduler, SchedulerPolicy, SchedulingBatch, SchedulingState,
+    projected_proof_states,
+)
 
 
 def _now() -> str:
@@ -187,6 +190,7 @@ class GraphExecutionEngine:
             effective_plan, SchedulingState(
                 node_states=node_states,
                 approved_nodes=frozenset(reducer.approved_nodes),
+                proof_states=projected_proof_states(effective_plan, node_states),
             ),
         ) if reducer.run.terminal_status is None else SchedulingBatch()
         return build_canonical_projection(
@@ -720,6 +724,9 @@ class GraphExecutionEngine:
             effective_plan, SchedulingState(
                 node_states=projection.node_states,
                 approved_nodes=projection.approved_nodes,
+                proof_states=projected_proof_states(
+                    effective_plan, projection.node_states,
+                ),
             ),
         )
         nodes = {node.node_id: node for node in effective_plan.nodes}

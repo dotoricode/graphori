@@ -78,6 +78,7 @@ from .run_spec import PremiumPolicy, RunConstraints, RunSpec
 from .run_plan import NodeSpec, PlanEdge, RunPlan, TeamSpec
 from .scheduler import (
     DispatchDecision, Scheduler, SchedulerPolicy, SchedulingBatch, SchedulingState,
+    projected_proof_states,
 )
 from .ports import (
     AdapterCapabilities, AdapterError, ContextBundle, DispatchHandle, ExecutionAdapter,
@@ -109,6 +110,11 @@ from .product import (
     default_verification_argv, execute_product, render_plan_preview,
 )
 from .projection import CanonicalRunProjection
+from .sprout import (
+    AuthorityDecision, GrowthAction, GrowthCandidate, GrowthDecision,
+    ProofCarryingArtifact, ProofFrontier, ProofObligation, ProofResult, ProofState,
+    TransitionAuthority,
+)
 
 __all__ = [
     "Attempt", "AttemptState", "Edge", "EdgeKind", "Graph", "Liveness",
@@ -131,6 +137,7 @@ __all__ = [
     "RunPlan", "TeamSpec",
     "DispatchDecision", "Scheduler", "SchedulerPolicy", "SchedulingBatch",
     "SchedulingState",
+    "projected_proof_states",
     "AdapterCapabilities", "AdapterError", "ContextBundle", "DispatchHandle", "ExecutionAdapter",
     "ExecutionResult", "NativeHostCapabilities", "NativeHostPort", "RuntimeEvent",
     "RuntimeRunHandle", "SessionHandle",
@@ -149,4 +156,7 @@ __all__ = [
     "ProductCommand", "ProductPlanBundle", "ProductPlanCompiler",
     "default_verification_argv", "execute_product", "render_plan_preview",
     "CanonicalRunProjection",
+    "AuthorityDecision", "GrowthAction", "GrowthCandidate", "GrowthDecision",
+    "ProofCarryingArtifact", "ProofFrontier", "ProofObligation", "ProofResult",
+    "ProofState", "TransitionAuthority",
 ]

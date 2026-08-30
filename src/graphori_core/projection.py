@@ -298,6 +298,8 @@ def effective_plan(plan: RunPlan, events: Sequence[Mapping[str, Any]]) -> RunPla
             verifier, node_id=verifier_id, title=f"{verifier.title} (rework)",
             dependencies=(rework_id,),
         )
+        nodes[original.node_id] = replace(original, closes_proofs=())
+        nodes[verifier.node_id] = replace(verifier, closes_proofs=())
     return replace(plan, nodes=tuple(nodes.values()))
 
 

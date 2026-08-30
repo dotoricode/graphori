@@ -6,6 +6,9 @@ This directory contains two distinct things:
   data, corrected results, analysis code, and an independent verifier.
 - [`three_arm/`](three_arm/) contains the completed 72-run Direct/v1-style/
   Graphori v2 comparison, its fixed protocol, raw JSONL, and deterministic analysis.
+- [`sprout/`](sprout/) compares v1 target review, Graphori v2, unconditional and
+  adaptive Sprout, and a static oracle across repeated-target counts. Its latency is
+  modeled, not provider wall time.
 
 Do not commit generated results without the exact task set, tool versions, command
 transcript, and raw JSON records.

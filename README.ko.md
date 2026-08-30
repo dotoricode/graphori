@@ -103,6 +103,36 @@ Graphori는 다섯 역할을 두고 계획한다. 노드는 하나의 팀에 속
 
 이게 원래는 당신이 매번 머릿속으로 하던 계산이다.
 
+## Graphori Sprout
+
+**하나를 먼저 실행하고 검증한 뒤, 통과한 흐름만 확장한다.**
+
+Sprout에서는 노드가 끝났다는 이유만으로 그래프가 전진하지 않는다. 산출물이 다음
+전이에 선언된 검증 의무를 닫아야 한다.
+
+```text
+파일럿 --증거--> EXPAND --증거--> FAN_IN --증거--> 되돌릴 수 있는 COMMIT
+```
+
+Proof를 닫는 노드에 LLM이 들어갈 필요는 없다. process, test, schema checker,
+control node, agent, human 모두 같은 실행자다. `ProofFrontier`는 branch budget 안에서
+열린 의무를 모두 닫는 예상 지연이 가장 낮은 노드 조합을 고른다. 반복 작업에서는
+파일럿 추정 이득이 충분할 때만 확장하고 아니면 기존 v2 경로를 유지할 수 있다. 이는
+선택형 planning API이며 기본 CLI compiler가 Sprout plan을 자동 생성하지는 않는다. 실패한 의무만
+제한적으로 다시 처리하고, 판단할 수 없는 의무는 추측하지 않고 사람에게 보낸다.
+결정은 재생 가능하다.
+
+`proof_policy="sprout-1"`인 plan은 실제 scheduler와 journal 경로에서 proof 기반 fan-in과
+되돌릴 수 있는 외부 commit을 강제한다. 되돌릴 수 없는 Sprout commit은 전용 사람 승인
+계약이 구현될 때까지 거부한다.
+
+DeepSeek에서 가져온 생각은 큰 비용을 흉내 내는 게 아니다. 더 좋은 구조로 필요한
+계산만 활성화하고, 신뢰할 수 있는 판정을 다음 선택에 쓰면 무조건적인 규모 경쟁을
+피할 수 있다는 점이다. Graphori가 모델을 학습하거나 수정하는 것은 아니다.
+
+[Sprout 구조](docs/architecture/SPROUT.ko.md) ·
+[정책 벤치마크](benchmarks/sprout/REPORT.ko.md)
+
 ## 모델은 어떻게 고르나
 
 노드마다 요구 수준을 분류하고, 분류마다 최소 점수가 있다. 그 선을 넘고 필요한
@@ -215,6 +245,26 @@ provider 진단은 호환 여부와 인증의 `ready` / `not_ready` 상태만 �
 `NOT_PROVEN`으로 남으며, 명령 하나가 모든 요구사항을 증명한다고 추정하지 않는다.
 
 ## 무엇을 측정했나
+
+### Sprout 라우팅 모델 벤치마크
+
+1,000칸 deterministic 모델에서 구조가 다른 workflow 4종, 대상 수 1/2/4/8/16,
+동일 fixture를 쓰는 반복 10회로 다섯 정책을 비교했다. 시간은 node estimate와 WIP
+lane 3개로 계산했으며 실제 provider 시간, 토큰, 품질 측정이 아니다.
+
+| 대상 수 | v1 target review | Graphori v2 | 무조건 파일럿 | Adaptive Sprout | Static oracle |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 234.0ms | **123.5ms** | 240.0ms | **123.5ms** | 125.0ms |
+| 2 | 316.5ms | 206.0ms | 290.0ms | 206.0ms | **178.0ms** |
+| 4 | 612.0ms | 395.0ms | 453.0ms | 377.5ms | **341.0ms** |
+| 8 | 1,103.0ms | 776.0ms | 779.5ms | 703.5ms | **666.5ms** |
+| 16 | 2,192.0ms | 1,539.0ms | 1,431.0ms | 1,382.5ms | **1,319.0ms** |
+
+감사한 첫 설계는 대상 8개까지 v2보다 느렸다. 최종 성능 gate는 파일럿의 추정 이득이
+확인되기 전에는 v2를 유지한다. Adaptive Sprout는 대상 1~2개에서 v2와 같았고,
+4·8·16개에서 모델링 지연 중앙값을 4.4%·9.3%·10.2% 줄였다. 16개에서는 실행 노드도
+39.4% 줄였으며 모든 조건이 선언 의무 3,520/3,520개를 덮고 잘못된 fan-in은 0개였다.
+이는 독립 실측 속도 주장이 아닌 모델 결과다. [방법과 전체 결과](benchmarks/sprout/REPORT.ko.md)
 
 ### 공개 72회 비교
 
