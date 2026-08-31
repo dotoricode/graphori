@@ -262,7 +262,27 @@ proves AC-01. Put it before `--verify-command`, which consumes the remaining
 arguments. Unmapped criteria stay `NOT_PROVEN`; Graphori never assumes one
 passing command proves every requirement.
 
+For a slow, repeatable, local verification command, add `--live-verify` before
+`--verify-command`. Graphori runs the check on an immutable workspace copy while
+the agent finishes its report, then reuses PASS only if the final content digest
+is identical. A changed workspace, symlink, failed check, or unsupported snapshot
+falls back to the normal v2 verifier. Keep the flag off for short checks and for
+commands with network, clock, random, or external side effects.
+
 ## What was measured
+
+### Live Verify control-plane benchmark
+
+Ten paired real-process runs compared the existing v2 serial verifier with the
+immutable-snapshot overlap path. Ten additional late-write faults tested stale
+proof rejection. On this synthetic write-then-report-tail fixture, median wall
+time improved **33.2%**, p95 improved **35.0%**, and the paired bootstrap 95%
+lower bound was **31.8%**. All 10 Live Verify runs produced complete bounded
+ActionKeys and reused 10/10 PASS candidates. Paired results were correct in
+20/20 runs; all 10 late-write faults fell back with `source_changed`, and stale
+proofs were reused in 0/10 faults. Neither arm used an AI session or token. This passes the benchmark's fixed
+25% median / 15% p95 / 20% lower-bound gate, but it is a control-plane result—not
+a Codex or Claude end-to-end speed claim. [Method](benchmarks/live_verify/README.md)
 
 ### Sprout routing-model benchmark
 

@@ -17,8 +17,10 @@ from graphori_adapters.generic.adapter import GenericProcessAdapter, ProcessComm
 from graphori_core import (
     AdapterCapabilities,
     Availability,
+    ContextBundle,
     DispatchHandle,
     ExecutionResult,
+    NodeSpec,
     RunConstraints,
     RunSpec,
     RuntimeEvent,
@@ -213,6 +215,8 @@ class ProductPlanTests(unittest.TestCase):
         ])
         self.assertEqual(routed.implementation_provider, "claude")
         self.assertEqual(routed.uncertainty, "high")
+        live = parser.parse_args(["run", "Fix it", "--live-verify"])
+        self.assertTrue(live.live_verify)
 
     def test_verification_criteria_are_explicit_and_part_of_the_plan(self):
         spec = RunSpec(
@@ -225,8 +229,10 @@ class ProductPlanTests(unittest.TestCase):
         )
         verifier = next(node for node in bundle.plan.nodes if node.node_id == "v1")
         self.assertEqual(verifier.evidence_requirements, ("criterion:AC-01",))
-        command = bundle.process_commands["v1"].argv
-        self.assertIn('["AC-01"]', command)
+        self.assertEqual(verifier.write_scope, ())
+        command = bundle.process_commands["v1"]
+        self.assertTrue(command.verdict_from_exit)
+        self.assertEqual(command.criterion_ids, ("AC-01",))
 
     def test_unknown_verification_criterion_is_rejected(self):
         spec = RunSpec(
@@ -245,9 +251,32 @@ class ProductPlanTests(unittest.TestCase):
                 (sys.executable, "-c", "raise SystemExit(7)"),
                 "verdict.json", ("AC-01",),
             )
-            result = subprocess.run(command.argv, cwd=temp, check=False)
-            self.assertEqual(result.returncode, 0)
-            verdict = json.loads((Path(temp) / "verdict.json").read_text(encoding="utf-8"))
+            node = NodeSpec(
+                "verify", "verification", "Verify", "verify", "verifier",
+                verification_policy="independent",
+            )
+            adapter = GenericProcessAdapter(
+                workspace_root=temp,
+                commands={"verify": ProcessCommand(
+                    command.argv, verdict_from_exit=command.verdict_from_exit,
+                    criterion_ids=command.criterion_ids,
+                )},
+            )
+
+            async def scenario():
+                session = await adapter.start_session(node)
+                dispatch = await adapter.dispatch(
+                    session, node,
+                    ContextBundle(objective="verify", attempt_id="attempt:verify:1"),
+                )
+                events = [event async for event in adapter.events(dispatch)]
+                await adapter.collect(dispatch)
+                await adapter.release(session)
+                return events
+
+            events = asyncio.run(scenario())
+            verdict = next(event.payload for event in events
+                           if event.event_type == "verdict_recorded")
             self.assertEqual(verdict["verdict"], "revise")
             self.assertEqual(
                 verdict["criterion_evidence"]["AC-01"]["status"], "FAILED",
@@ -461,7 +490,12 @@ class ProductPlanTests(unittest.TestCase):
             generic = GenericProcessAdapter(
                 workspace_root=root,
                 commands={
-                    key: ProcessCommand(value.argv, verdict_file=value.verdict_file)
+                    key: ProcessCommand(
+                        value.argv,
+                        verdict_file=value.verdict_file,
+                        verdict_from_exit=value.verdict_from_exit,
+                        criterion_ids=value.criterion_ids,
+                    )
                     for key, value in bundle.process_commands.items()
                 },
             )

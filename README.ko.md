@@ -244,7 +244,25 @@ provider 진단은 호환 여부와 인증의 `ready` / `not_ready` 상태만 �
 나머지 인자를 모두 받는 `--verify-command`보다 앞에 둔다. 연결하지 않은 기준은
 `NOT_PROVEN`으로 남으며, 명령 하나가 모든 요구사항을 증명한다고 추정하지 않는다.
 
+느리고 반복 실행해도 안전한 로컬 검증 명령이라면 `--verify-command` 앞에
+`--live-verify`를 붙일 수 있다. Graphori는 에이전트가 보고를 마치는 동안 불변 작업공간
+복제본에서 검증하고, 마지막 내용 해시가 정확히 같을 때만 PASS를 재사용한다. 작업공간
+변경, symlink, 검사 실패, 복제 불가 상황에서는 기존 v2 검증으로 돌아간다. 짧은 검사나
+network·clock·random·외부 부작용이 있는 명령에는 켜지 않는다.
+
 ## 무엇을 측정했나
+
+### Live Verify 제어 경로 벤치마크
+
+실제 process를 쓰는 10쌍에서 기존 v2 순차 검증과 불변 snapshot 중첩 경로를 비교했고,
+늦은 쓰기 fault 10건으로 오래된 증거를 거부하는지 확인했다. 합성
+write-then-report-tail fixture에서 중앙값은 **33.2%**, p95는 **35.0%** 줄었고 paired
+bootstrap 95% 하한은 **31.8%**였다. Live Verify 10건 모두 bounded ActionKey가 완전했고
+PASS 후보 10/10건을 재사용했다. paired 결과는 20/20에서 올바랐으며 늦은 쓰기 10건은 모두
+`source_changed` 사유로 fallback했고 오래된 증거 재사용은 0/10이었다. 두 조건 모두 AI
+session과 token은 0이었다. 고정 gate인 중앙값 25%·p95 15%·하한
+20%를 통과했지만, 이는 제어 경로 결과이지 Codex·Claude end-to-end 속도 주장이 아니다.
+[방법](benchmarks/live_verify/README.md)
 
 ### Sprout 라우팅 모델 벤치마크
 

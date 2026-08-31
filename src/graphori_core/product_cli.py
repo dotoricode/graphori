@@ -15,6 +15,7 @@ from graphori_adapters.claude.adapter import ClaudeCodeExecutionAdapter
 from graphori_adapters.codex.adapter import CodexExecutionAdapter
 from graphori_adapters.direct import RoutedExecutionAdapter
 from graphori_adapters.generic.adapter import GenericProcessAdapter, ProcessCommand
+from graphori_adapters.live_verify import LiveVerifyAdapter
 
 from .execution_engine import GraphExecutionEngine
 from .dashboard import DashboardStore, create_server
@@ -72,6 +73,12 @@ _HELP_TEXT = {
         "en": "Acceptance criterion ID proven by the verification command (repeatable).",
         "ko": "검증 명령이 증명하는 완료 기준 ID입니다. 여러 번 지정할 수 있습니다.",
     },
+    "live_verify": {
+        "en": ("Overlap a repeatable verification command with agent work; reuse it only "
+               "when the final workspace digest is identical."),
+        "ko": ("반복 실행해도 안전한 검증 명령을 작업과 겹쳐 실행합니다. 마지막 작업공간 "
+               "해시가 정확히 같을 때만 결과를 재사용합니다."),
+    },
     "language": {
         "en": "Help and output language: auto, en, or ko.",
         "ko": "도움말과 출력 언어: auto, en, ko 중 하나입니다.",
@@ -117,7 +124,7 @@ def _bootstrap_objective(argv: list[str]) -> str:
         "--cross-review", "--implementation-provider", "--uncertainty",
         "--verify-criterion",
     }
-    flag_options = {"--no-network", "--json", "--help", "-h"}
+    flag_options = {"--no-network", "--live-verify", "--json", "--help", "-h"}
     objective: list[str] = []
     skip_value = False
     for token in argv[command_index + 1:]:
@@ -248,11 +255,19 @@ def cmd_plan(args: argparse.Namespace) -> int:
 
 async def _run(args: argparse.Namespace) -> int:
     root, spec, bundle, codex, claude = _bundle(args)
+    nodes = {node.node_id: node for node in bundle.plan.nodes}
     commands = {
         node_id: ProcessCommand(
             command.argv, verdict_file=command.verdict_file,
+            verdict_from_exit=command.verdict_from_exit,
+            criterion_ids=command.criterion_ids,
             env={"PYTHONDONTWRITEBYTECODE": "1"},
             limits=ProcessLimits(timeout_seconds=args.timeout, grace_seconds=3),
+            permission_profile=nodes[node_id].permission_profile,
+            sandbox_profile="none",
+            network_policy=(
+                "allowed" if spec.constraints.allow_network else "disabled_requested"
+            ),
         )
         for node_id, command in bundle.process_commands.items()
     }
@@ -263,6 +278,10 @@ async def _run(args: argparse.Namespace) -> int:
     routed = RoutedExecutionAdapter({
         "codex": codex, "claude": claude, "generic-process": generic,
     })
+    if args.live_verify:
+        routed = LiveVerifyAdapter(
+            routed, workspace_root=root, commands=commands,
+        )
     engine = GraphExecutionEngine(adapter=routed, plan_factory=lambda _spec: bundle.plan)
     def publish(preview: str) -> None:
         print(preview, end="", flush=True)
@@ -284,7 +303,12 @@ async def _run(args: argparse.Namespace) -> int:
         )
         (run_root / "process-commands.json").write_text(
             json.dumps({
-                node_id: {"argv": list(command.argv), "verdict_file": command.verdict_file}
+                node_id: {
+                    "argv": list(command.argv),
+                    "verdict_file": command.verdict_file,
+                    "verdict_from_exit": command.verdict_from_exit,
+                    "criterion_ids": list(command.criterion_ids),
+                }
                 for node_id, command in bundle.process_commands.items()
             }, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
             encoding="utf-8",
@@ -401,10 +425,16 @@ async def _resume(args: argparse.Namespace) -> int:
         value = recorded_commands.get(node_id)
         if (not isinstance(value, dict) or not isinstance(value.get("argv"), list)
                 or not all(isinstance(item, str) for item in value["argv"])
-                or not isinstance(value.get("verdict_file"), str)):
+                or not isinstance(value.get("verdict_file"), str)
+                or not isinstance(value.get("verdict_from_exit", False), bool)
+                or not isinstance(value.get("criterion_ids", []), list)
+                or not all(isinstance(item, str) and item
+                           for item in value.get("criterion_ids", []))):
             raise LocalizedValueError("resume_unclear_command", node_id)
         commands[node_id] = ProcessCommand(
             tuple(value["argv"]), verdict_file=value["verdict_file"],
+            verdict_from_exit=value.get("verdict_from_exit", False),
+            criterion_ids=tuple(value.get("criterion_ids", ())),
             env={"PYTHONDONTWRITEBYTECODE": "1"},
             limits=ProcessLimits(timeout_seconds=args.timeout, grace_seconds=3),
         )
@@ -792,6 +822,10 @@ def build_parser(*, locale: str = "en") -> argparse.ArgumentParser:
         command.add_argument(
             "--verify-criterion", action="append", default=[], metavar="ID",
             help=_help_text("verify_criterion", locale),
+        )
+        command.add_argument(
+            "--live-verify", action="store_true",
+            help=_help_text("live_verify", locale),
         )
         command.add_argument("--verify-command", nargs=argparse.REMAINDER)
         command.add_argument("--json", action="store_true")

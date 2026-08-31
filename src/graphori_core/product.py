@@ -23,7 +23,9 @@ TEAM_ORDER = ("planning", "research", "design", "implementation", "verification"
 @dataclass(frozen=True)
 class ProductCommand:
     argv: tuple[str, ...]
-    verdict_file: str
+    verdict_file: str = ""
+    verdict_from_exit: bool = False
+    criterion_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -81,24 +83,9 @@ def _objective_title(objective: str, fallback: str) -> str:
 def _verifier_command(
         argv: tuple[str, ...], verdict_file: str,
         criterion_ids: tuple[str, ...] = ()) -> ProductCommand:
-    script = (
-        "import json,pathlib,subprocess,sys;"
-        "command=json.loads(sys.argv[1]);target=pathlib.Path(sys.argv[2]);"
-        "criteria=json.loads(sys.argv[3]);"
-        "result=subprocess.run(command,check=False);target.parent.mkdir(parents=True,exist_ok=True);"
-        "verdict='pass' if result.returncode==0 else 'revise';"
-        "proof_status='PROVEN' if result.returncode==0 else 'FAILED';"
-        "proof={item:{'status':proof_status,'evidence_ids':['subprocess:criterion-command:'"
-        "+item+':exit:'+str(result.returncode)]} for item in criteria};"
-        "target.write_text(json.dumps({'verdict':verdict,'evidence_ids':['deterministic:'"
-        "+str(result.returncode)],'criterion_evidence':proof}))"
-    )
+    del verdict_file
     return ProductCommand(
-        (
-            sys.executable, "-c", script, json.dumps(list(argv)), verdict_file,
-            json.dumps(list(criterion_ids)),
-        ),
-        verdict_file,
+        argv, verdict_from_exit=True, criterion_ids=criterion_ids,
     )
 
 
@@ -266,8 +253,6 @@ class ProductPlanCompiler:
                 )
         commands: dict[str, ProductCommand] = {}
         if profile != "research":
-            verdict_file = f".graphori/verdicts/{run_id}-v1.json"
-            rework_verdict = f".graphori/verdicts/{run_id}-v1-rework-1.json"
             argv = verification_argv or default_verification_argv(spec.workspace)
             verifier = NodeSpec(
                 "v1", "verification", f"Verify: {display_title}",
@@ -275,18 +260,19 @@ class ProductPlanCompiler:
                 "verifier", role="verifier",
                 dependencies=(("i1", "cr1") if review_enabled else ("i1",)),
                 read_scope=tuple(sorted(set((*read_scope, *write_scope)))),
-                write_scope=(verdict_file,), adapter="generic-process",
+                write_scope=(), adapter="generic-process",
                 provider="generic-process", task_kind="deterministic",
                 verification_policy="independent", estimated_execution_ms=30_000,
+                permission_profile="read_only",
                 routing_reason_codes=("DETERMINISTIC_VERIFIER",),
                 evidence_requirements=tuple(
                     f"criterion:{identifier}" for identifier in mapped_criteria
                 ),
             )
             routed = replace(routed, nodes=tuple((*routed.nodes, verifier)))
-            commands["v1"] = _verifier_command(argv, verdict_file, mapped_criteria)
+            commands["v1"] = _verifier_command(argv, "", mapped_criteria)
             commands["v1:rework:1"] = _verifier_command(
-                argv, rework_verdict, mapped_criteria,
+                argv, "", mapped_criteria,
             )
         routed = replace(
             routed, teams=self._teams(routed.nodes),

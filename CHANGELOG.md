@@ -57,6 +57,18 @@
 
 ### Changed
 
+- `--live-verify` can overlap an explicitly repeatable deterministic check with
+  the worker's reporting tail. It verifies an immutable copy and reuses only a
+  matching PASS; uncertainty falls back to the serial v2 verifier. The paired
+  control-plane gate passed, but no provider end-to-end speed claim is made.
+- `ProofActionKey v0` now compares the bounded, observable verifier envelope at
+  speculation and adoption without claiming complete transitive toolchain
+  closure. Persistable metadata contains only environment names and one
+  aggregate digest, never raw environment values.
+- Deterministic verifier commands now map their exit status directly to a
+  verdict instead of launching a second Python process to write and reread a
+  verdict file.
+
 - Graphori Sprout introduces proof-carrying artifacts and a replayable Proof
   Frontier. Declared proof obligations, rather than node completion alone, now
   gate sparse dispatch; qualified pilots can create immutable plan revisions,

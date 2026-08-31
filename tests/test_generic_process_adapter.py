@@ -425,6 +425,44 @@ class GenericProcessEngineIntegrationTests(unittest.TestCase):
 
         asyncio.run(scenario())
 
+    def test_explicit_exit_verdict_passes_without_wrapper_or_verdict_file(self):
+        plan = RunPlan(
+            run_id="run-direct-verdict", plan_version=1, status="committed",
+            nodes=(
+                NodeSpec(
+                    "worker", "implementation", "Worker", "work", "worker",
+                    verification_policy="independent",
+                ),
+                NodeSpec(
+                    "verify", "verification", "Verify", "verify", "verifier",
+                    dependencies=("worker",), verification_policy="independent",
+                    acceptance_criteria=("AC-01: command passes",),
+                ),
+            ),
+        )
+        adapter = GenericProcessAdapter(
+            workspace_root=self.workspace,
+            commands={
+                "worker": ProcessCommand(argv=(PY, "-c", "pass")),
+                "verify": ProcessCommand(
+                    argv=(PY, "-c", "pass"), verdict_from_exit=True,
+                    criterion_ids=("AC-01",),
+                ),
+            },
+        )
+        engine = GraphExecutionEngine(adapter=adapter, plan_factory=lambda _spec: plan)
+
+        async def scenario():
+            handle = await engine.start(RunSpec("verify", "test", str(self.workspace)))
+            await engine.advance(handle.run_id)
+            await engine.advance(handle.run_id)
+            return engine.snapshot(handle.run_id)
+
+        snapshot = asyncio.run(scenario())
+        self.assertEqual(snapshot.node_states["worker"], "passed")
+        self.assertEqual(snapshot.node_states["verify"], "passed")
+        self.assertEqual(snapshot.terminal_status, "succeeded")
+
     def test_verifier_cannot_reuse_stale_verdict_file(self):
         (self.workspace / "verdict.json").write_text(
             json.dumps({"verdict": "pass", "evidence_ids": ["ev:stale"]}),

@@ -4,6 +4,7 @@
 - provider 준비 상태는 유료 model 호출 없이 CLI 호환성과 로컬 인증을 확인합니다. 실행 뒤에는 quota·service·network·policy 변경으로 실패할 수 있으며, Graphori는 그 결과를 기록하고 결과가 불명확한 attempt를 몰래 다른 provider로 돌리지 않습니다.
 - 교차 provider 리뷰는 AI review report이지 검증 판정이 아닙니다. blocking report는 그래프를 멈추고, 뒤의 deterministic command만 PASS를 기록할 수 있습니다. 두 provider가 모두 준비되지 않았으면 계획에 deterministic-only 축소를 기록합니다.
 - generic verifier는 받은 command만 보고합니다. 통과는 그 command의 근거일 뿐 일반적인 정확성 주장이 아닙니다.
+- Live Verify는 선택 기능이며 충분히 느리고 반복 가능한 로컬 검사에 중첩 시간이 있을 때만 이득이 있습니다. symlink snapshot은 거부하고 지원하지 않거나 변경된 작업공간에서는 기존 경로로 돌아갑니다. 공개 수치는 합성 제어 경로 시간이지 Codex·Claude end-to-end 성능이 아닙니다.
 - locale은 표시만 바꿉니다. canonical identifier는 영어이며 digest에는 번역 label이 들어가지 않습니다.
 - journal replay는 저장 파일이 존재하고 읽힌다고 가정합니다. 안전하지 않은 resume는 의도적으로 거부합니다.
 - dashboard와 학습 게임은 설명용 UI이지 외부 provider가 활성이라는 증거가 아닙니다.
