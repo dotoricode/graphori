@@ -20,6 +20,7 @@ from graphori_core.ports import (
 from graphori_core.proof_action import (
     INCOMPLETE, ProofActionKey, build_proof_action_key,
 )
+from graphori_core.proof_adoption import ProofAdopter, ProofCandidate
 from graphori_core.process_supervisor import ProcessResult, ProcessSupervisor
 from graphori_core.run_plan import NodeSpec, RunPlan
 
@@ -79,8 +80,8 @@ def _copy_workspace(root: Path, destination: Path) -> None:
 
 
 @dataclass(frozen=True)
-class _Proof:
-    source_digest: str
+class _CandidateRecord:
+    candidate: ProofCandidate
     action_key: ProofActionKey
     process: ProcessResult
 
@@ -96,7 +97,7 @@ class _Dispatch:
     inner: DispatchHandle | None
     node: NodeSpec
     attempt_id: str
-    proof: _Proof | None = None
+    proof: _CandidateRecord | None = None
 
 
 @dataclass
@@ -141,7 +142,7 @@ class LiveVerifyAdapter:
         self._verifier_for_worker: dict[str, str] = {}
         self._watchers: dict[str, asyncio.Task[None]] = {}
         self._stop: dict[str, asyncio.Event] = {}
-        self._proofs: dict[str, _Proof] = {}
+        self._proofs: dict[str, _CandidateRecord] = {}
         self._pending_fallback: dict[str, str] = {}
         self._fallback_reasons: dict[str, int] = {}
         self._metrics = _Metrics()
@@ -290,8 +291,20 @@ class LiveVerifyAdapter:
             elif process.exit_code != 0 or process.timed_out or process.cancelled:
                 self._fallback(verifier_id, "verifier_did_not_pass")
             else:
-                self._proofs[verifier_id] = _Proof(
-                    source_digest, action_key_before, process,
+                evidence_refs = tuple(
+                    f"subprocess:criterion-command:{item}:exit:0"
+                    for item in _proof_ids(verifier_id, command)
+                )
+                candidate = ProofCandidate(
+                    proof_ids=_proof_ids(verifier_id, command),
+                    source_digest=source_digest,
+                    action_schema=action_key_before.schema,
+                    action_digest=action_key_before.digest(),
+                    evidence_refs=evidence_refs,
+                    verdict="pass",
+                )
+                self._proofs[verifier_id] = _CandidateRecord(
+                    candidate, action_key_before, process,
                 )
                 self._metrics.pass_candidates += 1
                 self._pending_fallback.pop(verifier_id, None)
@@ -324,18 +337,19 @@ class LiveVerifyAdapter:
                     current = await asyncio.to_thread(workspace_digest, self.workspace_root)
                 except (OSError, ValueError):
                     current = ""
-                if not current or current != proof.source_digest:
-                    self._fallback(node.node_id, "adoption_source_changed")
+                if not current:
+                    self._fallback(node.node_id, "adoption_source_unavailable")
                 else:
                     adoption_key = await asyncio.to_thread(
                         self._action_key, node.node_id, self.commands[node.node_id],
                         root=self.workspace_root, input_digest=current,
                     )
-                    if adoption_key.eligibility == INCOMPLETE:
-                        self._fallback(node.node_id, "adoption_action_key_incomplete")
-                    elif adoption_key.digest() != proof.action_key.digest():
-                        self._fallback(node.node_id, "adoption_action_key_mismatch")
-                    else:
+                    decision = ProofAdopter.decide(
+                        proof.candidate,
+                        current_source_digest=current,
+                        current_action_key=adoption_key,
+                    )
+                    if decision.adopted:
                         value = f"live-dispatch:{uuid.uuid4().hex}"
                         self._dispatches[value] = _Dispatch(
                             None, node, context.attempt_id, proof,
@@ -343,6 +357,7 @@ class LiveVerifyAdapter:
                         self._metrics.pass_reuses += 1
                         self._pending_fallback.pop(node.node_id, None)
                         return DispatchHandle(self.adapter_id, value, node.node_id)
+                    self._fallback(node.node_id, f"adoption_{decision.reason}")
             self._record_fallback(node.node_id)
         verifier_id = self._verifier_for_worker.get(node.node_id)
         initial = ""
@@ -379,9 +394,11 @@ class LiveVerifyAdapter:
             execution_ms=elapsed_ms, total_attempt_ms=elapsed_ms,
             runtime_metadata={"live_verify_reused": True,
                               "proof_source": "immutable_snapshot",
-                              "workspace_digest": route.proof.source_digest,
+                              "workspace_digest": route.proof.candidate.source_digest,
                               "proof_action_schema": route.proof.action_key.schema,
-                              "proof_action_digest": route.proof.action_key.digest()},
+                              "proof_action_digest": route.proof.action_key.digest(),
+                              "proof_candidate_digest": route.proof.candidate.digest(),
+                              "proof_adoption": "candidate_adopted"},
         )
 
     async def events(self, dispatch: DispatchHandle):

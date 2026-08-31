@@ -131,7 +131,7 @@ class LiveVerifyAdapterTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("live_verify_reused", result.runtime_metadata)
         self.assertEqual(
             self.last_live_metrics["live_verify_fallback_reasons"],
-            {"adoption_action_key_mismatch": 1},
+            {"adoption_action_key_changed": 1},
         )
 
     async def test_symlink_uncertainty_uses_the_normal_verifier(self):

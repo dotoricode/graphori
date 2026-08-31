@@ -59,6 +59,13 @@ Three independent checks remain separate:
 3. adoption safety: the final source digest and independently rebuilt key match
    the speculative candidate.
 
+The speculative result is represented as a `ProofCandidate`. It has no authority
+to update the Proof Frontier or publish PASS. `ProofAdopter` makes the matching
+decision deterministically; only the ordinary verifier result subsequently
+journaled by the execution engine changes canonical state. Candidate and adoption
+digests are included in safe runtime metadata so replay observes the same accepted
+verifier event without creating a second source of truth.
+
 The policy fields are identities, not enforcement claims. In particular,
 `sandbox_profile=none` records that the generic process verifier has no OS-level
 sandbox; it does not pretend one exists.
