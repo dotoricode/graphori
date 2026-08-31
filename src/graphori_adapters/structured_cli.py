@@ -206,6 +206,9 @@ class StructuredCliAdapter:
         self.limits = limits
         self.enable_session_reuse = enable_session_reuse
         self.session_vault = ProviderSessionVault(self.workspace_root)
+        self._session_reuse_available = (
+            enable_session_reuse and self.session_vault.secure_storage_supported()
+        )
         self._records: dict[str, _Record] = {}
         self._sessions: set[str] = set()
         self._probe: AdapterCapabilities | None = None
@@ -244,7 +247,7 @@ class StructuredCliAdapter:
             supports_heartbeat=False,
             supports_progress=False,
             supports_worktree=False,
-            supports_persistent_session=self.enable_session_reuse,
+            supports_persistent_session=self._session_reuse_available,
             supports_questions=False,
             supports_gate=False,
             supports_usage=True,
@@ -276,7 +279,7 @@ class StructuredCliAdapter:
                     self._resume_help_argv(), workspace_root=self.workspace_root,
                     env=self.process_env, env_allowlist=self.process_env_allowlist,
                     limits=probe_limits,
-                ) if self.enable_session_reuse else None
+                ) if self._session_reuse_available else None
             )
             auth_result = self.supervisor.run(
                 self._auth_argv(), workspace_root=self.workspace_root,
@@ -360,7 +363,7 @@ class StructuredCliAdapter:
 
     def _session_boundary(
             self, node: NodeSpec, context: ContextBundle) -> SessionBoundary | None:
-        if (not self.enable_session_reuse or node.role != "implementer"
+        if (not self._session_reuse_available or node.role != "implementer"
                 or not context.run_id or not context.node_lineage
                 or not node.model or not node.effort or not self._cli_version):
             return None

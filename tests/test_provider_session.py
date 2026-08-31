@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 import json
+import os
 from pathlib import Path
 import sys
 import tempfile
@@ -53,6 +54,10 @@ class ProviderSessionContractTests(unittest.TestCase):
         )
         self.assertTrue(continuation.handle.resumable)
 
+    @unittest.skipUnless(
+        ProviderSessionVault.secure_storage_supported(),
+        "secure dir-fd storage is unavailable",
+    )
     def test_private_vault_hides_raw_provider_id_and_checks_every_binding(self):
         with tempfile.TemporaryDirectory() as temporary:
             vault = ProviderSessionVault(temporary)
@@ -80,6 +85,37 @@ class ProviderSessionContractTests(unittest.TestCase):
             self.assertIn("raw-provider-secret", json.loads(target.read_text()).values())
             vault.clear_run("run-1")
             self.assertFalse(target.exists())
+
+    @unittest.skipUnless(
+        hasattr(os, "symlink") and ProviderSessionVault.secure_storage_supported(),
+        "secure symlink-resistant storage is unavailable",
+    )
+    def test_private_vault_rejects_symlink_escape_without_touching_external_files(self):
+        with tempfile.TemporaryDirectory() as temporary, tempfile.TemporaryDirectory() as outside:
+            workspace = Path(temporary)
+            sessions = workspace / ".graphori" / "runs" / "run-1" / "private"
+            sessions.mkdir(parents=True)
+            sessions.joinpath("sessions").symlink_to(outside, target_is_directory=True)
+            marker = Path(outside) / ("a" * 32 + ".json")
+            marker.write_text("external", encoding="utf-8")
+            vault = ProviderSessionVault(workspace)
+            binding = PrivateSessionBinding(
+                provider="codex", provider_session_id="raw-provider-secret",
+                boundary_digest="sha256:boundary", attempt_id="attempt:i1:1",
+                observed_model="model",
+            )
+
+            with self.assertRaises(OSError):
+                vault.put("run-1", binding)
+            self.assertIsNone(vault.resolve(
+                "run-1", "a" * 32, provider="codex",
+                boundary_digest="sha256:boundary", attempt_id="attempt:i1:1",
+            ))
+            vault.clear_run("run-1")
+            self.assertEqual(marker.read_text(encoding="utf-8"), "external")
+            self.assertEqual(
+                sorted(path.name for path in Path(outside).iterdir()), [marker.name],
+            )
 
 
 if __name__ == "__main__":
