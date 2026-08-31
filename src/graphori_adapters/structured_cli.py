@@ -613,7 +613,7 @@ class StructuredCliAdapter:
                 "structured_result": True,
                 "cancel": True,
                 "reconcile": False,
-                "persistent_session": self.enable_session_reuse,
+                "persistent_session": self._session_reuse_available,
                 "nested_agents": False,
             },
             "observed_model": parsed.observed_model if parsed else "",

@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[1] / "src"))
@@ -20,6 +21,7 @@ from graphori_core.provider_session import (  # noqa: E402
     ProviderContinuation, ProviderSessionHandle, VerificationNack,
 )
 from graphori_core.provider_session_vault import PrivateSessionBinding  # noqa: E402
+from graphori_core.provider_session_vault import ProviderSessionVault  # noqa: E402
 
 
 REPORT = {
@@ -402,6 +404,46 @@ class ProviderAdapterCompatibilityMixin:
         argv, nack_only = asyncio.run(nack_only_scenario())
         self.assertIn("Verification NACK (immutable evidence)", "\n".join(argv))
         self.assertFalse(nack_only.runtime_metadata["session_resumed"])
+
+    def test_missing_secure_vault_primitives_keep_execution_ephemeral(self):
+        with mock.patch.object(
+                ProviderSessionVault, "secure_storage_supported", return_value=False):
+            adapter = self.adapter(session_reuse=True)
+            capabilities = adapter.probe()
+            self.assertFalse(capabilities.supports_persistent_session)
+            node = NodeSpec(**{
+                **self.node.__dict__, "role": "implementer",
+                "model": "fixture-model", "effort": "medium",
+            })
+            context = ContextBundle(
+                objective=node.objective, attempt_id="attempt:worker-a:1",
+                read_scope=node.read_scope, write_scope=node.write_scope,
+                run_id="run-no-secure-vault", node_lineage=node.node_id,
+            )
+            self.assertIsNone(adapter._session_boundary(node, context))
+            command = adapter._command(
+                adapter._envelope(node, context), self.workspace / "schema.json", node,
+                persist_session=False,
+            )
+            if self.provider == "codex":
+                self.assertIn("--ephemeral", command)
+            else:
+                self.assertIn("--no-session-persistence", command)
+
+            async def scenario():
+                session = await adapter.start_session(node)
+                dispatch = await adapter.dispatch(session, node, context)
+                result = await adapter.collect(dispatch)
+                await adapter.release(session)
+                return result
+
+            result = asyncio.run(scenario())
+            self.assertFalse(
+                result.runtime_metadata["capability_snapshot"]["persistent_session"],
+            )
+            self.assertFalse((
+                self.workspace / ".graphori" / "runs" / context.run_id / "private"
+            ).exists())
 
     def test_persisted_session_uses_an_opaque_journal_handle(self):
         adapter = self.adapter(session_reuse=True)
