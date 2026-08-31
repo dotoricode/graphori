@@ -162,3 +162,13 @@ class RoutedExecutionAdapter:
             await route.adapter.release(route.inner)
         finally:
             self._sessions.pop(session.value, None)
+
+    async def close_run(self, run_id: str) -> None:
+        seen: set[int] = set()
+        for adapter in self.adapters.values():
+            if id(adapter) in seen:
+                continue
+            seen.add(id(adapter))
+            close_run = getattr(adapter, "close_run", None)
+            if callable(close_run):
+                await close_run(run_id)

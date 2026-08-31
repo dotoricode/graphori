@@ -118,6 +118,12 @@ is repeatable. It must appear before `--verify-command`, which consumes all
 remaining argv. Criteria without an explicit mapping remain `NOT_PROVEN` even
 when the command exits successfully.
 
+Add `--live-verify` before `--verify-command` only when the verification command
+is repeatable, local, and slow enough to benefit from overlap. Graphori verifies
+an immutable copy and reuses only a matching PASS. It conservatively falls back
+to the normal verifier when it cannot create an exact snapshot. Short or
+side-effecting commands should use the default v2 path.
+
 `--cross-review auto` adds a read-only review by the provider opposite the
 implementer for sensitive changes, two or more write scopes, directory or glob
 scopes, high-uncertainty work, and synthesis-heavy changes when both Codex and

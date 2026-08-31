@@ -31,6 +31,11 @@ from graphori_core.process_supervisor import (
     ProcessResult,
     ProcessSupervisor,
 )
+from graphori_core.provider_session import SessionBoundary
+from graphori_core.provider_session_vault import (
+    PrivateSessionBinding,
+    ProviderSessionVault,
+)
 from graphori_core.run_plan import NodeSpec, RunPlan
 
 from .agent_contract import AgentTaskEnvelope, WorkerReport, worker_report_schema
@@ -160,6 +165,10 @@ class _Record:
     queued_at: float
     baseline: WorkspaceSnapshot
     temp_dir: tempfile.TemporaryDirectory[str]
+    session_boundary: SessionBoundary | None = None
+    resumed: bool = False
+    resume_fallback: bool = False
+    fresh_command: tuple[str, ...] = ()
     result: ExecutionResult | None = None
 
 
@@ -170,6 +179,7 @@ class StructuredCliAdapter:
     adapter_id = ""
     parser: ProviderParser
     required_help_tokens: tuple[str, ...] = ()
+    required_resume_help_tokens: tuple[str, ...] = ()
 
     def __init__(
             self, *, workspace_root: os.PathLike[str] | str,
@@ -178,7 +188,8 @@ class StructuredCliAdapter:
             supervisor: ProcessSupervisor | None = None,
             process_env: Mapping[str, str] | None = None,
             process_env_allowlist: frozenset[str] = DEFAULT_ENV_ALLOWLIST,
-            limits: ProcessLimits = ProcessLimits()) -> None:
+            limits: ProcessLimits = ProcessLimits(),
+            enable_session_reuse: bool = False) -> None:
         if max_concurrency < 1:
             raise ValueError("max_concurrency must be at least 1")
         self.workspace_root = Path(workspace_root).resolve()
@@ -193,6 +204,11 @@ class StructuredCliAdapter:
         }
         self.process_env_allowlist = process_env_allowlist
         self.limits = limits
+        self.enable_session_reuse = enable_session_reuse
+        self.session_vault = ProviderSessionVault(self.workspace_root)
+        self._session_reuse_available = (
+            enable_session_reuse and self.session_vault.secure_storage_supported()
+        )
         self._records: dict[str, _Record] = {}
         self._sessions: set[str] = set()
         self._probe: AdapterCapabilities | None = None
@@ -207,6 +223,9 @@ class StructuredCliAdapter:
         return (*self.executable, "--help")
 
     def _auth_argv(self) -> tuple[str, ...]:
+        raise NotImplementedError
+
+    def _resume_help_argv(self) -> tuple[str, ...]:
         raise NotImplementedError
 
     def _auth_ready(
@@ -228,7 +247,7 @@ class StructuredCliAdapter:
             supports_heartbeat=False,
             supports_progress=False,
             supports_worktree=False,
-            supports_persistent_session=False,
+            supports_persistent_session=self._session_reuse_available,
             supports_questions=False,
             supports_gate=False,
             supports_usage=True,
@@ -255,6 +274,13 @@ class StructuredCliAdapter:
                 env=self.process_env, env_allowlist=self.process_env_allowlist,
                 limits=probe_limits,
             )
+            resume_help = (
+                self.supervisor.run(
+                    self._resume_help_argv(), workspace_root=self.workspace_root,
+                    env=self.process_env, env_allowlist=self.process_env_allowlist,
+                    limits=probe_limits,
+                ) if self._session_reuse_available else None
+            )
             auth_result = self.supervisor.run(
                 self._auth_argv(), workspace_root=self.workspace_root,
                 env=self.process_env, env_allowlist=self.process_env_allowlist,
@@ -266,10 +292,21 @@ class StructuredCliAdapter:
         self._cli_version = version.stdout.decode("utf-8", errors="replace").strip()
         help_text = help_result.stdout.decode("utf-8", errors="replace")
         missing = tuple(token for token in self.required_help_tokens if token not in help_text)
-        if version.exit_code != 0 or help_result.exit_code != 0 or missing:
+        resume_text = (
+            resume_help.stdout.decode("utf-8", errors="replace")
+            if resume_help is not None else ""
+        )
+        missing_resume = tuple(
+            token for token in self.required_resume_help_tokens
+            if token not in resume_text
+        ) if resume_help is not None else ()
+        if (version.exit_code != 0 or help_result.exit_code != 0 or missing
+                or (resume_help is not None and resume_help.exit_code != 0)
+                or missing_resume):
             self._probe = self._probe_result(
                 False, "required CLI capability is unavailable"
-                + (f": {', '.join(missing)}" if missing else ""),
+                + (f": {', '.join((*missing, *missing_resume))}"
+                   if missing or missing_resume else ""),
             )
         elif not self._auth_ready(
                 auth_result.stdout, auth_result.stderr, auth_result.exit_code):
@@ -309,8 +346,50 @@ class StructuredCliAdapter:
 
     def _command(
             self, envelope: AgentTaskEnvelope, schema_path: Path,
+            node: NodeSpec, *, persist_session: bool = False) -> tuple[str, ...]:
+        raise NotImplementedError
+
+    def _resume_command(
+            self, prompt: str, session_id: str, schema_path: Path,
             node: NodeSpec) -> tuple[str, ...]:
         raise NotImplementedError
+
+    @staticmethod
+    def _policy_digest(value: Mapping[str, Any]) -> str:
+        payload = json.dumps(
+            value, sort_keys=True, separators=(",", ":"), ensure_ascii=False,
+        ).encode("utf-8")
+        return "sha256:" + hashlib.sha256(payload).hexdigest()
+
+    def _session_boundary(
+            self, node: NodeSpec, context: ContextBundle) -> SessionBoundary | None:
+        if (not self._session_reuse_available or node.role != "implementer"
+                or not context.run_id or not context.node_lineage
+                or not node.model or not node.effort or not self._cli_version):
+            return None
+        return SessionBoundary(
+            run_id=context.run_id,
+            node_lineage=context.node_lineage,
+            role=node.role,
+            workspace=str(self.workspace_root),
+            provider=self.provider,
+            model=node.model,
+            effort=node.effort,
+            system_prompt_digest=self._policy_digest({
+                "agent_contract": "graphori-worker-report-v1",
+                "provider": self.provider,
+                "worker_report_schema": worker_report_schema(),
+            }),
+            tool_policy_digest=self._policy_digest({
+                "adapter": self.adapter_id,
+                "executable": list(self.executable),
+                "cli_version": self._cli_version,
+                "read_scope": list(context.read_scope),
+                "write_scope": list(context.write_scope),
+                "skills": [item.digest for item in context.skill_bindings],
+            }),
+            permission_profile=node.permission_profile,
+        )
 
     async def dispatch(
             self, session: SessionHandle, node: NodeSpec,
@@ -328,10 +407,45 @@ class StructuredCliAdapter:
         )
         runtime_id = f"{self.provider}:{uuid.uuid4().hex}"
         queued_at = self.supervisor.clock.monotonic()
+        boundary = self._session_boundary(node, context)
+        fresh_command = self._command(
+            self._envelope(node, context), schema_path, node,
+            persist_session=boundary is not None,
+        )
+        continuation = context.continuation
+        resume_binding = None
+        if (
+                boundary is not None and continuation is not None
+                and continuation.handle is not None
+                and continuation.handle.resumable
+                and continuation.handle.provider == self.provider
+                and continuation.handle.boundary_digest == boundary.digest()):
+            resume_binding = self.session_vault.resolve(
+                context.run_id, continuation.handle.opaque_id,
+                provider=self.provider, boundary_digest=boundary.digest(),
+                attempt_id=continuation.handle.attempt_id,
+            )
+        resumed = resume_binding is not None
+        if continuation is not None and not resumed:
+            envelope = self._envelope(node, context)
+            fresh_command = self._command(
+                replace(
+                    envelope,
+                    objective=envelope.objective + "\n\n" + continuation.nack.render(),
+                ),
+                schema_path, node, persist_session=boundary is not None,
+            )
+        command = (
+            self._resume_command(
+                continuation.nack.render(), resume_binding.provider_session_id,
+                schema_path, node,
+            ) if resumed and continuation is not None and resume_binding is not None
+            else fresh_command
+        )
         try:
             execution = await asyncio.to_thread(
                 self.supervisor.start,
-                self._command(self._envelope(node, context), schema_path, node),
+                command,
                 workspace_root=self.workspace_root,
                 env=self.process_env,
                 env_allowlist=self.process_env_allowlist,
@@ -350,6 +464,8 @@ class StructuredCliAdapter:
             execution=execution,
             task=asyncio.create_task(asyncio.to_thread(self.supervisor.collect, execution)),
             queued_at=queued_at, baseline=baseline, temp_dir=temp_dir,
+            session_boundary=boundary, resumed=resumed,
+            fresh_command=fresh_command,
         )
         async with self._lock:
             if len(self._records) >= self.max_concurrency:
@@ -383,17 +499,25 @@ class StructuredCliAdapter:
                 finished_at=finished, error_kind=type(exc).__name__,
                 error_detail="provider process supervision failed",
                 total_attempt_ms=max(0, round((finished - record.queued_at) * 1000)),
-                runtime_metadata=self._runtime_metadata(None, record.node.model),
+                runtime_metadata=self._runtime_metadata(
+                    None, record.node.model, record.session_boundary,
+                    record.resumed, record.resume_fallback,
+                    context=record.context,
+                ),
             )
             return record.result
 
         parsed: ProviderParseResult | None = None
         protocol_error = ""
+        report: WorkerReport | None = None
+        observed: tuple[str, ...] = ()
+        protocol_error = ""
         try:
             parsed = self.parser.parse(process.stdout)
         except ProviderProtocolError as exc:
+            parsed = None
             protocol_error = str(exc)
-        report: WorkerReport | None = parsed.report if parsed else None
+        report = parsed.report if parsed else None
         after = _git_snapshot(self.workspace_root)
         observed = _workspace_delta(self.workspace_root, record.baseline, after)
         violations = tuple(
@@ -419,7 +543,13 @@ class StructuredCliAdapter:
             outcome, error_kind, error_detail = "failed", "", ""
         stdout_digest = "sha256:" + hashlib.sha256(process.stdout).hexdigest()
         stderr_digest = "sha256:" + hashlib.sha256(process.stderr).hexdigest()
-        metadata = self._runtime_metadata(parsed, record.node.model)
+        metadata = self._runtime_metadata(
+            parsed, record.node.model, record.session_boundary,
+            record.resumed, record.resume_fallback,
+            context=record.context,
+            persist_session=(outcome == "succeeded" and not record.resumed
+                             and record.context.continuation is None),
+        )
         metadata.update({
             "worker_report_status": report.status if report else "missing",
             "usage_status": "known" if parsed and parsed.usage else "unknown",
@@ -468,8 +598,13 @@ class StructuredCliAdapter:
 
     def _runtime_metadata(
             self, parsed: ProviderParseResult | None,
-            requested_model: str = "") -> dict[str, Any]:
-        return {
+            requested_model: str = "",
+            session_boundary: SessionBoundary | None = None,
+            resumed: bool = False,
+            resume_fallback: bool = False, *,
+            context: ContextBundle | None = None,
+            persist_session: bool = False) -> dict[str, Any]:
+        metadata = {
             "provider": self.provider,
             "adapter": self.adapter_id,
             "adapter_protocol": 1,
@@ -478,17 +613,43 @@ class StructuredCliAdapter:
                 "structured_result": True,
                 "cancel": True,
                 "reconcile": False,
-                "persistent_session": False,
+                "persistent_session": self._session_reuse_available,
                 "nested_agents": False,
             },
             "observed_model": parsed.observed_model if parsed else "",
             "requested_model": requested_model,
-            "session_id": parsed.session_id if parsed else "",
             "usage": dict(parsed.usage) if parsed else {},
             "provider_reported_cost_usd": (
                 parsed.provider_reported_cost_usd if parsed else None
             ),
+            "session_resumed": resumed,
+            "session_resume_fallback": resume_fallback,
         }
+        if (persist_session and session_boundary is not None and parsed is not None
+                and parsed.session_id and parsed.observed_model and context is not None):
+            try:
+                opaque_id = self.session_vault.put(
+                    context.run_id,
+                    PrivateSessionBinding(
+                        provider=self.provider,
+                        provider_session_id=parsed.session_id,
+                        boundary_digest=session_boundary.digest(),
+                        attempt_id=context.attempt_id,
+                        observed_model=parsed.observed_model,
+                    ),
+                )
+            except (OSError, RuntimeError, ValueError):
+                opaque_id = ""
+            if opaque_id:
+                metadata["provider_session"] = {
+                    "provider": self.provider,
+                    "opaque_id": opaque_id,
+                    "boundary_digest": session_boundary.digest(),
+                    "attempt_id": context.attempt_id,
+                    "observed_model": parsed.observed_model,
+                    "resumable": True,
+                }
+        return metadata
 
     async def events(self, dispatch: DispatchHandle):
         record = self._require(dispatch)
@@ -562,3 +723,6 @@ class StructuredCliAdapter:
                 self._records.pop(record.runtime_id, None)
             record.temp_dir.cleanup()
         self._sessions.discard(session.value)
+
+    async def close_run(self, run_id: str) -> None:
+        self.session_vault.clear_run(run_id)

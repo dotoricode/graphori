@@ -32,6 +32,7 @@ from graphori_core.process_supervisor import (
     resolve_workspace_path,
 )
 from graphori_core.run_plan import NodeSpec, RunPlan
+from graphori_core.workspace_snapshot import workspace_digest
 
 
 @dataclass(frozen=True)
@@ -45,6 +46,12 @@ class ProcessCommand:
     limits: ProcessLimits = ProcessLimits()
     capture_evidence: bool = False
     verdict_file: str = ""
+    verdict_from_exit: bool = False
+    criterion_ids: tuple[str, ...] = ()
+    permission_profile: str = "workspace_process"
+    sandbox_profile: str = "none"
+    network_policy: str = "inherited"
+    verifier_identity: str = "generic-process-exit-v1"
 
     def __post_init__(self) -> None:
         if isinstance(self.argv, (str, bytes)) or not isinstance(self.argv, Sequence):
@@ -53,6 +60,16 @@ class ProcessCommand:
         if not normalized or any(not isinstance(item, str) or not item for item in normalized):
             raise ValueError("argv must contain non-empty strings")
         object.__setattr__(self, "argv", normalized)
+        criteria = tuple(self.criterion_ids)
+        if any(not isinstance(item, str) or not item for item in criteria):
+            raise ValueError("criterion_ids must contain non-empty strings")
+        object.__setattr__(self, "criterion_ids", criteria)
+        for name in (
+            "permission_profile", "sandbox_profile", "network_policy",
+            "verifier_identity",
+        ):
+            if not isinstance(getattr(self, name), str) or not getattr(self, name):
+                raise ValueError(f"{name} must be a non-empty string")
 
 
 @dataclass
@@ -205,6 +222,45 @@ class GenericProcessAdapter:
             return None
 
     def _verdict_event(self, record: _DispatchRecord, process: ProcessResult) -> RuntimeEvent | None:
+        verification_metadata: dict[str, object] = {
+            "verification_command": list(record.command.argv),
+            "verification_exit_code": process.exit_code,
+        }
+        try:
+            verification_metadata["workspace_digest"] = workspace_digest(
+                self.workspace_root.resolve(),
+            )
+        except (OSError, ValueError):
+            # Verification remains canonical. Only same-session reuse becomes
+            # ineligible when the workspace cannot be identified completely.
+            pass
+        if (record.command.verdict_from_exit and not process.timed_out
+                and not process.cancelled):
+            proof_status = "PROVEN" if process.exit_code == 0 else "FAILED"
+            evidence = [
+                f"deterministic:{process.exit_code}",
+                f"subprocess:verifier-command:exit:{process.exit_code}",
+            ]
+            criterion_evidence = {
+                item: {
+                    "status": proof_status,
+                    "evidence_ids": [
+                        f"subprocess:criterion-command:{item}:exit:{process.exit_code}"
+                    ],
+                }
+                for item in record.command.criterion_ids
+            }
+            return RuntimeEvent(
+                "verdict_recorded", record.node.node_id, "verifier",
+                {
+                    "verdict": "pass" if process.exit_code == 0 else "revise",
+                    "evidence_ids": evidence,
+                    **verification_metadata,
+                    "criterion_evidence": criterion_evidence,
+                },
+                event_id=f"generic:{record.runtime_id}:verdict",
+                producer_event_id=f"generic:{record.runtime_id}:verdict",
+            )
         if not record.command.verdict_file or process.exit_code != 0 \
                 or process.timed_out or process.cancelled:
             return None
@@ -240,6 +296,7 @@ class GenericProcessAdapter:
         return RuntimeEvent(
             "verdict_recorded", record.node.node_id, "verifier",
             {"verdict": verdict, "evidence_ids": evidence,
+             **verification_metadata,
              "criterion_evidence": criterion_evidence},
             event_id=f"generic:{record.runtime_id}:verdict",
             producer_event_id=f"generic:{record.runtime_id}:verdict",
@@ -288,7 +345,7 @@ class GenericProcessAdapter:
                 outcome = "cancelled"
             elif process.timed_out:
                 outcome = "timed_out"
-            elif process.exit_code == 0:
+            elif process.exit_code == 0 or record.command.verdict_from_exit:
                 outcome = "succeeded"
             else:
                 outcome = "failed"

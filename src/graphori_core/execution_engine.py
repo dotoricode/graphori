@@ -28,12 +28,18 @@ from .projection import (
     RunProjection, build_canonical_projection, effective_plan, fresh_reducer,
 )
 from .model_routing import ApprovalClass, PremiumApprovalEnvelope, RouteTarget
+from .provider_session import (
+    ProviderContinuation,
+    ProviderSessionHandle,
+    VerificationNack,
+)
 from .run_plan import NodeSpec, RunPlan
 from .run_spec import RunSpec
 from .scheduler import (
     Scheduler, SchedulerPolicy, SchedulingBatch, SchedulingState,
     projected_proof_states,
 )
+from .workspace_snapshot import workspace_digest
 
 
 def _now() -> str:
@@ -284,6 +290,9 @@ class GraphExecutionEngine:
         else:
             self._reconcile_inflight(engine_run)
         if terminal_replay:
+            close_run = getattr(self._adapter, "close_run", None)
+            if callable(close_run):
+                await close_run(plan.run_id)
             writer.close()
         return RunHandle(plan.run_id, plan.digest(), runtime)
 
@@ -463,10 +472,23 @@ class GraphExecutionEngine:
 
     def _context_for_node(self, run: _EngineRun, node: NodeSpec,
                           attempt_id: str) -> ContextBundle:
-        context = replace(ContextBundle.from_node(node), attempt_id=attempt_id)
+        events, _tail = read_journal_lines(run.paths.journal_file)
+        lineage = node.node_id
+        for event in events:
+            payload = event.get("payload", {})
+            if (event.get("type") == "rework_created"
+                    and payload.get("rework_node_id") == node.node_id
+                    and isinstance(payload.get("original_node_id"), str)):
+                lineage = payload["original_node_id"]
+        context = replace(
+            ContextBundle.from_node(node), attempt_id=attempt_id,
+            run_id=run.plan.run_id, node_lineage=lineage,
+        )
+        continuation = self._continuation_for_rework(run, node, events)
+        if continuation is not None:
+            context = replace(context, continuation=continuation)
         if not node.dependencies:
             return context
-        events, _tail = read_journal_lines(run.paths.journal_file)
         latest: dict[str, Mapping[str, Any]] = {}
         for event in events:
             if event["type"] != "worker_finished":
@@ -493,6 +515,127 @@ class GraphExecutionEngine:
             context, objective=objective,
             evidence_requirements=tuple(dict.fromkeys(evidence)),
         )
+
+    @staticmethod
+    def _string_tuple(value: object) -> tuple[str, ...]:
+        if not isinstance(value, (list, tuple)):
+            return ()
+        result = tuple(item for item in value if isinstance(item, str) and item)
+        return result if len(result) == len(value) else ()
+
+    def _continuation_for_rework(
+            self, run: _EngineRun, node: NodeSpec,
+            events: list[dict[str, Any]]) -> ProviderContinuation | None:
+        """Recover a same-session NACK only from complete canonical evidence."""
+
+        if ":rework:" not in node.node_id or self._node_kind(node) is NodeKind.VERIFIER:
+            return None
+        rework_index = -1
+        rework_payload: Mapping[str, Any] | None = None
+        for index, event in enumerate(events):
+            payload = event.get("payload", {})
+            if (event.get("type") == "rework_created"
+                    and payload.get("rework_node_id") == node.node_id):
+                rework_index = index
+                rework_payload = payload
+        if rework_payload is None:
+            return None
+        original_id = rework_payload.get("original_node_id")
+        verifier_id = rework_payload.get("verifier_node_id")
+        if not isinstance(original_id, str) or not isinstance(verifier_id, str):
+            return None
+
+        provider_session: Mapping[str, Any] | None = None
+        provider_attempt = ""
+        verdict: Mapping[str, Any] | None = None
+        verifier_summary = ""
+        for event in events[:rework_index]:
+            entity = event.get("entity", {})
+            payload = event.get("payload", {})
+            if not isinstance(payload, Mapping):
+                continue
+            if (event.get("type") == "worker_finished"
+                    and entity.get("node_id") == original_id
+                    and payload.get("outcome") == "succeeded"):
+                runtime_metadata = payload.get("runtime_metadata", {})
+                if isinstance(runtime_metadata, Mapping):
+                    candidate = runtime_metadata.get("provider_session")
+                    if isinstance(candidate, Mapping):
+                        provider_session = candidate
+                        attempt = entity.get("attempt_id")
+                        provider_attempt = attempt if isinstance(attempt, str) else ""
+            elif (event.get("type") == "worker_finished"
+                  and entity.get("node_id") == verifier_id):
+                verifier_summary = str(payload.get("summary", ""))[:4_000]
+            elif (event.get("type") == "verdict_recorded"
+                  and entity.get("node_id") == verifier_id
+                  and payload.get("verdict") == "revise"
+                  and original_id in payload.get("target_node_ids", ())):
+                verdict = payload
+        if verdict is None:
+            return None
+
+        command = self._string_tuple(verdict.get("verification_command"))
+        evidence_refs = self._string_tuple(verdict.get("evidence_ids"))
+        recorded_workspace = verdict.get("workspace_digest")
+        exit_code = verdict.get("verification_exit_code")
+        criteria = verdict.get("criterion_evidence", {})
+        target_attempts = verdict.get("target_attempt_ids", {})
+        target_attempt = (
+            target_attempts.get(original_id)
+            if isinstance(target_attempts, Mapping) else None
+        )
+        proof_ids = tuple(sorted(
+            key for key in criteria if isinstance(key, str) and key
+        )) if isinstance(criteria, Mapping) else ()
+        if not proof_ids:
+            proof_ids = tuple(sorted(set(node.closes_proofs)))
+        if not (
+                command and evidence_refs and proof_ids
+                and isinstance(recorded_workspace, str) and recorded_workspace
+                and (isinstance(exit_code, int) or exit_code is None)):
+            return None
+        try:
+            current_workspace = workspace_digest(Path(run.spec.workspace).resolve())
+        except (OSError, ValueError):
+            return None
+        if current_workspace != recorded_workspace:
+            return None
+        try:
+            nack = VerificationNack(
+                proof_ids=proof_ids, command=command, exit_code=exit_code,
+                evidence_refs=evidence_refs,
+                workspace_digest=recorded_workspace,
+                summary=verifier_summary,
+            )
+            handle = None
+            if provider_session is not None:
+                provider = provider_session.get("provider")
+                opaque_id = provider_session.get("opaque_id")
+                boundary_digest = provider_session.get("boundary_digest")
+                bound_attempt = provider_session.get("attempt_id")
+                observed_model = provider_session.get("observed_model")
+                resumable = provider_session.get("resumable")
+                if (
+                        isinstance(provider, str) and provider
+                        and isinstance(opaque_id, str) and opaque_id
+                        and isinstance(boundary_digest, str) and boundary_digest
+                        and isinstance(bound_attempt, str) and bound_attempt
+                        and isinstance(observed_model, str) and observed_model
+                        and observed_model == node.model
+                        and bound_attempt == provider_attempt == target_attempt
+                        and resumable is True):
+                    handle = ProviderSessionHandle(
+                        provider=provider, opaque_id=opaque_id,
+                        boundary_digest=boundary_digest,
+                        attempt_id=bound_attempt, resumable=True,
+                    )
+            return ProviderContinuation(
+                handle,
+                nack,
+            )
+        except ValueError:
+            return None
 
     async def _execute_node(self, run: _EngineRun, node: NodeSpec) -> None:
         projection = self._projection(run)
@@ -745,6 +888,9 @@ class GraphExecutionEngine:
                     run.execution_tasks.pop(node_id, None)
         self._settle(run)
         if self._projection(run).terminal_status is not None:
+            close_run = getattr(self._adapter, "close_run", None)
+            if callable(close_run):
+                await close_run(run.plan.run_id)
             run.writer.close()
         all_events = self._projection(run).events
         return EngineDecisionBatch(scheduling, all_events[before:])
@@ -865,4 +1011,7 @@ class GraphExecutionEngine:
             payload={"terminal_status": "cancelled", "reason": reason},
             event_id=f"engine:{run.plan.run_id}:terminal:cancelled",
         )
+        close_run = getattr(self._adapter, "close_run", None)
+        if callable(close_run):
+            await close_run(run.plan.run_id)
         run.writer.close()

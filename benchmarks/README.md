@@ -9,6 +9,10 @@ This directory contains two distinct things:
 - [`sprout/`](sprout/) compares v1 target review, Graphori v2, unconditional and
   adaptive Sprout, and a static oracle across repeated-target counts. Its latency is
   modeled, not provider wall time.
+- [`live_verify/`](live_verify/) compares the v2 serial verifier path with exact-digest
+  speculative verification using paired real-process wall time and stale-proof faults.
+- [`session_repair/`](session_repair/) checks Codex and Claude same-session repair
+  mechanisms with deterministic protocol fixtures. It is not a provider performance claim.
 
 Do not commit generated results without the exact task set, tool versions, command
 transcript, and raw JSON records.

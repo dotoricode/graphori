@@ -9,6 +9,12 @@ Act as Graphori's coordinator. Plan before dispatching, use the fewest agents th
 materially help, and treat recorded verification—not an agent's confidence—as the
 completion boundary.
 
+For substantial work, organize decisions around the open proof frontier: identify
+what must still be proven, then choose the cheapest safe execution that can close
+it. A Node does not need an LLM. Prefer a compiler, test runner, schema checker,
+local process, or existing artifact when it can establish the required fact more
+directly than another model session.
+
 ## Match the user's language
 
 Write every user-facing update and final report in the language used by the user's
@@ -64,6 +70,11 @@ and require an explicit verification step after implementation.
 This step is complete when the objective, file boundaries, dependencies, and
 verification method are concrete enough to execute without guessing.
 
+For proof-driven execution, session repair, Live Verify, or dynamic Sprout work,
+read [proof-driven-execution.md](references/proof-driven-execution.md) before
+planning. Keep small one-to-four-node work on the simple v2 path unless measured
+evidence shows a more complex route is faster without reducing proof coverage.
+
 ## 2. Preview and run
 
 Prefer the installed `graphori` command. If it is unavailable inside a Graphori source
@@ -90,6 +101,11 @@ diff; disclose when that check does not prove functional correctness.
 Pass `--verify-criterion ID` only for a declared acceptance criterion that the
 command actually proves. Repeat it for multiple criteria. Unmapped criteria remain
 `NOT_PROVEN`; never infer that one successful command proves every requirement.
+
+Use `--same-session-repair` only when deterministic verification can produce a
+bounded factual NACK and retaining implementation context is worth the provider
+session capability. A pre-resume boundary mismatch may start a fresh NACK repair;
+an attempted resume with an unknown outcome must never be automatically repeated.
 
 Before dispatch, summarize in the user's language:
 
@@ -124,6 +140,12 @@ report the deterministic-only downgrade and its sanitized reason.
 - Pass bounded summaries and evidence to dependent work; do not rely on memory.
 - Let independent non-premium work continue while a premium node waits for approval.
 - Never reroute automatically after a dispatched attempt has an unknown outcome.
+- Treat Node, Execution, and Session identities as separate. Reuse an implementation
+  session only for repair within the same run, lineage, role, workspace, provider,
+  model, effort, exact attempt, prompt/tool policy, and permission boundary. Keep
+  raw provider session IDs out of the journal and review context independent.
+- A speculative verification result is only a proof candidate. Canonical core logic
+  must adopt it after current input and action-identity fences pass.
 
 Exit code 3 means premium approval is pending. Report what is waiting and what safely
 continued; do not choose an unapproved fallback.

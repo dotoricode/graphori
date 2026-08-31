@@ -23,7 +23,8 @@
 - `sprout-unconditional`: 실제 `ProofFrontier`가 고른 compound cover를 파일럿으로 한 번
   더 실행합니다. 파일럿 시간과 agent/process 노드를 모두 계산합니다.
 - `graphori-sprout`: 같은 WIP 모델로 static 경로와 pilot 경로를 먼저 비교하고,
-  모델링 지연이 줄어드는 cell에서만 파일럿을 켭니다.
+  모델링 지연이 줄면서 AI session이 늘지 않고 proof·scope gate를 모두 통과하는
+  cell에서만 파일럿을 켭니다.
 - `oracle-static`: 같은 compound cover를 처음부터 안다고 가정해 파일럿 비용을 빼는
   대조군입니다. 전역 이론적 하한도, 실제 Graphori 실행 모드도 아닙니다.
 

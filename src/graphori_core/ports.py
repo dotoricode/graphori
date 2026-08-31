@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from typing import Any, Mapping, Protocol
 
 from .run_plan import NodeSpec, RunPlan
+from .provider_session import ProviderContinuation
 from .skills import SkillBinding
 
 
@@ -99,6 +100,9 @@ class ContextBundle:
     selected_skills: tuple[str, ...] = ()
     skill_bindings: tuple[SkillBinding, ...] = ()
     evidence_requirements: tuple[str, ...] = ()
+    run_id: str = ""
+    node_lineage: str = ""
+    continuation: ProviderContinuation | None = None
 
     @classmethod
     def from_node(cls, node: NodeSpec) -> "ContextBundle":

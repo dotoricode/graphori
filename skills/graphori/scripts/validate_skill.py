@@ -107,7 +107,10 @@ def validate(root: Path) -> None:
 
     required_files = list(COMMON_UTF8_FILES)
     if expected_name == "graphori":
-        required_files.append(Path("references/canonical-routing.md"))
+        required_files.extend((
+            Path("references/canonical-routing.md"),
+            Path("references/proof-driven-execution.md"),
+        ))
     texts: dict[Path, str] = {}
     for relative in required_files:
         path = root / relative

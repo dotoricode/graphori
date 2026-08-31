@@ -244,7 +244,32 @@ provider 진단은 호환 여부와 인증의 `ready` / `not_ready` 상태만 �
 나머지 인자를 모두 받는 `--verify-command`보다 앞에 둔다. 연결하지 않은 기준은
 `NOT_PROVEN`으로 남으며, 명령 하나가 모든 요구사항을 증명한다고 추정하지 않는다.
 
+느리고 반복 실행해도 안전한 로컬 검증 명령이라면 `--verify-command` 앞에
+`--live-verify`를 붙일 수 있다. Graphori는 에이전트가 보고를 마치는 동안 불변 작업공간
+복제본에서 검증하고, 마지막 내용 해시가 정확히 같을 때만 PASS를 재사용한다. 작업공간
+변경, symlink, 검사 실패, 복제 불가 상황에서는 기존 v2 검증으로 돌아간다. 짧은 검사나
+network·clock·random·외부 부작용이 있는 명령에는 켜지 않는다.
+
+결정적 검증 실패 뒤 기존 구현 문맥을 재사용하려면 `--same-session-repair`를 붙인다.
+Graphori는 세션 경계와 정확한 대상 attempt가 모두 같을 때만 resume한다. 경계가 다르면
+불변 실패 사실을 포함한 새 repair 세션을 시작하지만, resume를 실제 시도한 뒤 실패한
+작업은 외부 효과 중복을 막기 위해 자동 재실행하지 않는다. 실제 provider session ID는
+journal이 아니라 권한 `0600`인 private vault에만 둔다.
+[안전 계약](docs/architecture/SESSION_REPAIR.ko.md)
+
 ## 무엇을 측정했나
+
+### Live Verify 제어 경로 벤치마크
+
+실제 process를 쓰는 10쌍에서 기존 v2 순차 검증과 불변 snapshot 중첩 경로를 비교했고,
+늦은 쓰기 fault 10건으로 오래된 증거를 거부하는지 확인했다. 합성
+write-then-report-tail fixture에서 중앙값은 **33.2%**, p95는 **35.0%** 줄었고 paired
+bootstrap 95% 하한은 **31.8%**였다. Live Verify 10건 모두 bounded ActionKey가 완전했고
+PASS 후보 10/10건을 재사용했다. paired 결과는 20/20에서 올바랐으며 늦은 쓰기 10건은 모두
+`source_changed` 사유로 fallback했고 오래된 증거 재사용은 0/10이었다. 두 조건 모두 AI
+session과 token은 0이었다. 고정 gate인 중앙값 25%·p95 15%·하한
+20%를 통과했지만, 이는 제어 경로 결과이지 Codex·Claude end-to-end 속도 주장이 아니다.
+[방법](benchmarks/live_verify/README.md)
 
 ### Sprout 라우팅 모델 벤치마크
 
@@ -258,12 +283,13 @@ lane 3개로 계산했으며 실제 provider 시간, 토큰, 품질 측정이 �
 | 2 | 316.5ms | 206.0ms | 290.0ms | 206.0ms | **178.0ms** |
 | 4 | 612.0ms | 395.0ms | 453.0ms | 377.5ms | **341.0ms** |
 | 8 | 1,103.0ms | 776.0ms | 779.5ms | 703.5ms | **666.5ms** |
-| 16 | 2,192.0ms | 1,539.0ms | 1,431.0ms | 1,382.5ms | **1,319.0ms** |
+| 16 | 2,192.0ms | 1,539.0ms | 1,431.0ms | 1,389.0ms | **1,319.0ms** |
 
 감사한 첫 설계는 대상 8개까지 v2보다 느렸다. 최종 성능 gate는 파일럿의 추정 이득이
 확인되기 전에는 v2를 유지한다. Adaptive Sprout는 대상 1~2개에서 v2와 같았고,
-4·8·16개에서 모델링 지연 중앙값을 4.4%·9.3%·10.2% 줄였다. 16개에서는 실행 노드도
-39.4% 줄였으며 모든 조건이 선언 의무 3,520/3,520개를 덮고 잘못된 fan-in은 0개였다.
+4·8·16개에서 모델링 지연 중앙값을 4.4%·9.3%·9.7% 줄였다. 강화한 gate는 모델링 AI
+session을 늘리지 않으며 16개에서는 AI 노드를 5.6% 줄였다. 모든 조건이 선언 의무
+3,520/3,520개를 덮고 잘못된 fan-in은 0개였다.
 이는 독립 실측 속도 주장이 아닌 모델 결과다. [방법과 전체 결과](benchmarks/sprout/REPORT.ko.md)
 
 ### 공개 72회 비교

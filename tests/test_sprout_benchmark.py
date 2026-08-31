@@ -68,6 +68,40 @@ class SproutBenchmarkTests(unittest.TestCase):
                     sprout["modeled_latency_ms"], v2["modeled_latency_ms"],
                 )
 
+    def test_actual_route_is_v2_for_small_targets_and_shadow_is_deterministic(self):
+        work = RUNNER["MATRIX"][0]
+        for branches in (1, 2):
+            row = RUNNER["run_cell"](work, "graphori-sprout", 1, branches)
+            self.assertEqual(row["actual_route"], "v2")
+            self.assertFalse(row["pilot_used"])
+            self.assertTrue(row["shadow_planning"])
+            self.assertEqual(row["proof_coverage_delta"], 0)
+        first = RUNNER["run_cell"](work, "graphori-sprout", 2, 8)
+        second = RUNNER["run_cell"](work, "graphori-sprout", 2, 8)
+        shadow_keys = (
+            "shadow_action", "shadow_selected_nodes", "activation_eligible",
+            "activation_reason", "estimated_v2_latency_ms",
+            "estimated_shadow_latency_ms", "estimated_gain_ms",
+            "proof_coverage_delta", "incorrect_expansion", "missed_expansion",
+        )
+        self.assertEqual(
+            tuple(first[key] for key in shadow_keys),
+            tuple(second[key] for key in shadow_keys),
+        )
+
+    def test_conditional_activation_requires_four_independent_covered_targets(self):
+        for work in RUNNER["MATRIX"]:
+            for branches in RUNNER["BRANCH_COUNTS"]:
+                row = RUNNER["run_cell"](
+                    work, "graphori-sprout", 1, branches,
+                )
+                self.assertGreaterEqual(row["proof_coverage_delta"], 0)
+                self.assertEqual(row["incorrect_expansion"], 0)
+                if row["actual_route"] == "sprout":
+                    self.assertGreaterEqual(branches, 4)
+                    self.assertTrue(row["activation_eligible"])
+                    self.assertGreater(row["estimated_gain_ms"], 0)
+
     def test_analysis_rejects_unpaired_arm_jitter(self):
         rows = [
             RUNNER["run_cell"](work, arm, 1, 1)

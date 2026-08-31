@@ -32,7 +32,8 @@ row and analysis rejects an unpaired matrix.
   process nodes, and agent nodes are all counted.
 - **graphori-sprout:** the adaptive planning policy estimates the static route and
   pilot route with the same WIP model. It keeps v2 when the pilot cannot reduce modeled
-  latency and pilots only after the declared break-even point.
+  latency, would increase modeled AI sessions, or fails any proof/scope gate. It pilots
+  only after the declared break-even point.
 - **oracle-static:** the same compound cover as Sprout, assumed to be known before the
   run, without a pilot. It isolates compound-cover pilot cost, but it is neither a
   global lower bound nor an available Graphori mode.
