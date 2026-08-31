@@ -269,6 +269,13 @@ is identical. A changed workspace, symlink, failed check, or unsupported snapsho
 falls back to the normal v2 verifier. Keep the flag off for short checks and for
 commands with network, clock, random, or external side effects.
 
+To reuse the original implementation context after a deterministic verifier
+failure, add `--same-session-repair`. Graphori resumes only an exact session and
+attempt boundary; a mismatch starts a fresh repair with the immutable failure
+facts. An attempted resume that fails is never automatically executed again.
+Raw provider session IDs stay in a private `0600` vault, not the journal.
+[Safety contract](docs/architecture/SESSION_REPAIR.md)
+
 ## What was measured
 
 ### Live Verify control-plane benchmark
@@ -296,12 +303,13 @@ estimates on three WIP lanes; it does not measure provider wall time, tokens, or
 | 2 | 316.5 ms | 206.0 ms | 290.0 ms | 206.0 ms | **178.0 ms** |
 | 4 | 612.0 ms | 395.0 ms | 453.0 ms | 377.5 ms | **341.0 ms** |
 | 8 | 1,103.0 ms | 776.0 ms | 779.5 ms | 703.5 ms | **666.5 ms** |
-| 16 | 2,192.0 ms | 1,539.0 ms | 1,431.0 ms | 1,382.5 ms | **1,319.0 ms** |
+| 16 | 2,192.0 ms | 1,539.0 ms | 1,431.0 ms | 1,389.0 ms | **1,319.0 ms** |
 
 The first audited design was slower than v2 through eight targets. The final performance
 gate therefore keeps v2 until a pilot's own estimates predict a gain. Adaptive Sprout
-matched v2 at 1–2 targets and reduced modeled median latency by 4.4%, 9.3%, and 10.2%
-at 4, 8, and 16. At 16 it also used 39.4% fewer activated nodes, while all arms covered
+matched v2 at 1–2 targets and reduced modeled median latency by 4.4%, 9.3%, and 9.7%
+at 4, 8, and 16. The stricter gate never increased modeled AI sessions; at 16 it used
+5.6% fewer AI nodes, while all arms covered
 3,520/3,520 declared obligations with zero invalid fan-in declarations. These are model
 results, not independent real-world speed claims. [Method and full results](benchmarks/sprout/REPORT.md)
 

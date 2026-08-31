@@ -16,17 +16,18 @@ count:
 | 2 | 316.5 | 206.0 | 290.0 | 206.0 | **178.0** |
 | 4 | 612.0 | 395.0 | 453.0 | 377.5 | **341.0** |
 | 8 | 1,103.0 | 776.0 | 779.5 | 703.5 | **666.5** |
-| 16 | 2,192.0 | 1,539.0 | 1,431.0 | 1,382.5 | **1,319.0** |
+| 16 | 2,192.0 | 1,539.0 | 1,431.0 | 1,389.0 | **1,319.0** |
 
 Relative to v2, adaptive Sprout's modeled latency changed by 0.0%, 0.0%, -4.4%,
--9.3%, and -10.2% at 1, 2, 4, 8, and 16 targets. It enabled pilots in 0, 0, 7,
-24, and 35 of the 40 paired cells respectively. The compound-cover oracle was faster
+-9.3%, and -9.7% at 1, 2, 4, 8, and 16 targets. It enabled pilots in 0, 0, 3,
+3, and 3 of the 40 paired cells respectively. The stricter gate rejects any pilot
+that would increase modeled AI sessions. The compound-cover oracle was faster
 at 2–16 targets; at one target, v2 remained 1.5 ms lower.
 
 At 16 targets, adaptive Sprout covered the same 3,520 declared target obligations
-with zero invalid fan-in declarations. It used 2,134 activated nodes versus v2's
-3,520 (-39.4%), 794 agent nodes versus 800 (-0.8%), and 1,340 process nodes versus
-2,720 (-50.7%).
+with zero invalid fan-in declarations. It used 3,385 activated nodes versus v2's
+3,520 (-3.8%), 755 agent nodes versus 800 (-5.6%), and 2,630 process nodes versus
+2,720 (-3.3%).
 
 ## What this establishes
 

@@ -211,17 +211,55 @@ def run_cell(work: Workload, arm: str, repetition: int, branches: int) -> dict[s
     singles = choose_v2(candidates, work.obligations)
     cover = choose_cover(work, candidates)
     pilot_used = arm == "sprout-unconditional"
+    shadow_fields: dict[str, Any] = {
+        "shadow_planning": False,
+        "actual_route": "v2" if arm in {"graphori-v2", "graphori-sprout"} else arm,
+        "shadow_action": "",
+        "shadow_selected_nodes": [],
+        "activation_eligible": False,
+        "activation_reason": "",
+        "estimated_v2_latency_ms": None,
+        "estimated_shadow_latency_ms": None,
+        "estimated_gain_ms": None,
+        "planning_cost_ms": 0,
+        "estimated_v2_ai_nodes": None,
+        "estimated_shadow_ai_nodes": None,
+        "proof_coverage_delta": 0,
+        "shadow_proof_coverage_delta": 0,
+        "incorrect_expansion": 0,
+        "missed_expansion": 0,
+    }
     if arm == "graphori-sprout":
-        decision = ProofFrontier(policy_version="sprout-1").route_if_profitable(
+        planning = ProofFrontier(policy_version="sprout-1").plan_conditionally(
             proof_artifact(work), candidates,
             tuple(item.node for item in singles), target_count=branches,
+            targets_independent=True, uncertain=False,
             branch_budget=work.branch_budget, max_wip=3,
             min_gain_ms=0, min_gain_ratio=0,
         )
-        pilot_used = decision.action == "spawn"
-        selected_ids = set(decision.target_node_ids)
+        pilot_used = planning.telemetry.actual_route == "sprout"
+        selected_ids = set(planning.actual.target_node_ids)
         selected = tuple(item for item in candidates
                          if item.node.node_id in selected_ids)
+        telemetry = planning.telemetry
+        shadow_fields = {
+            "shadow_planning": True,
+            "actual_route": telemetry.actual_route.value,
+            "shadow_action": planning.shadow.action.value,
+            "shadow_selected_nodes": list(telemetry.shadow_node_ids),
+            "activation_eligible": telemetry.activation_eligible,
+            "activation_reason": telemetry.activation_reason,
+            "estimated_v2_latency_ms": telemetry.estimated_v2_latency_ms,
+            "estimated_shadow_latency_ms": telemetry.estimated_shadow_latency_ms,
+            "estimated_gain_ms": telemetry.estimated_gain_ms,
+            "planning_cost_ms": telemetry.planning_cost_ms,
+            "estimated_v2_ai_nodes": telemetry.v2_ai_nodes,
+            "estimated_shadow_ai_nodes": telemetry.shadow_ai_nodes,
+            "proof_coverage_delta": telemetry.proof_coverage_delta,
+            "shadow_proof_coverage_delta": telemetry.shadow_proof_coverage_delta,
+            "incorrect_expansion": int(telemetry.incorrect_expansion),
+            "missed_expansion": int(telemetry.missed_expansion),
+        }
     elif arm in {"sprout-unconditional", "oracle-static"}:
         selected = cover
     else:
@@ -276,6 +314,7 @@ def run_cell(work: Workload, arm: str, repetition: int, branches: int) -> dict[s
         "declared_proofs_total": len(work.obligations) * branches,
         "invalid_fan_in": int(not set(work.obligations) <= closed),
         "selected_nodes": sorted(item.node.node_id for item in selected),
+        **shadow_fields,
     }
 
 

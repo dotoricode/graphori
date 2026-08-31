@@ -43,6 +43,12 @@ canonical JSON과 digest를 가져 같은 입력에서 재생됩니다.
 판정기이며, 전달받은 trusted digest 집합은 호출자 소유의 신뢰 경계이지 Graphori가
 journal을 읽었다는 증거가 아닙니다.
 
+`plan_shadow`는 실제 실행을 항상 v2로 유지하고 Sprout 대안의 불변 telemetry만
+돌려줍니다. `plan_conditionally`만 명시적 opt-in 활성화 경로입니다. 대상이 4개
+이상이고 독립성이 명시됐으며 v2 proof coverage가 완전하고 coverage가 줄지 않고
+dependency·scope 충돌과 planning 불확실성이 없으며 절대·상대 이득 기준을 모두 넘을
+때만 Sprout를 선택합니다. 하나라도 알 수 없으면 v2를 선택합니다.
+
 ## 현재 범위와 한계
 
 `NodeSpec.requires_proofs`가 실행을 막고, `closes_proofs`가 canonical PASS로 닫히는

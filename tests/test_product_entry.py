@@ -411,6 +411,9 @@ class ProductPlanTests(unittest.TestCase):
         self.assertEqual(parser.parse_args(["plan", "Fix it", "--lang", "en"]).locale, "en")
         self.assertEqual(parser.parse_args(["plan", "Fix it", "--locale", "ko"]).locale, "ko")
         self.assertEqual(parser.parse_args(["--lang", "ko", "plan", "Fix it"]).locale, "ko")
+        self.assertTrue(parser.parse_args([
+            "run", "Fix it", "--same-session-repair",
+        ]).same_session_repair)
 
     def test_help_follows_explicit_and_objective_language(self):
         def render(argv):
@@ -428,6 +431,12 @@ class ProductPlanTests(unittest.TestCase):
         self.assertIn("도움말과 출력 언어", korean)
         self.assertIn("Preview the plan", render(["plan", "Fix this bug", "--help"]))
         self.assertIn("실행 전에 계획", render(["plan", "이 버그를 고쳐줘", "--help"]))
+        self.assertIn("Resume the original implementation session", render([
+            "run", "Fix this bug", "--help",
+        ]))
+        self.assertIn("기존 구현 세션", render([
+            "run", "이 버그를 고쳐줘", "--help",
+        ]))
 
         with mock.patch.dict(
             os.environ,

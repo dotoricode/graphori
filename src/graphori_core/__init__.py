@@ -109,11 +109,14 @@ from .product import (
     ProductCommand, ProductPlanBundle, ProductPlanCompiler,
     default_verification_argv, execute_product, render_plan_preview,
 )
+from .acceptance import (
+    AcceptanceContract, AcceptanceContractCompiler, AcceptanceProof, AcceptanceSource,
+)
 from .projection import CanonicalRunProjection
 from .sprout import (
     AuthorityDecision, GrowthAction, GrowthCandidate, GrowthDecision,
     ProofCarryingArtifact, ProofFrontier, ProofObligation, ProofResult, ProofState,
-    TransitionAuthority,
+    SproutPlanningResult, SproutRoute, SproutShadowTelemetry, TransitionAuthority,
 )
 
 __all__ = [
@@ -155,8 +158,11 @@ __all__ = [
     "SkillRegistryError", "TrustLevel",
     "ProductCommand", "ProductPlanBundle", "ProductPlanCompiler",
     "default_verification_argv", "execute_product", "render_plan_preview",
+    "AcceptanceContract", "AcceptanceContractCompiler", "AcceptanceProof",
+    "AcceptanceSource",
     "CanonicalRunProjection",
     "AuthorityDecision", "GrowthAction", "GrowthCandidate", "GrowthDecision",
     "ProofCarryingArtifact", "ProofFrontier", "ProofObligation", "ProofResult",
-    "ProofState", "TransitionAuthority",
+    "ProofState", "SproutPlanningResult", "SproutRoute", "SproutShadowTelemetry",
+    "TransitionAuthority",
 ]

@@ -58,13 +58,19 @@ only when this full boundary matches:
 
 ```text
 run + node lineage + role + workspace + provider + model
-+ system prompt + tool policy + permission profile
++ effort + system prompt + tool policy + permission profile
++ exact implementation attempt
 ```
 
 The verifier states the failed proof, command, exit status, and bounded error
 evidence. It does not instruct the agent to weaken or modify the verifier.
-Resume failure falls back to a fresh repair session. Implementation and
-independent-review sessions never share context.
+Keep raw provider session IDs in a private capability vault, never in the
+canonical journal. A boundary mismatch detected before resume starts may use a
+fresh repair session containing the immutable NACK. Once resume is attempted,
+timeout, cancellation, nonzero exit, or malformed output must not automatically
+start a second repair: the provider response cannot prove that the first turn
+had no external effect. Implementation and independent-review sessions never
+share context.
 
 ## Introduce automatic planning through evidence
 
@@ -82,7 +88,8 @@ mandatory proof or PASS rule.
 Run dynamic Sprout planning in shadow mode before it controls execution. Record
 the v2 plan, shadow plan, estimated and actual latency, proof coverage, planning
 cost, incorrect expansion, and missed expansion. Activate only patterns that
-pass a fixed gate; uncertainty falls back to v2.
+pass a fixed gate; uncertainty falls back to v2. Conditional activation must
+not increase modeled AI sessions compared with the v2 route.
 
 ## Required measurement
 

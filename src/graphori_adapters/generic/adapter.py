@@ -32,6 +32,7 @@ from graphori_core.process_supervisor import (
     resolve_workspace_path,
 )
 from graphori_core.run_plan import NodeSpec, RunPlan
+from graphori_core.workspace_snapshot import workspace_digest
 
 
 @dataclass(frozen=True)
@@ -221,6 +222,18 @@ class GenericProcessAdapter:
             return None
 
     def _verdict_event(self, record: _DispatchRecord, process: ProcessResult) -> RuntimeEvent | None:
+        verification_metadata: dict[str, object] = {
+            "verification_command": list(record.command.argv),
+            "verification_exit_code": process.exit_code,
+        }
+        try:
+            verification_metadata["workspace_digest"] = workspace_digest(
+                self.workspace_root.resolve(),
+            )
+        except (OSError, ValueError):
+            # Verification remains canonical. Only same-session reuse becomes
+            # ineligible when the workspace cannot be identified completely.
+            pass
         if (record.command.verdict_from_exit and not process.timed_out
                 and not process.cancelled):
             proof_status = "PROVEN" if process.exit_code == 0 else "FAILED"
@@ -242,6 +255,7 @@ class GenericProcessAdapter:
                 {
                     "verdict": "pass" if process.exit_code == 0 else "revise",
                     "evidence_ids": evidence,
+                    **verification_metadata,
                     "criterion_evidence": criterion_evidence,
                 },
                 event_id=f"generic:{record.runtime_id}:verdict",
@@ -282,6 +296,7 @@ class GenericProcessAdapter:
         return RuntimeEvent(
             "verdict_recorded", record.node.node_id, "verifier",
             {"verdict": verdict, "evidence_ids": evidence,
+             **verification_metadata,
              "criterion_evidence": criterion_evidence},
             event_id=f"generic:{record.runtime_id}:verdict",
             producer_event_id=f"generic:{record.runtime_id}:verdict",

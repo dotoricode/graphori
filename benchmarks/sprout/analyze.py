@@ -36,6 +36,8 @@ def _arm_summary(cells: list[dict[str, Any]]) -> dict[str, Any]:
         "ai_nodes": sum(row["ai_nodes"] for row in cells),
         "process_nodes": sum(row["process_nodes"] for row in cells),
         "pilots_used": sum(row["pilot_used"] for row in cells),
+        "incorrect_expansion": sum(row["incorrect_expansion"] for row in cells),
+        "missed_expansion": sum(row["missed_expansion"] for row in cells),
         "median_modeled_latency_ms": round(statistics.median(
             row["modeled_latency_ms"] for row in cells
         ), 3),
@@ -113,6 +115,20 @@ def summarize(rows: list[dict[str, Any]], repetitions: int,
     if any(cell["declared_proofs_closed"] != cell["declared_proofs_total"]
            or cell["invalid_fan_in"] for cell in all_arms):
         raise ValueError("declared proof coverage invariant failed")
+    if any(row["proof_coverage_delta"] < 0 or row["incorrect_expansion"] for row in rows):
+        raise ValueError("conditional Sprout activation invariant failed")
+    if any(
+            row["arm"] == "graphori-sprout"
+            and row["actual_route"] == "sprout"
+            and row["ai_nodes"] > next(
+                peer["ai_nodes"] for peer in rows
+                if peer["workload"] == row["workload"]
+                and peer["repetition"] == row["repetition"]
+                and peer["branches"] == row["branches"]
+                and peer["arm"] == "graphori-v2"
+            )
+            for row in rows):
+        raise ValueError("conditional Sprout increased AI sessions")
     return {
         "schema_version": 2,
         "matrix": {

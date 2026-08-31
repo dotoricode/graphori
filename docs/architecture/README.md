@@ -7,3 +7,4 @@
 - `SPROUT.md` / `SPROUT.ko.md`: proof-driven sparse execution and current limits
 - `LIVE_VERIFY.md`: immutable speculative verification and fail-closed fallback
 - `DOMAIN_MODEL.md`: Proof, execution, evidence, and identity boundaries using existing types
+- `SESSION_REPAIR.md` / `SESSION_REPAIR.ko.md`: exact-boundary provider context reuse and private capability storage

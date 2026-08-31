@@ -12,6 +12,7 @@ from graphori_core import (  # noqa: E402
     ProofObligation,
     ProofResult,
     RunPlan,
+    SproutRoute,
     TransitionAuthority,
 )
 
@@ -370,6 +371,139 @@ class ProofFrontierTests(unittest.TestCase):
         )
         self.assertEqual(decision.action, "use_static")
         self.assertEqual(decision.reason, "pilot_schedule_uncertain")
+
+    def shadow_fixture(self):
+        artifact = ProofCarryingArtifact(
+            "artifact:shadow", "sha256:" + "6" * 64,
+            obligations=(ProofObligation("a", "verify"),
+                         ProofObligation("b", "verify")),
+        )
+        static = (
+            NodeSpec("static-a", "verification", "a", "a", "verifier",
+                     estimated_execution_ms=100, closes_proofs=("a",)),
+            NodeSpec("static-b", "verification", "b", "b", "verifier",
+                     estimated_execution_ms=100, closes_proofs=("b",)),
+        )
+        compound = NodeSpec(
+            "compound", "verification", "compound", "compound", "verifier",
+            estimated_execution_ms=110, closes_proofs=("a", "b"),
+        )
+        return artifact, (GrowthCandidate(compound, ("a", "b")),), static
+
+    def test_shadow_planning_is_deterministic_and_keeps_v2_actual(self):
+        artifact, candidates, static = self.shadow_fixture()
+        first = self.frontier.plan_shadow(
+            artifact, candidates, static, target_count=4,
+            targets_independent=True, uncertain=False, max_wip=1,
+            min_gain_ms=0, min_gain_ratio=0,
+        )
+        second = self.frontier.plan_shadow(
+            artifact, candidates, static, target_count=4,
+            targets_independent=True, uncertain=False, max_wip=1,
+            min_gain_ms=0, min_gain_ratio=0,
+        )
+
+        self.assertEqual(first.actual.action, "use_static")
+        self.assertEqual(first.telemetry.actual_route, SproutRoute.V2)
+        self.assertEqual(first.shadow.target_node_ids, ("compound",))
+        self.assertTrue(first.telemetry.activation_eligible)
+        self.assertTrue(first.telemetry.missed_expansion)
+        self.assertEqual(first.telemetry.proof_coverage_delta, 0)
+        self.assertEqual(first.telemetry.digest(), second.telemetry.digest())
+
+    def test_conditional_sprout_keeps_small_targets_on_v2(self):
+        artifact, candidates, static = self.shadow_fixture()
+        for target_count in (1, 2, 3):
+            with self.subTest(target_count=target_count):
+                result = self.frontier.plan_conditionally(
+                    artifact, candidates, static, target_count=target_count,
+                    targets_independent=True, uncertain=False, max_wip=1,
+                    min_gain_ms=0, min_gain_ratio=0,
+                )
+                self.assertEqual(result.telemetry.actual_route, SproutRoute.V2)
+                self.assertEqual(result.actual.target_node_ids,
+                                 ("static-a", "static-b"))
+                self.assertEqual(result.telemetry.activation_reason,
+                                 "target_count_below_four")
+
+    def test_conditional_sprout_requires_independence_coverage_and_gain(self):
+        artifact, candidates, static = self.shadow_fixture()
+        activated = self.frontier.plan_conditionally(
+            artifact, candidates, static, target_count=4,
+            targets_independent=True, uncertain=False, max_wip=1,
+            min_gain_ms=0, min_gain_ratio=0,
+        )
+        dependent = self.frontier.plan_conditionally(
+            artifact, candidates, static, target_count=4,
+            targets_independent=False, uncertain=False, max_wip=1,
+            min_gain_ms=0, min_gain_ratio=0,
+        )
+        no_gain = self.frontier.plan_conditionally(
+            artifact, candidates, static, target_count=4,
+            targets_independent=True, uncertain=False, max_wip=1,
+            min_gain_ms=251, min_gain_ratio=0,
+        )
+        incomplete_static = self.frontier.plan_conditionally(
+            artifact, candidates, static[:1], target_count=4,
+            targets_independent=True, uncertain=False, max_wip=1,
+            min_gain_ms=0, min_gain_ratio=0,
+        )
+
+        self.assertEqual(activated.telemetry.actual_route, SproutRoute.SPROUT)
+        self.assertEqual(activated.actual.target_node_ids, ("compound",))
+        self.assertEqual(dependent.telemetry.activation_reason,
+                         "targets_not_independent")
+        self.assertEqual(no_gain.telemetry.activation_reason, "pilot_not_profitable")
+        self.assertEqual(incomplete_static.telemetry.activation_reason,
+                         "proof_coverage_reduced")
+        for fallback in (dependent, no_gain, incomplete_static):
+            self.assertEqual(fallback.telemetry.actual_route, SproutRoute.V2)
+            self.assertGreaterEqual(fallback.telemetry.proof_coverage_delta, 0)
+
+    def test_uncertainty_and_unknown_proof_fall_back_to_v2(self):
+        artifact, candidates, static = self.shadow_fixture()
+        uncertain = self.frontier.plan_conditionally(
+            artifact, candidates, static, target_count=8,
+            targets_independent=True, uncertain=True, max_wip=1,
+            min_gain_ms=0, min_gain_ratio=0,
+        )
+        unknown_artifact = ProofCarryingArtifact(
+            "artifact:unknown-shadow", "sha256:" + "7" * 64,
+            obligations=(ProofObligation("a", "verify"),),
+            results=(ProofResult("a", "unknown"),),
+        )
+        unknown = self.frontier.plan_conditionally(
+            unknown_artifact, candidates, static, target_count=8,
+            targets_independent=True, uncertain=False, max_wip=1,
+            min_gain_ms=0, min_gain_ratio=0,
+        )
+
+        self.assertEqual(uncertain.telemetry.activation_reason, "planning_uncertain")
+        self.assertEqual(unknown.telemetry.actual_route, SproutRoute.V2)
+        self.assertEqual(unknown.shadow.action, "escalate")
+        self.assertEqual(unknown.telemetry.activation_reason, "unknown_proof")
+        self.assertEqual(unknown.telemetry.proof_coverage_delta, 0)
+
+    def test_conditional_sprout_never_increases_ai_sessions(self):
+        artifact, _candidates, static = self.shadow_fixture()
+        deterministic = tuple(NodeSpec(**{
+            **item.__dict__, "provider": "generic-process",
+            "adapter": "generic-process",
+        }) for item in static)
+        agent = NodeSpec(
+            "agent-compound", "verification", "compound", "compound", "verifier",
+            provider="codex", adapter="codex-cli", estimated_execution_ms=1,
+            closes_proofs=("a", "b"),
+        )
+        result = self.frontier.plan_conditionally(
+            artifact, (GrowthCandidate(agent, ("a", "b")),), deterministic,
+            target_count=8, targets_independent=True, uncertain=False,
+            max_wip=2, min_gain_ms=0, min_gain_ratio=0,
+        )
+        self.assertEqual(result.telemetry.actual_route, SproutRoute.V2)
+        self.assertEqual(result.telemetry.activation_reason, "ai_session_count_increased")
+        self.assertEqual(result.telemetry.v2_ai_nodes, 0)
+        self.assertEqual(result.telemetry.shadow_ai_nodes, 9)
 
 
 if __name__ == "__main__":

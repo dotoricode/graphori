@@ -102,6 +102,11 @@ Pass `--verify-criterion ID` only for a declared acceptance criterion that the
 command actually proves. Repeat it for multiple criteria. Unmapped criteria remain
 `NOT_PROVEN`; never infer that one successful command proves every requirement.
 
+Use `--same-session-repair` only when deterministic verification can produce a
+bounded factual NACK and retaining implementation context is worth the provider
+session capability. A pre-resume boundary mismatch may start a fresh NACK repair;
+an attempted resume with an unknown outcome must never be automatically repeated.
+
 Before dispatch, summarize in the user's language:
 
 - the stages included and deliberately omitted;
@@ -137,7 +142,8 @@ report the deterministic-only downgrade and its sanitized reason.
 - Never reroute automatically after a dispatched attempt has an unknown outcome.
 - Treat Node, Execution, and Session identities as separate. Reuse an implementation
   session only for repair within the same run, lineage, role, workspace, provider,
-  model, prompt/tool policy, and permission boundary. Keep review context independent.
+  model, effort, exact attempt, prompt/tool policy, and permission boundary. Keep
+  raw provider session IDs out of the journal and review context independent.
 - A speculative verification result is only a proof candidate. Canonical core logic
   must adopt it after current input and action-identity fences pass.
 

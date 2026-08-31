@@ -57,6 +57,15 @@
 
 ### Changed
 
+- Acceptance Contracts now accumulate user, repository, deterministic, and LLM
+  strengthening proofs monotonically without changing existing RunPlan digests.
+- Sprout now has a shadow-only default and a separate conditional opt-in gate;
+  small or uncertain workloads remain on v2 and proof coverage may not decrease.
+- `--same-session-repair` can resume the exact Codex or Claude implementation
+  context after deterministic verification failure. Provider session IDs remain
+  in a private `0600` vault, verifier NACKs are factual, and attempted resume
+  failures are never automatically double-executed.
+
 - `--live-verify` can overlap an explicitly repeatable deterministic check with
   the worker's reporting tail. It verifies an immutable copy and reuses only a
   matching PASS; uncertainty falls back to the serial v2 verifier. The paired

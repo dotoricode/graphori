@@ -37,6 +37,11 @@ class GrowthAction(str, Enum):
     ESCALATE = "escalate"
 
 
+class SproutRoute(str, Enum):
+    V2 = "v2"
+    SPROUT = "sprout"
+
+
 @dataclass(frozen=True)
 class ProofObligation:
     obligation_id: str
@@ -201,6 +206,91 @@ class GrowthDecision:
         return "sha256:" + hashlib.sha256(self.canonical_json().encode()).hexdigest()
 
 
+@dataclass(frozen=True)
+class SproutShadowTelemetry:
+    """Immutable planning evidence; callers may journal it but it is not truth."""
+
+    actual_route: SproutRoute | str
+    target_count: int
+    targets_independent: bool | None
+    uncertain: bool
+    conditional_enabled: bool
+    activation_eligible: bool
+    activation_reason: str
+    v2_node_ids: tuple[str, ...]
+    shadow_node_ids: tuple[str, ...]
+    required_proofs: tuple[str, ...]
+    v2_proofs_closed: tuple[str, ...]
+    shadow_proofs_closed: tuple[str, ...]
+    estimated_v2_latency_ms: int
+    estimated_shadow_latency_ms: int | None
+    estimated_gain_ms: int | None
+    estimated_gain_basis_points: int | None
+    planning_cost_ms: int
+    v2_ai_nodes: int
+    shadow_ai_nodes: int | None
+    incorrect_expansion: bool
+    missed_expansion: bool
+
+    def __post_init__(self) -> None:
+        try:
+            object.__setattr__(self, "actual_route", SproutRoute(self.actual_route))
+        except ValueError as exc:
+            raise ValueError("invalid Sprout actual route") from exc
+        if self.target_count < 1 or self.planning_cost_ms < 0:
+            raise ValueError("invalid Sprout telemetry inputs")
+        for name in (
+            "v2_node_ids", "shadow_node_ids", "required_proofs",
+            "v2_proofs_closed", "shadow_proofs_closed",
+        ):
+            object.__setattr__(self, name, tuple(sorted(set(getattr(self, name)))))
+
+    @property
+    def proof_coverage_delta(self) -> int:
+        if self.actual_route is SproutRoute.V2:
+            return 0
+        return self.shadow_proof_coverage_delta
+
+    @property
+    def shadow_proof_coverage_delta(self) -> int:
+        return len(self.shadow_proofs_closed) - len(self.v2_proofs_closed)
+
+    def canonical_json(self) -> str:
+        return json.dumps({
+            "activation_eligible": self.activation_eligible,
+            "activation_reason": self.activation_reason,
+            "actual_route": self.actual_route.value,
+            "conditional_enabled": self.conditional_enabled,
+            "estimated_gain_basis_points": self.estimated_gain_basis_points,
+            "estimated_gain_ms": self.estimated_gain_ms,
+            "estimated_shadow_latency_ms": self.estimated_shadow_latency_ms,
+            "estimated_v2_latency_ms": self.estimated_v2_latency_ms,
+            "incorrect_expansion": self.incorrect_expansion,
+            "missed_expansion": self.missed_expansion,
+            "planning_cost_ms": self.planning_cost_ms,
+            "shadow_ai_nodes": self.shadow_ai_nodes,
+            "required_proofs": list(self.required_proofs),
+            "shadow_node_ids": list(self.shadow_node_ids),
+            "shadow_proofs_closed": list(self.shadow_proofs_closed),
+            "target_count": self.target_count,
+            "targets_independent": self.targets_independent,
+            "uncertain": self.uncertain,
+            "v2_node_ids": list(self.v2_node_ids),
+            "v2_ai_nodes": self.v2_ai_nodes,
+            "v2_proofs_closed": list(self.v2_proofs_closed),
+        }, sort_keys=True, separators=(",", ":"))
+
+    def digest(self) -> str:
+        return "sha256:" + hashlib.sha256(self.canonical_json().encode()).hexdigest()
+
+
+@dataclass(frozen=True)
+class SproutPlanningResult:
+    actual: GrowthDecision
+    shadow: GrowthDecision
+    telemetry: SproutShadowTelemetry
+
+
 class ProofFrontier:
     """Evaluate bounded proof-driven planning decisions deterministically."""
 
@@ -360,6 +450,162 @@ class ProofFrontier:
                 self.policy_version, "pilot_not_profitable",
             )
         return decision
+
+    def _plan_with_shadow(
+        self,
+        artifact: ProofCarryingArtifact,
+        candidates: tuple[GrowthCandidate, ...],
+        static_nodes: tuple[NodeSpec, ...],
+        *,
+        target_count: int,
+        targets_independent: bool | None,
+        uncertain: bool,
+        conditional_enabled: bool,
+        branch_budget: int = 2,
+        max_wip: int = 2,
+        min_gain_ms: int = 30_000,
+        min_gain_ratio: float = 0.15,
+        coordination_overhead_ms: int = 0,
+    ) -> SproutPlanningResult:
+        """Plan Sprout beside v2 and activate only a fully proven opt-in case."""
+        if (target_count < 1 or max_wip < 1 or min_gain_ms < 0
+                or min_gain_ratio < 0 or coordination_overhead_ms < 0):
+            raise ValueError("invalid shadow-planning inputs")
+        required = artifact.failed_obligations or artifact.open_obligations
+        static_ids = tuple(sorted(node.node_id for node in static_nodes))
+        static_proofs = tuple(sorted({
+            proof for node in static_nodes for proof in node.closes_proofs
+            if proof in set(required)
+        }))
+        static_latency = self._wave_latency(static_nodes, target_count, max_wip)
+        shadow = self.route(
+            artifact, candidates, branch_budget=branch_budget, max_wip=max_wip,
+        )
+        selected_ids = (
+            set(shadow.target_node_ids)
+            if shadow.action is GrowthAction.SPAWN else set()
+        )
+        selected = tuple(
+            item.node for item in candidates if item.node.node_id in selected_ids
+        )
+        shadow_proofs = tuple(sorted({
+            proof for node in selected for proof in node.closes_proofs
+            if proof in set(required)
+        }))
+        schedule_safe = bool(selected) and not (
+            any(node.dependencies for node in selected)
+            or any(node.write_scope for node in selected)
+            or any(
+                self._scope_conflict(left, right)
+                for index, left in enumerate(selected)
+                for right in selected[index + 1:]
+            )
+        )
+        shadow_latency = None
+        gain_ms = None
+        gain_basis_points = None
+        v2_ai_nodes = sum(
+            node.provider != "generic-process" for node in static_nodes
+        ) * target_count
+        shadow_ai_nodes = None
+        if shadow.action is GrowthAction.SPAWN and schedule_safe:
+            shadow_latency = (
+                self._wave_latency(selected, 1, max_wip)
+                + self._wave_latency(selected, target_count, max_wip)
+                + coordination_overhead_ms
+            )
+            gain_ms = static_latency - shadow_latency
+            gain_basis_points = (
+                gain_ms * 10_000 // static_latency if static_latency else 0
+            )
+            selected_ai = sum(
+                node.provider != "generic-process" for node in selected
+            )
+            shadow_ai_nodes = selected_ai * (target_count + 1)
+
+        required_set = set(required)
+        coverage_safe = (
+            required_set <= set(static_proofs)
+            and set(static_proofs) <= set(shadow_proofs)
+        )
+        threshold = max(min_gain_ms, int(static_latency * min_gain_ratio))
+        if uncertain or targets_independent is None:
+            eligible, reason = False, "planning_uncertain"
+        elif target_count < 4:
+            eligible, reason = False, "target_count_below_four"
+        elif not targets_independent:
+            eligible, reason = False, "targets_not_independent"
+        elif shadow.action is not GrowthAction.SPAWN:
+            eligible, reason = False, shadow.reason
+        elif not schedule_safe:
+            eligible, reason = False, "pilot_schedule_uncertain"
+        elif not coverage_safe:
+            eligible, reason = False, "proof_coverage_reduced"
+        elif shadow_ai_nodes is None or shadow_ai_nodes > v2_ai_nodes:
+            eligible, reason = False, "ai_session_count_increased"
+        elif gain_ms is None or gain_ms <= threshold:
+            eligible, reason = False, "pilot_not_profitable"
+        else:
+            eligible = True
+            reason = "conditional_sprout_eligible"
+
+        activated = conditional_enabled and eligible
+        actual = shadow if activated else GrowthDecision(
+            "use_static", static_ids, tuple(sorted(required)), artifact.evidence_refs,
+            self.policy_version,
+            "conditional_sprout_activated" if activated else (
+                "shadow_only" if eligible else reason
+            ),
+        )
+        actual_route = SproutRoute.SPROUT if activated else SproutRoute.V2
+        telemetry = SproutShadowTelemetry(
+            actual_route=actual_route,
+            target_count=target_count,
+            targets_independent=targets_independent,
+            uncertain=uncertain,
+            conditional_enabled=conditional_enabled,
+            activation_eligible=eligible,
+            activation_reason=("conditional_sprout_activated" if activated else reason),
+            v2_node_ids=static_ids,
+            shadow_node_ids=tuple(sorted(selected_ids)),
+            required_proofs=tuple(sorted(required)),
+            v2_proofs_closed=static_proofs,
+            shadow_proofs_closed=shadow_proofs,
+            estimated_v2_latency_ms=static_latency,
+            estimated_shadow_latency_ms=shadow_latency,
+            estimated_gain_ms=gain_ms,
+            estimated_gain_basis_points=gain_basis_points,
+            planning_cost_ms=coordination_overhead_ms,
+            v2_ai_nodes=v2_ai_nodes,
+            shadow_ai_nodes=shadow_ai_nodes,
+            incorrect_expansion=activated and not eligible,
+            missed_expansion=eligible and not activated,
+        )
+        return SproutPlanningResult(actual, shadow, telemetry)
+
+    def plan_shadow(
+        self,
+        artifact: ProofCarryingArtifact,
+        candidates: tuple[GrowthCandidate, ...],
+        static_nodes: tuple[NodeSpec, ...],
+        **kwargs,
+    ) -> SproutPlanningResult:
+        """Keep v2 actual while deterministically measuring a Sprout alternative."""
+        return self._plan_with_shadow(
+            artifact, candidates, static_nodes, conditional_enabled=False, **kwargs,
+        )
+
+    def plan_conditionally(
+        self,
+        artifact: ProofCarryingArtifact,
+        candidates: tuple[GrowthCandidate, ...],
+        static_nodes: tuple[NodeSpec, ...],
+        **kwargs,
+    ) -> SproutPlanningResult:
+        """Opt in to Sprout only after every conservative activation gate passes."""
+        return self._plan_with_shadow(
+            artifact, candidates, static_nodes, conditional_enabled=True, **kwargs,
+        )
 
     @staticmethod
     def _scope_conflict(left: NodeSpec, right: NodeSpec) -> bool:

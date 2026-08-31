@@ -13,6 +13,7 @@ from graphori_core import (  # noqa: E402
     RuntimeEvent, RuntimeRunHandle, Scheduler, SchedulerPolicy, SessionHandle,
     StateTransitionError, ActivationScope, SkillBinding,
 )
+from graphori_core.workspace_snapshot import workspace_digest  # noqa: E402
 
 
 class ConcurrentFakeAdapter:
@@ -22,6 +23,7 @@ class ConcurrentFakeAdapter:
         self.active = 0
         self.max_active = 0
         self.started = []
+        self.closed_runs = []
 
     def probe(self):
         return AdapterCapabilities(adapter_id=self.adapter_id, available=True,
@@ -58,6 +60,9 @@ class ConcurrentFakeAdapter:
     async def release(self, session):
         return None
 
+    async def close_run(self, run_id):
+        self.closed_runs.append(run_id)
+
 
 class RetryOnceAdapter(ConcurrentFakeAdapter):
     def __init__(self):
@@ -78,19 +83,46 @@ class RetryOnceAdapter(ConcurrentFakeAdapter):
 
 
 class ReviseOnceAdapter(ConcurrentFakeAdapter):
+    def __init__(self, workspace="."):
+        super().__init__()
+        self.contexts = {}
+        self.workspace = Path(workspace)
+
+    async def dispatch(self, session, node, context):
+        self.contexts[node.node_id] = context
+        return await super().dispatch(session, node, context)
+
     async def events(self, dispatch):
         await asyncio.sleep(0)
         is_verifier = dispatch.node_id.startswith("verify")
+        payload = {"outcome": "succeeded"}
+        if dispatch.node_id == "work":
+            payload["runtime_metadata"] = {"provider_session": {
+                "provider": "codex", "opaque_id": "a" * 32,
+                "boundary_digest": "sha256:boundary",
+                "attempt_id": "attempt:work:1", "observed_model": "model",
+                "resumable": True,
+            }}
         yield RuntimeEvent(
             "worker_finished", dispatch.node_id,
             "verifier" if is_verifier else "worker",
-            {"outcome": "succeeded"},
+            payload,
         )
         if is_verifier:
             verdict = "revise" if dispatch.node_id == "verify" else "pass"
+            evidence = {"verdict": verdict, "evidence_ids": [f"ev:{dispatch.node_id}"]}
+            if verdict == "revise":
+                evidence.update({
+                    "verification_command": ["python", "-m", "unittest"],
+                    "verification_exit_code": 1,
+                    "workspace_digest": workspace_digest(Path(self.workspace)),
+                    "criterion_evidence": {
+                        "AC-01": {"status": "FAILED", "evidence_ids": ["ev:verify"]},
+                    },
+                })
             yield RuntimeEvent(
                 "verdict_recorded", dispatch.node_id, "verifier",
-                {"verdict": verdict, "evidence_ids": [f"ev:{dispatch.node_id}"]},
+                evidence,
             )
 
 
@@ -238,6 +270,22 @@ class V2ExecutionEngineContractTests(unittest.TestCase):
             await advancing
 
         asyncio.run(scenario())
+
+    def test_cancelled_run_closes_private_provider_state(self):
+        adapter = ConcurrentFakeAdapter()
+        plan = RunPlan(
+            run_id="run-cancel-cleanup", plan_version=1, status="committed",
+            nodes=(NodeSpec("a", "research", "A", "read", "worker"),),
+        )
+        engine = GraphExecutionEngine(adapter=adapter, plan_factory=lambda _spec: plan)
+
+        async def scenario():
+            handle = await engine.start(spec(self.workspace))
+            await engine.cancel(handle.run_id, "user request")
+            self.assertEqual(engine.snapshot(handle.run_id).terminal_status, "cancelled")
+
+        asyncio.run(scenario())
+        self.assertEqual(adapter.closed_runs, [plan.run_id])
 
     def test_two_workers_run_in_parallel_then_fan_in_verifier_runs(self):
         adapter = ConcurrentFakeAdapter()
@@ -724,6 +772,7 @@ class V2ExecutionEngineContractTests(unittest.TestCase):
             result = await restarted.advance(restored.run_id)
             self.assertEqual(result.scheduling.dispatches, ())
             self.assertEqual(adapter.started, [])
+            self.assertEqual(adapter.closed_runs, [plan.run_id])
             self.assertEqual(
                 restarted.snapshot(restored.run_id).projection_digest,
                 terminal.projection_digest,
@@ -781,7 +830,8 @@ class V2ExecutionEngineContractTests(unittest.TestCase):
             run_id="run-rework", plan_version=1, status="committed",
             nodes=(
                 NodeSpec("work", "implementation", "Work", "build", "worker",
-                         verification_policy="independent", closes_proofs=("work",)),
+                         verification_policy="independent", closes_proofs=("work",),
+                         model="model"),
                 NodeSpec("verify", "verification", "Verify", "review", "verifier",
                          dependencies=("work",), closes_proofs=("review",),
                          verification_policy="independent"),
@@ -789,7 +839,7 @@ class V2ExecutionEngineContractTests(unittest.TestCase):
         )
 
         async def scenario():
-            adapter = ReviseOnceAdapter()
+            adapter = ReviseOnceAdapter(self.workspace)
             engine = GraphExecutionEngine(adapter=adapter, plan_factory=lambda _spec: plan)
             handle = await engine.start(spec(self.workspace))
             for _ in range(4):
@@ -803,14 +853,72 @@ class V2ExecutionEngineContractTests(unittest.TestCase):
             self.assertEqual(adapter.started, [
                 "work", "verify", "work:rework:1", "verify:rework:1",
             ])
+            continuation = adapter.contexts["work:rework:1"].continuation
+            self.assertIsNotNone(continuation)
+            self.assertEqual(continuation.handle.opaque_id, "a" * 32)
+            self.assertEqual(continuation.nack.proof_ids, ("AC-01",))
+            self.assertEqual(
+                continuation.nack.command, ("python", "-m", "unittest"),
+            )
 
             restarted = GraphExecutionEngine(
-                adapter=ReviseOnceAdapter(), plan_factory=lambda _spec: plan,
+                adapter=ReviseOnceAdapter(self.workspace), plan_factory=lambda _spec: plan,
             )
             restored = await restarted.start(spec(self.workspace))
             replayed = restarted.snapshot(restored.run_id)
             self.assertEqual(replayed.projection_digest, snapshot.projection_digest)
             self.assertEqual(replayed.rework_counts, {"work": 1})
+
+        asyncio.run(scenario())
+
+    def test_rework_keeps_nack_when_provider_session_is_not_eligible(self):
+        class ModelMismatchAdapter(ReviseOnceAdapter):
+            async def events(self, dispatch):
+                async for event in super().events(dispatch):
+                    if event.node_id == "work" and event.event_type == "worker_finished":
+                        payload = dict(event.payload)
+                        metadata = dict(payload["runtime_metadata"])
+                        session = dict(metadata["provider_session"])
+                        session["observed_model"] = "different-model"
+                        metadata["provider_session"] = session
+                        payload["runtime_metadata"] = metadata
+                        event = RuntimeEvent(
+                            event.event_type, event.node_id, event.actor_role, payload,
+                            event.event_id, event.producer_event_id,
+                            event.actor_role_id, event.occurred_at,
+                        )
+                    yield event
+
+        plan = RunPlan(
+            run_id="run-fresh-repair-nack", plan_version=1, status="committed",
+            nodes=(
+                NodeSpec(
+                    "work", "implementation", "Work", "build", "worker",
+                    verification_policy="independent", closes_proofs=("work",),
+                    model="model",
+                ),
+                NodeSpec(
+                    "verify", "verification", "Verify", "review", "verifier",
+                    dependencies=("work",), closes_proofs=("review",),
+                    verification_policy="independent",
+                ),
+            ),
+        )
+
+        async def scenario():
+            adapter = ModelMismatchAdapter(self.workspace)
+            engine = GraphExecutionEngine(adapter=adapter, plan_factory=lambda _spec: plan)
+            handle = await engine.start(spec(self.workspace))
+            await engine.advance(handle.run_id)
+            await engine.advance(handle.run_id)
+            await engine.advance(handle.run_id)
+            continuation = adapter.contexts["work:rework:1"].continuation
+            self.assertIsNotNone(continuation)
+            self.assertIsNone(continuation.handle)
+            self.assertEqual(continuation.nack.proof_ids, ("AC-01",))
+            self.assertEqual(
+                continuation.nack.command, ("python", "-m", "unittest"),
+            )
 
         asyncio.run(scenario())
 

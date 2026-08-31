@@ -4,10 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
-import hashlib
-import os
 from pathlib import Path
-import shutil
 import tempfile
 import time
 from typing import Mapping
@@ -23,60 +20,12 @@ from graphori_core.proof_action import (
 from graphori_core.proof_adoption import ProofAdopter, ProofCandidate
 from graphori_core.process_supervisor import ProcessResult, ProcessSupervisor
 from graphori_core.run_plan import NodeSpec, RunPlan
+from graphori_core.workspace_snapshot import (
+    copy_workspace as _copy_workspace,
+    workspace_digest,
+)
 
 from .generic.adapter import ProcessCommand
-
-
-_EXCLUDED_DIRECTORIES = {".git", ".graphori", "__pycache__"}
-
-
-def _workspace_files(root: Path) -> tuple[Path, ...]:
-    values = []
-    for directory, names, files in os.walk(root):
-        names[:] = sorted(name for name in names if name not in _EXCLUDED_DIRECTORIES)
-        base = Path(directory)
-        if any((base / name).is_symlink() for name in names):
-            raise ValueError("live verification does not snapshot directory symlinks")
-        for name in sorted(files):
-            path = base / name
-            values.append(path.relative_to(root))
-    return tuple(sorted(values, key=lambda item: item.as_posix()))
-
-
-def workspace_digest(root: Path) -> str:
-    """Hash the verifier-visible workspace, excluding Graphori runtime state."""
-
-    digest = hashlib.sha256()
-    for relative_path in _workspace_files(root):
-        path = root / relative_path
-        if path.is_symlink():
-            raise ValueError("live verification does not snapshot file symlinks")
-        if not path.is_file():
-            if path.exists():
-                raise ValueError("live verification does not snapshot special files")
-            continue
-        relative = relative_path.as_posix().encode("utf-8", "surrogateescape")
-        digest.update(len(relative).to_bytes(8, "big"))
-        digest.update(relative)
-        with path.open("rb") as stream:
-            while chunk := stream.read(1024 * 1024):
-                digest.update(chunk)
-    return "sha256:" + digest.hexdigest()
-
-
-def _copy_workspace(root: Path, destination: Path) -> None:
-    destination.mkdir(parents=True, exist_ok=True)
-    for relative in _workspace_files(root):
-        source = root / relative
-        if source.is_symlink():
-            raise ValueError("live verification does not snapshot symlinks")
-        if not source.is_file():
-            if source.exists():
-                raise ValueError("live verification does not snapshot special files")
-            continue
-        target = destination / relative
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, target)
 
 
 @dataclass(frozen=True)
@@ -425,6 +374,9 @@ class LiveVerifyAdapter:
             {"verdict": "pass" if exit_code == 0 else "revise",
              "evidence_ids": ["deterministic:0",
                               f"subprocess:verifier-command:exit:{exit_code}"],
+             "verification_command": list(self.commands[route.node.node_id].argv),
+             "verification_exit_code": exit_code,
+             "workspace_digest": route.proof.candidate.source_digest,
              "criterion_evidence": {
                  item: {"status": status, "evidence_ids": [
                      f"subprocess:criterion-command:{item}:exit:{exit_code}"
@@ -464,3 +416,8 @@ class LiveVerifyAdapter:
     async def release(self, session: SessionHandle) -> None:
         route = self._sessions.pop(session.value)
         await self.inner.release(route.inner)
+
+    async def close_run(self, run_id: str) -> None:
+        close_run = getattr(self.inner, "close_run", None)
+        if callable(close_run):
+            await close_run(run_id)

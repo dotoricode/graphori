@@ -55,6 +55,13 @@ using declared costs, WIP, dependency, and scope-conflict constraints. It return
 sparse execution is never mandatory. `authorize` is a pure planning evaluator: its
 trusted digest set is a caller-owned boundary, not proof that Graphori read a journal.
 
+`plan_shadow` always executes v2 and returns immutable telemetry for the Sprout
+alternative. `plan_conditionally` is the only opt-in activation seam. It requires
+at least four explicitly independent targets, complete v2 proof coverage, no
+coverage reduction, a dependency/scope-safe schedule, no planning uncertainty,
+and a gain above both fixed absolute and relative thresholds. Any missing fact
+selects v2.
+
 ## Runtime seam
 
 `NodeSpec.requires_proofs` gates dispatch. `NodeSpec.closes_proofs` names the proofs

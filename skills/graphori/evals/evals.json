@@ -18,7 +18,8 @@
       "assertions": [
         "Reuses the implementation session only when the complete session boundary matches",
         "Keeps the verifier and independent reviewer context separate",
-        "Falls back to a fresh repair session if resume is unavailable or unsafe"
+        "Uses a fresh NACK repair only before resume starts, and never auto-repeats an attempted resume with an unknown outcome",
+        "Keeps raw provider session IDs out of canonical journal metadata"
       ]
     },
     {

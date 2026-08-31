@@ -16,6 +16,10 @@ from graphori_core import (  # noqa: E402
     ContextBundle, GraphExecutionEngine, NodeSpec, ProcessLimits,
     RunConstraints, RunPlan, RunSpec,
 )
+from graphori_core.provider_session import (  # noqa: E402
+    ProviderContinuation, ProviderSessionHandle, VerificationNack,
+)
+from graphori_core.provider_session_vault import PrivateSessionBinding  # noqa: E402
 
 
 REPORT = {
@@ -45,10 +49,10 @@ if "--version" in args:
     raise SystemExit(0)
 if "--help" in args or (provider == "codex" and args == ["exec", "--help"]):
     if provider == "codex":
-        print("exec --json --output-schema --ephemeral --sandbox --model")
+        print("exec resume --json --output-schema --ephemeral --sandbox --model --strict-config")
     else:
         print("-p --output-format --json-schema --no-session-persistence --permission-mode "
-              "--allowedTools --disallowedTools --disable-slash-commands --model")
+              "--allowedTools --disallowedTools --disable-slash-commands --model --resume")
     raise SystemExit(0)
 if provider == "codex" and args == ["login", "status"]:
     print("Logged in" if authenticated else "Not logged in", file=sys.stderr)
@@ -58,6 +62,8 @@ if provider == "claude" and args == ["auth", "status"]:
     raise SystemExit(0)
 if mode == "sleep":
     time.sleep(30)
+if mode == "resume_nonzero" and any(item in {"resume", "--resume"} for item in args):
+    raise SystemExit(7)
 if mode == "write":
     pathlib.Path(os.environ["FAKE_WRITE_PATH"]).write_text("provider change", encoding="utf-8")
 if mode == "commit":
@@ -73,7 +79,8 @@ if provider == "codex":
     if report is not None:
         print(json.dumps({"type": "item.completed", "item": {
             "type": "agent_message", "text": json.dumps(report)}}))
-    print(json.dumps({"type": "turn.completed", "usage": {"input_tokens": 2}}))
+    print(json.dumps({"type": "turn.completed", "model": "fixture-model",
+                      "usage": {"input_tokens": 2}}))
 else:
     print(json.dumps({"type": "system", "subtype": "init", "session_id": "ses-fixture",
                       "model": "claude-fixture"}))
@@ -117,7 +124,7 @@ class ProviderAdapterCompatibilityMixin:
         )
 
     def adapter(self, *, mode="success", report=None, limits=None, write_path="",
-                authenticated=True):
+                authenticated=True, session_reuse=False):
         env = {
             "FAKE_PROVIDER": self.provider,
             "FAKE_MODE": mode,
@@ -136,6 +143,7 @@ class ProviderAdapterCompatibilityMixin:
                 "FAKE_LOGIN_STATE",
             }),
             limits=limits or ProcessLimits(timeout_seconds=5, grace_seconds=0.2),
+            enable_session_reuse=session_reuse,
         )
 
     def run_adapter(self, adapter, node=None):
@@ -317,6 +325,162 @@ class ProviderAdapterCompatibilityMixin:
         capabilities = adapter.probe()
         self.assertFalse(capabilities.available)
         self.assertIn("required CLI capability", capabilities.reason)
+
+    def test_exact_session_boundary_resumes_and_mismatch_stays_fresh(self):
+        adapter = self.adapter(session_reuse=True)
+        adapter.probe()
+        node = NodeSpec(**{
+            **self.node.__dict__, "role": "implementer",
+            "model": "fixture-model", "effort": "medium",
+        })
+        context = ContextBundle(
+            objective=node.objective, attempt_id="attempt:worker-a:rework:1",
+            read_scope=node.read_scope, write_scope=node.write_scope,
+            run_id="run-session", node_lineage=node.node_id,
+        )
+        boundary = adapter._session_boundary(node, context)
+        self.assertIsNotNone(boundary)
+        opaque_id = adapter.session_vault.put(
+            context.run_id,
+            PrivateSessionBinding(
+                provider=self.provider,
+                provider_session_id="old-provider-session",
+                boundary_digest=boundary.digest(),
+                attempt_id="attempt:worker-a:1",
+                observed_model="fixture-model",
+            ),
+        )
+        continuation = ProviderContinuation(
+            ProviderSessionHandle(
+                self.provider, opaque_id, boundary.digest(),
+                "attempt:worker-a:1", True,
+            ),
+            VerificationNack(
+                proof_ids=("AC-01",), command=("python", "-m", "unittest"),
+                exit_code=1, evidence_refs=("ev:failure",),
+                workspace_digest="sha256:workspace",
+            ),
+        )
+
+        async def scenario(current):
+            session = await adapter.start_session(node)
+            dispatch = await adapter.dispatch(session, node, current)
+            result = await adapter.collect(dispatch)
+            await adapter.release(session)
+            return result
+
+        resumed = asyncio.run(scenario(ContextBundle(**{
+            **context.__dict__, "continuation": continuation,
+        })))
+        self.assertTrue(resumed.runtime_metadata["session_resumed"])
+        self.assertNotIn("session_id", resumed.runtime_metadata)
+
+        mismatched = ProviderContinuation(
+            ProviderSessionHandle(
+                self.provider, opaque_id, "sha256:mismatch",
+                "attempt:worker-a:1", True,
+            ),
+            continuation.nack,
+        )
+        fresh = asyncio.run(scenario(ContextBundle(**{
+            **context.__dict__, "continuation": mismatched,
+        })))
+        self.assertFalse(fresh.runtime_metadata["session_resumed"])
+        self.assertFalse(fresh.runtime_metadata["session_resume_fallback"])
+
+        async def nack_only_scenario():
+            session = await adapter.start_session(node)
+            dispatch = await adapter.dispatch(session, node, ContextBundle(**{
+                **context.__dict__,
+                "continuation": ProviderContinuation(None, continuation.nack),
+            }))
+            argv = tuple(adapter._require(dispatch).execution.process.args)
+            result = await adapter.collect(dispatch)
+            await adapter.release(session)
+            return argv, result
+
+        argv, nack_only = asyncio.run(nack_only_scenario())
+        self.assertIn("Verification NACK (immutable evidence)", "\n".join(argv))
+        self.assertFalse(nack_only.runtime_metadata["session_resumed"])
+
+    def test_persisted_session_uses_an_opaque_journal_handle(self):
+        adapter = self.adapter(session_reuse=True)
+        node = NodeSpec(**{
+            **self.node.__dict__, "role": "implementer",
+            "model": "fixture-model", "effort": "medium",
+        })
+
+        async def scenario():
+            session = await adapter.start_session(node)
+            dispatch = await adapter.dispatch(
+                session, node, ContextBundle(
+                    objective=node.objective, attempt_id="attempt:worker-a:1",
+                    read_scope=node.read_scope, write_scope=node.write_scope,
+                    run_id="run-opaque", node_lineage=node.node_id,
+                ),
+            )
+            result = await adapter.collect(dispatch)
+            await adapter.release(session)
+            return result
+
+        result = asyncio.run(scenario())
+        binding = result.runtime_metadata["provider_session"]
+        serialized = json.dumps(result.runtime_metadata, sort_keys=True)
+        self.assertNotIn("thr-fixture", serialized)
+        self.assertNotIn("ses-fixture", serialized)
+        self.assertRegex(binding["opaque_id"], r"^[a-f0-9]{32}$")
+        self.assertEqual(binding["attempt_id"], "attempt:worker-a:1")
+
+    def test_failed_resume_never_replays_external_effects_in_a_fresh_session(self):
+        adapter = self.adapter(mode="resume_nonzero", session_reuse=True)
+        adapter.probe()
+        node = NodeSpec(**{
+            **self.node.__dict__, "role": "implementer",
+            "model": "fixture-model", "effort": "medium",
+        })
+        context = ContextBundle(
+            objective=node.objective, attempt_id="attempt:worker-a:rework:1",
+            read_scope=node.read_scope, write_scope=node.write_scope,
+            run_id="run-session", node_lineage=node.node_id,
+        )
+        boundary = adapter._session_boundary(node, context)
+        opaque_id = adapter.session_vault.put(
+            context.run_id,
+            PrivateSessionBinding(
+                provider=self.provider,
+                provider_session_id="old-provider-session",
+                boundary_digest=boundary.digest(),
+                attempt_id="attempt:worker-a:1",
+                observed_model="fixture-model",
+            ),
+        )
+        continuation = ProviderContinuation(
+            ProviderSessionHandle(
+                self.provider, opaque_id, boundary.digest(),
+                "attempt:worker-a:1", True,
+            ),
+            VerificationNack(
+                proof_ids=("AC-01",), command=("python", "-m", "unittest"),
+                exit_code=1, evidence_refs=("ev:failure",),
+                workspace_digest="sha256:workspace",
+            ),
+        )
+
+        async def scenario():
+            session = await adapter.start_session(node)
+            dispatch = await adapter.dispatch(
+                session, node, ContextBundle(**{
+                    **context.__dict__, "continuation": continuation,
+                }),
+            )
+            result = await adapter.collect(dispatch)
+            await adapter.release(session)
+            return result
+
+        result = asyncio.run(scenario())
+        self.assertEqual(result.outcome, "failed")
+        self.assertTrue(result.runtime_metadata["session_resumed"])
+        self.assertFalse(result.runtime_metadata["session_resume_fallback"])
 
 
 class CodexExecutionAdapterTests(ProviderAdapterCompatibilityMixin, unittest.TestCase):
