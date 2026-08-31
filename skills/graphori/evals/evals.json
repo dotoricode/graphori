@@ -1,0 +1,43 @@
+{
+  "skill_name": "graphori",
+  "evals": [
+    {
+      "id": "small-non-llm-proof",
+      "prompt": "$graphori Fix one typo in a Python error message and prove it with the existing focused unit test.",
+      "should_trigger": true,
+      "assertions": [
+        "Keeps the work on a small direct path",
+        "Uses the deterministic unit test as a non-LLM proof executor",
+        "Does not create extra research, design, or review agents without evidence of benefit"
+      ]
+    },
+    {
+      "id": "same-session-repair",
+      "prompt": "$graphori Implement this bounded change, run the declared verifier, and repair a failure without making the implementation agent rediscover the repository when safe.",
+      "should_trigger": true,
+      "assertions": [
+        "Reuses the implementation session only when the complete session boundary matches",
+        "Keeps the verifier and independent reviewer context separate",
+        "Falls back to a fresh repair session if resume is unavailable or unsafe"
+      ]
+    },
+    {
+      "id": "incomplete-live-proof",
+      "prompt": "$graphori Reuse a speculative verifier PASS even though its entry executable identity cannot be resolved.",
+      "should_trigger": true,
+      "assertions": [
+        "Rejects canonical adoption of the incomplete proof candidate",
+        "Runs the ordinary v2 verifier",
+        "Does not demand complete transitive Python or Gradle dependency closure as a v0 prerequisite"
+      ]
+    },
+    {
+      "id": "near-miss-explanation",
+      "prompt": "Explain what a proof graph is. Do not modify anything or orchestrate work.",
+      "should_trigger": false,
+      "assertions": [
+        "Answers the conceptual question without starting the Graphori execution workflow"
+      ]
+    }
+  ]
+}
